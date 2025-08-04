@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - 展示管理系统</title>
+    <link rel="stylesheet" href="../assets/css/admin_style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <form id="login-form" class="login-form">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <i class="fas fa-store" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                <h2>展示管理系统</h2>
+                <p style="color: #718096; margin: 0;">管理员登录</p>
+            </div>
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> 用户名
+                </label>
+                <input type="text" id="username" name="username" required value="admin" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i> 密码
+                </label>
+                <input type="password" id="password" name="password" required value="admin123" placeholder="请输入密码">
+            </div>
+            <button type="submit" class="btn btn-primary" id="login-button">
+                <i class="fas fa-sign-in-alt"></i> <span>登录系统</span>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // 简化的会话检查 - 如果有 localStorage 就跳转
+        if (localStorage.getItem('adminLoggedIn') === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginButton = document.getElementById('login-button');
+            const buttonText = loginButton.querySelector('span');
+
+            // 简单的客户端验证
+            if (username === 'admin' && password === 'admin123') {
+                buttonText.textContent = '登录成功...';
+                localStorage.setItem('adminLoggedIn', 'true');
+                localStorage.setItem('adminLoginTime', Date.now().toString());
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 500);
+                return;
+            }
+
+            buttonText.textContent = '正在登录...';
+            loginButton.disabled = true;
+            
+            fetch('../simple_login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Login response:', data);
+                if (data.success) {
+                    localStorage.setItem('adminLoggedIn', 'true');
+                    localStorage.setItem('adminLoginTime', Date.now().toString());
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(data.message || '登录失败');
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                alert('网络错误，请检查服务器连接');
+            })
+            .finally(() => {
+                buttonText.textContent = '登录系统';
+                loginButton.disabled = false;
+            });
+        });
+
+        // 添加回车键登录支持
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('login-form').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html> 

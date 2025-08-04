@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Configuration files (sensitive data)
+api/config.php
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Log files
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP specific
+*.cache
+cache/
+
+# Images (optional - you may want to track some images)
+# images/*.jpg
+# images/*.png
+# images/*.gif
+
+# phpMyAdmin (if you don't want to include it)
+phpMyAdmin/
+
+# Backup files
+*.bak
+*.backup

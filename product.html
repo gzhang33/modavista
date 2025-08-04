@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dettagli Prodotto</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Optimized font loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  </noscript>
+</head>
+<body>
+  <header class="main-header">
+    <div class="container">
+      <a href="/" class="logo">Moda Italiana</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/#collection">Collezione</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 主内容容器，JS将在此处渲染所有内容 -->
+    <div id="product-details-content">
+      <!-- 初始加载状态 -->
+      <div class="loading-state">
+        <p>Caricamento prodotto...</p>
+      </div>
+    </div>
+
+    <!-- 相关产品容器 -->
+    <section class="related-products-section">
+      <div class="container">
+        <h2 class="section-title">Potrebbero Interessarti Anche</h2>
+        <div id="related-products-grid" class="product-grid">
+          <!-- 相关产品将在此处渲染 -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+        <p>&copy; 2024 Moda Italiana. Tutti i Diritti Riservati.</p>
+    </div>
+  </footer>
+  
+  <script src="assets/js/product.js"></script>
+</body>
+</html> 

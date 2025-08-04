@@ -1,0 +1,70 @@
+# Cursor AI Rules: Fashion Factory Display System
+# Version: 2.0
+# Purpose: Guide AI for development on this project.
+
+## 1. CORE DIRECTIVES
+- **Project Goal**: A B2B product showcase for an Italian fashion factory. It is NOT an e-commerce platform.
+- **Primary User**: Clients browsing products.
+- **Secondary User**: Admin managing the catalog.
+- **Technology Stack**: Vanilla JS (ES6+), PHP 7+, MySQL. NO frameworks (React, Vue, Laravel, etc.).
+
+## 2. TECHNICAL SPECIFICATIONS
+
+### 2.1. Backend (PHP)
+- **Database Interaction**: MUST use prepared statements (`mysqli`). NO direct queries.
+- **Error Handling**: MUST use `json_response()` utility for all API outputs.
+- **Authentication**: All admin endpoints in `api/` (except `login.php`) MUST be protected by a `session_start()` and user authentication check.
+- **File Uploads**:
+    - Location: `images/`
+    - Permissions: `755`
+    - Naming: `media-[uniqid]-[random_hash].[ext]`
+    - Validation: Server-side checks for image types (`image/jpeg`, `image/png`, `image-gif`) are MANDATORY.
+- **Endpoints**:
+    - `POST /api/products.php`: Handles both CREATE and UPDATE.
+    - `GET /api/categories.php`: Dynamically generates a list of unique categories from the `products` table.
+- **Configuration**:
+    - `api/config.php` stores all credentials.
+    - `ADMIN_PASSWORD_HASH` uses `password_hash()` with `PASSWORD_BCRYPT`.
+
+### 2.2. Frontend (JavaScript)
+- **Style**: MUST use ES6+ classes.
+- **API Calls**: MUST use `async/await` with `try...catch` blocks for all `fetch` requests.
+- **Dependencies**: Use libraries from `assets/js/lib/`. Do NOT introduce new external libraries unless specified.
+- **Performance**: Lazy loading for images is a core feature. Ensure it is implemented correctly using the existing library.
+
+### 2.3. Database (MySQL)
+- **Primary Key**: `products.id` MUST be a string with the format `prod_[uniqid]`.
+- **Media Storage**: `products.media` field is a JSON array of image file paths.
+- **Default Image**: `products.defaultImage` is the first path from the `media` array.
+
+## 3. DEVELOPMENT WORKFLOWS
+
+### 3.1. How to Add a New Product
+1.  **Action**: User submits the form in `admin/dashboard.html`.
+2.  **API Call**: `POST` to `api/products.php` with product data and files.
+3.  **Backend Logic**:
+    a. Authenticate admin session.
+    b. Generate new `prod_[uniqid]`.
+    c. Handle file uploads: validate, rename, and move to `images/`.
+    d. Compress images using the image optimization library.
+    e. Store file paths in `media` (JSON array) and set `defaultImage`.
+    f. Insert new product record into the database via prepared statement.
+
+### 3.2. How to Modify Categories
+- Categories are not stored in a separate table. They are derived from the `DISTINCT category` values in the `products` table.
+- To add a new category, create a new product and assign it the new category name.
+- The frontend navigation and filters will update automatically.
+
+## 4. CODE STYLE & STANDARDS
+
+- **PHP**: Follow PSR-12 conventions.
+- **JavaScript**: Use modern ES6+ syntax. Code should be modular and class-based.
+- **CSS**: Use CSS custom properties (`var(--variable)`) for theming. Adhere to the existing mobile-first BEM (Block, Element, Modifier) methodology.
+- **HTML**: Write semantic HTML5.
+
+## 5. COMMON ISSUES & DEBUGGING CHECKS
+
+- **DB Connection Failed**: Verify `api/config.php` credentials and MySQL service status.
+- **Images Not Uploading**: Check `images/` directory permissions (`755`). Verify file type validation in `api/products.php`.
+- **Admin Login Fails**: Ensure `session_start()` is at the top of authenticated scripts. Check `ADMIN_PASSWORD_HASH` value. Clear browser cache/cookies.
+- **API Errors**: Check PHP error logs. Validate JSON format. Ensure correct `Content-Type: application/json` headers are sent and received.

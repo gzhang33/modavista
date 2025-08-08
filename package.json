@@ -1,5 +1,30 @@
 {
-  "dependencies": {
+  "name": "fashion-factory-showcase",
+  "version": "1.0.0",
+  "description": "Fashion Factory Display System - B2B Product Showcase",
+  "main": "index.html",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:admin": "node test/run_dashboard_tests.js",
+    "test:validate": "node test/validate_test_environment.js",
+    "test:config": "node test/check_config.js",
+    "install:browsers": "playwright install"
+  },
+  "devDependencies": {
     "@playwright/test": "^1.54.2"
-  }
+  },
+  "keywords": [
+    "fashion",
+    "showcase",
+    "b2b",
+    "product-catalog",
+    "php",
+    "javascript",
+    "playwright",
+    "testing"
+  ],
+  "author": "Fashion Factory",
+  "license": "MIT"
 }

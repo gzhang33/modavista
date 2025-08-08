@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员登录 - 展示管理系统</title>
-    <link rel="stylesheet" href="../assets/css/admin_style.css">
+    <link rel="stylesheet" href="..\admin\assets\css\admin_style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -34,10 +34,20 @@
     </div>
 
     <script>
-        // 简化的会话检查 - 如果有 localStorage 就跳转
-        if (localStorage.getItem('adminLoggedIn') === 'true') {
-            window.location.href = 'dashboard.html';
-        }
+        // 会话检查：优先使用服务器会话
+        fetch('../api/check_session.php')
+            .then(r => r.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    window.location.href = 'dashboard.php';
+                } else {
+                    localStorage.removeItem('adminLoggedIn');
+                    localStorage.removeItem('adminLoginTime');
+                }
+            })
+            .catch(() => {
+                // 忽略网络错误，停留在登录页
+            });
 
 
         document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -48,22 +58,10 @@
             const loginButton = document.getElementById('login-button');
             const buttonText = loginButton.querySelector('span');
 
-            // 简单的客户端验证
-            if (username === 'admin' && password === 'admin123') {
-                buttonText.textContent = '登录成功...';
-                localStorage.setItem('adminLoggedIn', 'true');
-                localStorage.setItem('adminLoginTime', Date.now().toString());
-                
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 500);
-                return;
-            }
-
             buttonText.textContent = '正在登录...';
             loginButton.disabled = true;
             
-            fetch('../simple_login.php', {
+            fetch('../api/login.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -74,9 +72,10 @@
             .then(data => {
                 console.log('Login response:', data);
                 if (data.success) {
+                    // 可选：本地存储镜像，仅作前端提示使用
                     localStorage.setItem('adminLoggedIn', 'true');
                     localStorage.setItem('adminLoginTime', Date.now().toString());
-                    window.location.href = 'dashboard.html';
+                    window.location.href = 'dashboard.php';
                 } else {
                     alert(data.message || '登录失败');
                 }

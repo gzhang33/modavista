@@ -32,13 +32,13 @@ function getProductIdFromUrl() {
     return urlParams.get('id');
 }
 
-/**
+/** 
  * 从 API 获取单个产品的详细信息
  * @param {string} productId - 产品ID
  * @returns {Promise<Object>} 产品数据
  */
 async function fetchProductDetails(productId) {
-    const response = await fetch(`../api/products.php?id=${productId}`);
+    const response = await fetch(`/api/products.php?id=${productId}`);
     if (!response.ok) {
         if (response.status === 404) {
             throw new Error('Prodotto non trovato.');
@@ -73,11 +73,11 @@ function renderProductDetails(product) {
     const imageGalleryHTML = `
         <div class="product-gallery">
             <div class="main-image-container">
-                <img src="${images.length > 0 ? '../' + images[0] : '../images/placeholder.svg'}" alt="Immagine principale di ${product.name}" id="main-product-image" class="loaded">
+                <img src="${images.length > 0 ? '/' + images[0] : '/images/placeholder.svg'}" alt="Immagine principale di ${product.name}" id="main-product-image" class="main-image loaded">
             </div>
-            <div class="thumbnail-container" id="thumbnail-images">
+            <div class="product-media-thumbnails" id="thumbnail-images">
                 ${images.map((img, index) => `
-                    <img src="../${img}" alt="Miniatura ${index + 1}" class="thumbnail-image ${index === 0 ? 'active' : ''}" data-src="../${img}">
+                    <img src="/${img}" alt="Miniatura ${index + 1}" class="thumbnail-image ${index === 0 ? 'active' : ''}" data-src="/${img}">
                 `).join('')}
             </div>
         </div>`;
@@ -117,15 +117,25 @@ function setupImageGalleryListeners() {
     // 确保主图片显示（处理错误情况）
     if (mainImage) {
         mainImage.onerror = () => { 
-            mainImage.src = '../images/placeholder.svg';
+            mainImage.src = '/images/placeholder.svg';
             mainImage.classList.add('loaded');
         };
     }
 
     thumbnails.forEach(thumb => {
+        // 添加加载完成事件监听
+        thumb.addEventListener('load', () => {
+            thumb.classList.add('loaded');
+        });
+
+        // 如果图片已经加载完成，立即添加loaded类
+        if (thumb.complete && thumb.naturalWidth > 0) {
+            thumb.classList.add('loaded');
+        }
+
         thumb.addEventListener('click', () => {
             const newSrc = thumb.dataset.src;
-            if (mainImage.src !== newSrc) {
+            if (!mainImage.src.endsWith(newSrc)) {
                 mainImage.classList.remove('loaded');
                 mainImage.style.opacity = '0';
                 setTimeout(() => {
@@ -144,7 +154,10 @@ function setupImageGalleryListeners() {
         });
 
         // 缩略图错误处理
-        thumb.onerror = () => { thumb.src = '../images/placeholder.svg'; };
+        thumb.onerror = () => { 
+            thumb.src = '/images/placeholder.svg'; 
+            thumb.classList.add('loaded'); // 即使错误也显示占位图
+        };
     });
 }
 
@@ -158,7 +171,7 @@ async function fetchAndRenderRelatedProducts(category, currentProductId) {
     if (!container) return;
 
     try {
-        const response = await fetch(`../api/products.php?category=${category}&exclude=${currentProductId}`);
+        const response = await fetch(`/api/products.php?category=${encodeURIComponent(category)}&exclude=${encodeURIComponent(currentProductId)}`);
         const relatedProducts = await response.json();
 
         if (relatedProducts && relatedProducts.length > 0) {
@@ -177,16 +190,19 @@ async function fetchAndRenderRelatedProducts(category, currentProductId) {
  * @returns {string} HTML字符串
  */
 function createProductCard(product) {
-    const imageSrc = product.defaultImage ? `../${product.defaultImage}` : '../images/placeholder.svg';
+    const fallbackFromMedia = Array.isArray(product.media) && product.media.length > 0 ? product.media[0] : null;
+    const chosenPath = product.defaultImage || fallbackFromMedia;
+    const imageSrc = chosenPath ? `/${chosenPath}` : '/images/placeholder.svg';
     return `
-      <article class="product-card" onclick="window.location.href='product.html?id=${product.id}'">
-        <div class="product-image-container">
+      <article class="product-card related-product" onclick="window.location.href='product.html?id=${product.id}'">
+        <div class="product-image-container spinner">
           <img 
             src="${imageSrc}" 
             alt="${product.name}" 
             class="product-img" 
             loading="lazy"
-            onerror="this.onerror=null; this.src='../images/placeholder.svg';"
+            onload="this.closest('.product-image-container').classList.add('loaded');this.closest('.product-image-container').classList.remove('spinner');"
+            onerror="this.onerror=null; this.src='/images/placeholder.svg'; this.closest('.product-image-container').classList.add('loaded'); this.closest('.product-image-container').classList.remove('spinner');"
           >
         </div>
         <div class="product-info">

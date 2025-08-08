@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // 数据库连接
-$conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) {
     json_response(500, ["message" => "数据库连接失败: " . $conn->connect_error]);
 }
@@ -38,17 +38,20 @@ $conn->close();
 function get_categories($conn) {
     // 假设我们有一个 categories 表，包含 id 和 name 字段
     // 为了演示，我们先从 products 表中获取所有唯一的分类
-    $sql = "SELECT DISTINCT category FROM products ORDER BY category ASC";
-    $result = $conn->query($sql);
-    if ($result) {
-        $categories = [];
-        while ($row = $result->fetch_assoc()) {
-            $categories[] = $row['category'];
-        }
-        json_response(200, $categories);
-    } else {
-        json_response(500, ["message" => "获取分类失败: " . $conn->error]);
+    $stmt = $conn->prepare("SELECT DISTINCT category FROM products ORDER BY category ASC");
+    if ($stmt === false) {
+        json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
+    if (!$stmt->execute()) {
+        json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
+    }
+    $result = $stmt->get_result();
+    $categories = [];
+    while ($row = $result->fetch_assoc()) {
+        $categories[] = $row['category'];
+    }
+    $stmt->close();
+    json_response(200, $categories);
 }
 
 function add_category($conn) {

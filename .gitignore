@@ -1,9 +1,7 @@
 # Dependencies
-node_modules/
+node_modules/ 
 vendor/
 
-# Configuration files (sensitive data)
-api/config.php
 
 # Temporary files
 *.tmp
@@ -34,6 +32,17 @@ Thumbs.db
 *.cache
 cache/
 
+# Testing
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.phpunit.result.cache
+coverage/
+test/screenshots/
+test/videos/
+test/traces/
+
 # Images (optional - you may want to track some images)
 # images/*.jpg
 # images/*.png
@@ -45,3 +54,20 @@ phpMyAdmin/
 # Backup files
 *.bak
 *.backup
+
+# Environment and configuration
+.env
+.env.local
+.env.*.local
+
+# Composer PHAR file (no longer used)
+# composer.phar
+
+# Database dumps and temporary files
+*.sql
+*.sqlite
+
+# Cursor files
+.cursor/
+.cursorrules
+.cursorignore

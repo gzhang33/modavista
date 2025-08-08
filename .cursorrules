@@ -1,54 +1,83 @@
+@always
 # Cursor AI Rules: Fashion Factory Display System
-# Version: 2.0
+# Version: 2.3
 # Purpose: Guide AI for development on this project.
 
 ## 1. CORE DIRECTIVES
 - **Project Goal**: A B2B product showcase for an Italian fashion factory. It is NOT an e-commerce platform.
 - **Primary User**: Clients browsing products.
 - **Secondary User**: Admin managing the catalog.
-- **Technology Stack**: Vanilla JS (ES6+), PHP 7+, MySQL. NO frameworks (React, Vue, Laravel, etc.).
+- **Technology Stack**: Vanilla JS (ES6+, Modules, Class-based), PHP 7+, MySQL. NO frameworks (React, Vue, Laravel, etc.).
 
 ## 2. TECHNICAL SPECIFICATIONS
 
 ### 2.1. Backend (PHP)
+- **Primary Logic**: All backend operations are handled within the `/api/` directory.
 - **Database Interaction**: MUST use prepared statements (`mysqli`). NO direct queries.
-- **Error Handling**: MUST use `json_response()` utility for all API outputs.
-- **Authentication**: All admin endpoints in `api/` (except `login.php`) MUST be protected by a `session_start()` and user authentication check.
-- **File Uploads**:
-    - Location: `images/`
-    - Permissions: `755`
-    - Naming: `media-[uniqid]-[random_hash].[ext]`
-    - Validation: Server-side checks for image types (`image/jpeg`, `image/png`, `image-gif`) are MANDATORY.
-- **Endpoints**:
-    - `POST /api/products.php`: Handles both CREATE and UPDATE.
-    - `GET /api/categories.php`: Dynamically generates a list of unique categories from the `products` table.
-- **Configuration**:
-    - `api/config.php` stores all credentials.
-    - `ADMIN_PASSWORD_HASH` uses `password_hash()` with `PASSWORD_BCRYPT`.
+- **Error Handling**: MUST use `json_response()` utility from `api/utils.php` for all API outputs.
+- **Authentication**: All admin endpoints in `api/` (except `login.php` and `GET` requests to `products.php` and `categories.php`) MUST be protected by `require_auth()`.
+- **Configuration**: `api/config.php` stores all credentials. `ADMIN_PASSWORD_HASH` uses `password_hash()` with `PASSWORD_BCRYPT`.
 
 ### 2.2. Frontend (JavaScript)
-- **Style**: MUST use ES6+ classes.
-- **API Calls**: MUST use `async/await` with `try...catch` blocks for all `fetch` requests.
-- **Dependencies**: Use libraries from `assets/js/lib/`. Do NOT introduce new external libraries unless specified.
-- **Performance**: Lazy loading for images is a core feature. Ensure it is implemented correctly using the existing library.
+- **Client-Side**:
+    - `assets/js/script.js`: Main script for the public-facing product showcase (`index.html`). Handles product grid, filtering, and navigation.
+    - `assets/js/product.js`: Handles logic for the individual product page (`product.html`), including image gallery and related products.
+- **Admin-Side**:
+    - `admin/assets/js/main.js`: Entry point for the admin dashboard. Initializes `EventBus`, `ComponentManager`, and all components.
+    - `admin/assets/js/EventBus.js`: A simple pub/sub system for communication between components.
+    - `admin/assets/js/ComponentManager.js`: Registers and manages the lifecycle of all admin components.
+    - `admin/assets/js/components/`: Directory containing all modular components for the admin dashboard.
+- **Styling**:
+    - `assets/css/style.css`: Main stylesheet for the public site.
+    - `admin/assets/css/admin_style.css`: Stylesheet for the admin dashboard.
+ - **Libraries**: 
+    - `assets/js/lib/`: Shared JS libraries for the public site.
+    - `admin/assets/lib/`: Shared JS libraries for the admin dashboard.
+    - Prefer not introducing new external libraries to keep the project lightweight. For complex UI components (e.g., data tables), after discussion, you may introduce a library to improve development efficiency and robustness. Any introduced library must be documented in the README under "Libraries Used".
 
 ### 2.3. Database (MySQL)
 - **Primary Key**: `products.id` MUST be a string with the format `prod_[uniqid]`.
 - **Media Storage**: `products.media` field is a JSON array of image file paths.
 - **Default Image**: `products.defaultImage` is the first path from the `media` array.
 
+### 2.4. Project File Structure
+- `/`: Root directory.
+    - `index.html`: Main product gallery page (public).
+    - `product.html`: Single product detail page (public).
+- `/admin/`: Contains all admin-related files.
+    - `login.html`: Admin login page.
+    - `dashboard.php`: Main admin dashboard, assembles components from `/admin/components/`.
+    - `/assets/`: Admin-specific assets directory.
+        - `/css/`: Admin stylesheets.
+            - `admin_style.css`: Main admin stylesheet.
+        - `/js/`: Contains all admin-side JavaScript.
+            - `main.js`: Main entry point.
+            - `EventBus.js`, `ComponentManager.js`: Core architecture.
+            - `/components/`: Reusable UI components (`ProductTableComponent`, `ProductFormComponent`, etc.).
+        - `/lib/`: Admin-specific JavaScript libraries.
+    - `/components/`: Reusable PHP UI parts for the dashboard.
+        - `sidebar.php`, `dashboard_stats.php`, `products_management.php`, `modals.php`.
+- `/api/`: Handles all server-side logic and data processing.
+    - `products.php`: CRUD operations for products.
+    - `categories.php`: Fetches unique product categories.
+    - `login.php`/`logout.php`: Admin authentication.
+    - `check_session.php`: Verifies admin session status.
+    - `dashboard_stats.php`: Provides data for the stats overview.
+    - `utils.php`: Contains helper functions like `json_response()` and `require_auth()`.
+- `/assets/`: Shared resources for the public-facing site.
+- `/images/`: Uploaded product media files.
+
 ## 3. DEVELOPMENT WORKFLOWS
 
 ### 3.1. How to Add a New Product
-1.  **Action**: User submits the form in `admin/dashboard.html`.
-2.  **API Call**: `POST` to `api/products.php` with product data and files.
+1.  **Action**: User submits the form in `admin/dashboard.php`.
+2.  **API Call**: `ProductFormComponent` sends a `POST` request to `api/products.php` using a `FormData` object.
 3.  **Backend Logic**:
     a. Authenticate admin session.
     b. Generate new `prod_[uniqid]`.
     c. Handle file uploads: validate, rename, and move to `images/`.
-    d. Compress images using the image optimization library.
-    e. Store file paths in `media` (JSON array) and set `defaultImage`.
-    f. Insert new product record into the database via prepared statement.
+    d. Store file paths in `media` (JSON array) and set `defaultImage`.
+    e. Insert new product record into the database via prepared statement.
 
 ### 3.2. How to Modify Categories
 - Categories are not stored in a separate table. They are derived from the `DISTINCT category` values in the `products` table.
@@ -56,15 +85,98 @@
 - The frontend navigation and filters will update automatically.
 
 ## 4. CODE STYLE & STANDARDS
-
 - **PHP**: Follow PSR-12 conventions.
-- **JavaScript**: Use modern ES6+ syntax. Code should be modular and class-based.
-- **CSS**: Use CSS custom properties (`var(--variable)`) for theming. Adhere to the existing mobile-first BEM (Block, Element, Modifier) methodology.
+- **JavaScript**: Use modern ES6+ syntax (classes, modules, `async/await`).
+    - **Admin Panel**: Follow the established modular, component-based architecture. Use `EventBus` for inter-component communication. Create new components by extending `BaseComponent`.
+    - **Client-Side**: Use class-based structures (`ProductGrid`).
+- **CSS**: Use CSS custom properties (`var(--variable)`) for theming. Adhere to BEM.
 - **HTML**: Write semantic HTML5.
 
-## 5. COMMON ISSUES & DEBUGGING CHECKS
+## 5. ADMIN PANEL ARCHITECTURE
+The admin panel is built on a modular, component-based architecture.
+- **`EventBus.js`**: A central event bus allows components to communicate without direct dependencies.
+- **`ComponentManager.js`**: Initializes and manages all components.
+- **`BaseComponent.js`**: A base class for all components, providing common functionality like element selection and visibility.
+- **Components**: Each component (e.g., `ProductTableComponent`, `ProductFormComponent`) is a self-contained class responsible for a specific part of the UI. They listen for and emit events on the `EventBus`.
 
+ ## 6. TESTING RULES & BEST PRACTICES
+
+### 6.1. Playwright Testing Configuration
+- **Base URL**: MUST use `http://localhost` as baseURL in `playwright.config.js`. DO NOT use `http://localhost/htdocs`.
+- **Test Environment**: Public site accessible via HTTP, admin panel requires special handling for file:// protocol.
+- **API Testing**: Always check response format before parsing JSON - APIs may return HTML error pages.
+- **Test Structure**: Use descriptive test names and group related tests in describe blocks.
+
+### 6.2. Required Test Coverage
+- **Public Site Tests**: 
+  - Page loading and titles
+  - Product list display and count validation
+  - Product detail navigation
+  - Responsive navigation functionality
+  - API endpoints (products.php, categories.php)
+- **Admin Panel Tests**:
+  - Login form validation
+  - Dashboard functionality
+  - Product CRUD operations
+  - Session expiry handling
+  - Toast notifications
+- **Performance Tests**:
+  - Core Web Vitals (LCP, FID, CLS)
+  - Resource loading optimization
+  - Network request validation
+
+### 6.3. Test File Organization
+- **`test/public_site_basic.spec.js`**: Core public website functionality
+- **`test/admin_login.spec.js`**: Admin authentication flows
+- **`test/admin_dashboard.spec.js`**: Admin panel features
+- **`test/session_handling.spec.js`**: Session expiry and error handling
+- **`test/run_dashboard_tests.js`**: Test execution script
+
+### 6.4. Testing Environment Setup
+- **Server Requirements**: Apache/XAMPP must be running on localhost
+- **Database**: MySQL service active with proper `api/config.php` configuration
+- **File Permissions**: Ensure `images/` directory has write permissions
+- **Browser Installation**: Run `npx playwright install` before testing
+
+### 6.5. Known Testing Issues & Solutions
+- **Admin Panel Access**: Use file:// protocol for admin pages if HTTP access fails
+- **API Error Handling**: Expect HTML error responses, not JSON, when configuration issues exist
+- **DB_SERVER Constant**: Ensure all database constants are properly defined in `api/config.php`
+- **Session Testing**: Mock session expiry by calling `/api/logout.php` endpoint
+- **Toast Notifications**: Verify `#toast-notification` element exists for error messaging tests
+
+### 6.6. Test Execution Commands
+```bash
+# Run all tests
+npx playwright test
+
+# Run specific test suite
+npx playwright test test/public_site_basic.spec.js
+
+# Generate HTML report
+npx playwright test --reporter=html
+
+# Debug mode (show browser)
+npx playwright test --debug
+
+# Custom test runner
+node test/run_dashboard_tests.js
+```
+
+### 6.7. Pre-Test Validation Checklist
+- [ ] Apache/XAMPP services running
+- [ ] MySQL database accessible
+- [ ] `api/config.php` properly configured
+- [ ] Admin credentials set in configuration
+- [ ] Product data exists in database
+- [ ] `images/` directory accessible
+- [ ] Playwright browsers installed
+
+## 7. COMMON ISSUES & DEBUGGING CHECKS
 - **DB Connection Failed**: Verify `api/config.php` credentials and MySQL service status.
-- **Images Not Uploading**: Check `images/` directory permissions (`755`). Verify file type validation in `api/products.php`.
-- **Admin Login Fails**: Ensure `session_start()` is at the top of authenticated scripts. Check `ADMIN_PASSWORD_HASH` value. Clear browser cache/cookies.
-- **API Errors**: Check PHP error logs. Validate JSON format. Ensure correct `Content-Type: application/json` headers are sent and received.
+- **Images Not Uploading**: Check `images/` directory permissions (`755`). Verify file type validation.
+- **Admin Login Fails**: Check `session_start()` is present. Check `ADMIN_PASSWORD_HASH`.
+- **API Errors**: Check PHP error logs. Validate JSON format and headers.
+- **JS Component Not Loading**: Check the browser's developer console for errors. Ensure the component is correctly registered in `admin/js/main.js`.
+- **Test Failures**: Verify baseURL in `playwright.config.js` matches server configuration. Check network requests in browser dev tools.
+- **Session Expiry Testing**: Use `/api/logout.php` to simulate expired sessions. Verify redirect to login page after 2.5 seconds.

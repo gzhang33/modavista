@@ -26,26 +26,29 @@ function get_media($dir) {
     $files = glob($dir . '{*.jpg,*.jpeg,*.png,*.gif,*.webp}', GLOB_BRACE);
     
     // 连接数据库以检查哪些图片正在被使用
-    $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     if ($conn->connect_error) {
         json_response(500, ["message" => "数据库连接失败"]);
     }
     
-    $sql = "SELECT media, defaultImage FROM products";
-    $result = $conn->query($sql);
     $used_images = [];
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            if (!empty($row['defaultImage'])) {
-                $used_images[$row['defaultImage']] = true;
-            }
-            $media = json_decode($row['media'], true);
-            if (is_array($media)) {
-                foreach ($media as $img) {
-                    $used_images[$img] = true;
+    $stmt = $conn->prepare("SELECT media, defaultImage FROM products");
+    if ($stmt) {
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            while ($row = $result->fetch_assoc()) {
+                if (!empty($row['defaultImage'])) {
+                    $used_images[$row['defaultImage']] = true;
+                }
+                $media = json_decode($row['media'], true);
+                if (is_array($media)) {
+                    foreach ($media as $img) {
+                        $used_images[$img] = true;
+                    }
                 }
             }
         }
+        $stmt->close();
     }
     $conn->close();
 

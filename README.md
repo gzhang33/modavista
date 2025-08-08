@@ -132,10 +132,33 @@ htdocs/
 ├── index.html              # Main product showcase
 ├── product.html            # Product detail page
 ├── admin/                  # Admin dashboard & login
+│   ├── assets/             # Admin-specific assets
+│   │   ├── css/            # Admin stylesheets
+│   │   ├── js/             # Admin JavaScript files
+│   │   │   └── components/ # Admin UI components
+│   │   └── lib/            # Admin-specific libraries
+│   ├── components/         # Admin PHP components
+│   ├── dashboard.php       # Main admin dashboard
+│   └── login.html          # Admin login page
 ├── api/                    # PHP backend APIs
-├── assets/                 # CSS, JavaScript, and libraries
+├── assets/                 # Public site assets
+│   ├── css/                # Public stylesheets
+│   ├── js/                 # Public JavaScript files
+│   │   └── lib/            # Public site libraries
 └── images/                 # Uploaded product images
 ```
+
+## 📚 Libraries Policy
+
+- **Public Site Libraries**: `assets/js/lib/` stores JavaScript libraries for the public site.
+- **Admin Libraries**: `admin/assets/lib/` stores JavaScript libraries for the admin dashboard.
+- **Introduction Principle**: Prefer no new external libraries to keep the project lightweight.
+- **Exception (By Discussion)**: For complex UI components (e.g., data tables), after discussion, you may introduce a lightweight, dependency-free, pure JavaScript library (such as Grid.js) to enhance efficiency and robustness.
+- **Documentation**: Any introduced library must be recorded in the section below.
+
+### Libraries Used
+
+- None at present. If a library is added (e.g., Grid.js for tables), list its name, version, source URL, and purpose here.
 
 ## 🤝 Contributing
 

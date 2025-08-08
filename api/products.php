@@ -6,7 +6,7 @@ require_once 'utils.php';
 
 // 允许跨域请求
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // 处理 OPTIONS 预检请求
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 
 // --- 数据库连接设置 ---
-$conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
 // 检查连接是否成功
 if ($conn->connect_error) {
@@ -40,6 +40,9 @@ switch ($method) {
     case 'POST':
         handle_post($conn);
         break;
+    case 'PUT':
+        handle_put($conn);
+        break;
     case 'DELETE':
         handle_delete($conn);
         break;
@@ -55,14 +58,12 @@ $conn->close();
  */
 function handle_get($conn) {
     if (isset($_GET['id'])) {
-        // --- 获取单个产品 ---
+        // --- Get single product ---
         $id = $_GET['id'];
-        $sql = "SELECT * FROM products WHERE id = ?";
-        $stmt = $conn->prepare($sql);
+        $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
         $stmt->bind_param("s", $id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
         if ($product = $result->fetch_assoc()) {
             $product['media'] = json_decode($product['media'], true) ?: [];
             json_response(200, $product);
@@ -70,41 +71,60 @@ function handle_get($conn) {
             json_response(404, ["message" => "产品未找到"]);
         }
         $stmt->close();
-    } elseif (isset($_GET['category'])) {
-        // --- 获取相关产品 (按分类) ---
-        $category = $_GET['category'];
-        $excludeId = $_GET['exclude'] ?? '';
-        
-        $sql = "SELECT * FROM products WHERE category = ? AND id != ? ORDER BY RAND() LIMIT 4";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $category, $excludeId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $products = [];
-        while ($row = $result->fetch_assoc()) {
-            $row['media'] = json_decode($row['media'], true) ?: [];
-            $products[] = $row;
-        }
-        json_response(200, $products);
-        $stmt->close();
-    } else {
-        // --- 获取所有产品 ---
-        $sql = "SELECT * FROM products ORDER BY createdAt DESC";
-        $result = $conn->query($sql);
-
-        if ($result) {
-            $products = [];
-            while ($row = $result->fetch_assoc()) {
-                $row['media'] = json_decode($row['media'], true) ?: [];
-                $row['variants'] = json_decode($row['variants'], true) ?: [];
-                $products[] = $row;
-            }
-            json_response(200, $products);
-        } else {
-            json_response(500, ["message" => "查询产品数据失败: " . $conn->error]);
-        }
+        return;
     }
+
+    // --- Advanced Filtering Logic ---
+    $sql = "SELECT * FROM products";
+    $where_clauses = [];
+    $params = [];
+    $types = "";
+    
+    // Handle the 'archived' status filter
+    $archived_status = isset($_GET['archived']) ? (int)$_GET['archived'] : 0;
+    $where_clauses[] = "archived = ?";
+    $params[] = $archived_status;
+    $types .= "i";
+    
+    // --- Simple Search Fallback ---
+    if (isset($_GET['search'])) {
+        $where_clauses[] = "name LIKE ?";
+        $params[] = "%" . $_GET['search'] . "%";
+        $types .= "s";
+    }
+    if (isset($_GET['category'])) {
+        $where_clauses[] = "category = ?";
+        $params[] = $_GET['category'];
+        $types .= "s";
+    }
+    if (!empty($where_clauses)) {
+        $sql .= " WHERE " . implode(" AND ", $where_clauses);
+    }
+
+    $sql .= " ORDER BY createdAt DESC";
+
+    $stmt = $conn->prepare($sql);
+
+    if ($stmt === false) {
+        json_response(500, ["message" => "查询准备失败: " . $conn->error]);
+        return;
+    }
+
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $products = [];
+    while ($row = $result->fetch_assoc()) {
+        $row['media'] = json_decode($row['media'], true) ?: [];
+        $products[] = $row;
+    }
+
+    json_response(200, $products);
+    $stmt->close();
 }
 
 /**
@@ -203,16 +223,50 @@ function handle_post($conn) {
  * 处理 DELETE 请求
  */
 function handle_delete($conn) {
-    $id = $_GET['id'] ?? null;
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    // 批量删除
+    if (isset($data['ids']) && is_array($data['ids'])) {
+        $ids_to_delete = $data['ids'];
+        if (empty($ids_to_delete)) {
+            json_response(400, ['message' => '没有提供要删除的 ID']);
+            return;
+        }
 
+        // 为 IN 子句创建占位符
+        $placeholders = implode(',', array_fill(0, count($ids_to_delete), '?'));
+        $types = str_repeat('s', count($ids_to_delete));
+        
+        $sql = "DELETE FROM products WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            json_response(500, ['message' => 'SQL prepare failed: ' . $conn->error]);
+            return;
+        }
+        
+        $stmt->bind_param($types, ...$ids_to_delete);
+
+        if ($stmt->execute()) {
+            json_response(200, ['message' => '批量删除成功', 'deleted_count' => $stmt->affected_rows]);
+        } else {
+            json_response(500, ['message' => '批量删除失败: ' . $stmt->error]);
+        }
+        $stmt->close();
+        return;
+    }
+
+    // 单个删除 (保持向后兼容)
+    $id = $_GET['id'] ?? null;
     if (!$id) {
         json_response(400, ['message' => '缺少产品 ID']);
+        return;
     }
 
     $sql = "DELETE FROM products WHERE id = ?";
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ['message' => 'SQL prepare failed: ' . $conn->error]);
+        return;
     }
     $stmt->bind_param("s", $id);
 
@@ -227,4 +281,88 @@ function handle_delete($conn) {
     }
     $stmt->close();
 }
-?> 
+
+/**
+ * 处理 PUT 请求 (归档/恢复)
+ */
+function handle_put($conn) {
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$data) {
+        json_response(400, ['message' => '请求数据格式错误']);
+        return;
+    }
+    
+    $action = $data['action'] ?? null;
+    $id = $data['id'] ?? null;
+    $ids = $data['ids'] ?? null;
+    
+    if (!$action || (!$id && !$ids)) {
+        json_response(400, ['message' => '缺少必要参数: action 和 id/ids']);
+        return;
+    }
+    
+    if (!in_array($action, ['archive', 'unarchive'])) {
+        json_response(400, ['message' => '无效的操作类型，只支持 archive 或 unarchive']);
+        return;
+    }
+    
+    $archived_value = ($action === 'archive') ? 1 : 0;
+    $action_text = ($action === 'archive') ? '归档' : '恢复';
+    
+    // 批量操作
+    if ($ids && is_array($ids)) {
+        if (empty($ids)) {
+            json_response(400, ['message' => '没有提供要操作的 ID']);
+            return;
+        }
+        
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $types = str_repeat('s', count($ids)) . 'i';
+        
+        $sql = "UPDATE products SET archived = ? WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            json_response(500, ['message' => 'SQL prepare failed: ' . $conn->error]);
+            return;
+        }
+        
+        $params = array_merge([$archived_value], $ids);
+        $stmt->bind_param($types, ...$params);
+        
+        if ($stmt->execute()) {
+            json_response(200, [
+                'message' => "成功{$action_text} {$stmt->affected_rows} 个产品", 
+                'affected_count' => $stmt->affected_rows
+            ]);
+        } else {
+            json_response(500, ['message' => "批量{$action_text}失败: " . $stmt->error]);
+        }
+        $stmt->close();
+        return;
+    }
+    
+    // 单个操作
+    if ($id) {
+        $sql = "UPDATE products SET archived = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            json_response(500, ['message' => 'SQL prepare failed: ' . $conn->error]);
+            return;
+        }
+        $stmt->bind_param("is", $archived_value, $id);
+        
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                json_response(200, ['message' => "产品{$action_text}成功"]);
+            } else {
+                json_response(404, ['message' => '未找到要操作的产品']);
+            }
+        } else {
+            json_response(500, ['message' => "产品{$action_text}失败: " . $stmt->error]);
+        }
+        $stmt->close();
+        return;
+    }
+}
+?>

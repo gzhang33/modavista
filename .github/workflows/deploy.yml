@@ -36,5 +36,13 @@ jobs:
           
         # (可选) 排除不想上传的文件或目录
         # 修正了 exclude 的格式，使用 | 来支持多行
-        exclude: 
+        exclude: |
+          **/.git*
+          **/.github/**
+          .gitignore
+          README.md
+          README.txt
+          .cursorrules
+          CURSORRULES.txt
           api/config.php
+

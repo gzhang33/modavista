@@ -1,0 +1,42 @@
+# 工作流名称
+name: Deploy to InfinityFree
+
+# 触发条件：当代码被推送到 main 分支时触发
+on:
+  push:
+    branches:
+      - main  # 您可以更改为您想部署的分支，比如 master
+
+# 任务
+jobs:
+  ftp-deploy:
+    # 任务名称
+    name: FTP Deploy
+    # 运行环境：使用最新的 Ubuntu 系统
+    runs-on: ubuntu-latest
+
+    steps:
+    # 第一步：检出代码
+    # 这个步骤会将你的仓库代码下载到 GitHub Actions 的虚拟机上
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 第二步：部署到 FTP 服务器
+    # 使用社区提供的 FTP 部署 Action
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        # InfinityFree 的 FTP 服务器地址，从 GitHub Secrets 读取
+        server: ${{ secrets.FTP_SERVER }}
+        # InfinityFree 的 FTP 用户名，从 GitHub Secrets 读取
+        username: ${{ secrets.FTP_USERNAME }}
+        # InfinityFree 的 FTP 密码，从 GitHub Secrets 读取
+        password: ${{ secrets.FTP_PASSWORD }}
+        # 目标服务器上的部署目录。InfinityFree 通常是 /htdocs
+        server-dir: /htdocs/
+        # （可选）排除不想上传的文件或目录
+        # exclude: |
+        #   **/.git*
+        #   **/.git*/**
+        #   **/node_modules/**
+        #   README.md

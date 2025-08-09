@@ -1,52 +1,33 @@
 @always
-# Cursor AI Rules: Fashion Factory Display System
 # Version: 2.3
 # Purpose: Guide AI for development on this project.
 
 ## 1. CORE DIRECTIVES
-- **Project Goal**: A B2B product showcase for an Italian fashion factory. It is NOT an e-commerce platform.
+- **Project Goal**: B2B product showcase (non-ecommerce).
 - **Primary User**: Clients browsing products.
-- **Secondary User**: Admin managing the catalog.
-- **Technology Stack**: Vanilla JS (ES6+, Modules, Class-based), PHP 7+, MySQL. NO frameworks (React, Vue, Laravel, etc.).
- - **Variants Model**: Each color variant is a standalone row in `products`, sharing the same base name/description/category. Admin panel supports batch creation of variants.
+- **Secondary User**: Admin maintaining the catalog.
+- **Technology Stack**: Vanilla JS (ES6+, modules, class-based), PHP 7+, MySQL. 
+- **Architecture Principles**: Componentized, modular, single-responsibility, and clear separation of concerns.
+- **Variants Model**: Each color variant is an independent `products` row sharing base attributes; admin tools support batch creation.
 
 ## 2. TECHNICAL SPECIFICATIONS
 
 ### 2.1. Backend (PHP)
-- **Primary Logic**: All backend operations are handled within the `/api/` directory.
-- **Database Interaction**: MUST use prepared statements (`mysqli`). NO direct queries.
-- **Error Handling**: MUST use `json_response()` utility from `api/utils.php` for all API outputs.
-- **Authentication**: All admin endpoints in `api/` (except `login.php` and `GET` requests to `products.php` and `categories.php`) MUST be protected by `require_auth()`.
-- **Configuration**: `api/config.php` stores all credentials. `ADMIN_PASSWORD_HASH` uses `password_hash()` with `PASSWORD_BCRYPT`.
- - **Variants Creation (POST /api/products.php)**: When `variants_meta` JSON and `variant_media_{index}[]` files are present, create one product per variant. Name is auto-suffixed with `- {color}`.
+- **Scope**: All server-side logic resides under the `api/` directory, exposing RESTful JSON endpoints.
+- **Database Interaction**: Use `mysqli` prepared statements for all queries. Prohibit SQL string concatenation.
+- **Responses**: All endpoints must return JSON with a consistent schema for success and errors.
+- **Authentication**: Admin-only endpoints require authenticated sessions; public, read-only catalog endpoints are accessible without auth.
+- **Security & Configuration**: Store secrets/configuration only within backend configuration; hash admin credentials using strong one-way algorithms (bcrypt or equivalent).
+- **Variants Creation (Batch)**: When receiving variant metadata with associated media, create one product per variant and suffix the name with the color.
 
 ### 2.2. Frontend (JavaScript)
-- **Client-Side Modular Architecture**:
-    - `assets/js/script.js`: Main entry point for the homepage (`index.html`). Coordinates `ProductGrid` and `MobileNavigation` components.
-    - `assets/js/product.js`: Main entry point for the product detail page (`product.html`). Coordinates `ProductDetails`, `ImageGallery`, and `RelatedProducts` components.
-    - `assets/js/components/`: Directory containing modular UI components for the public site:
-        - `ProductGrid.js`: Handles product listing, filtering, and navigation for homepage.
-        - `MobileNavigation.js`: Manages mobile navigation menu interactions.
-        - `ImageGallery.js`: Handles product image display, zoom, and thumbnail switching.
-        - `RelatedProducts.js`: Manages "You might also like" product recommendations.
-        - `ProductDetails.js`: Displays product information, variants, and breadcrumbs.
-    - `assets/js/utils/`: Utility functions and tools:
-        - `apiClient.js`: Centralized HTTP client for all API interactions with error handling.
-- **Admin-Side**:
-    - `admin/assets/js/main.js`: Entry point for the admin dashboard. Initializes `EventBus`, `ComponentManager`, and all components.
-    - `admin/assets/js/EventBus.js`: A simple pub/sub system for communication between components.
-    - `admin/assets/js/ComponentManager.js`: Registers and manages the lifecycle of all admin components.
-    - `admin/assets/js/components/`: Directory containing all modular components for the admin dashboard.
-        - `ProductFormComponent.js`: Supports variant rows with color + images, generates `variants_meta`, previews images.
-        - `ProductTableComponent.js`: Shows a "变体" column with color dots per group (based on base name).
-- **Styling**:
-    - `assets/css/style.css`: Main stylesheet for the public site.
-    - `admin/assets/css/admin_style.css`: Stylesheet for the admin dashboard.
-- **Module System**: Public site uses ES6 modules for better maintainability, reusability, and developer experience.
- - **Libraries**: 
-    - `assets/js/lib/`: Shared JS libraries for the public site.
-    - `admin/assets/lib/`: Shared JS libraries for the admin dashboard.
-    - Prefer not introducing new external libraries to keep the project lightweight. For complex UI components (e.g., data tables), after discussion, you may introduce a library to improve development efficiency and robustness. Any introduced library must be documented in the README under "Libraries Used".
+- **Modular Architecture**: Use ES6 modules and classes. Keep components single-purpose and reusable.
+- **Communication Pattern**: Use an event bus (pub/sub) for decoupled inter-component communication.
+- **HTTP Layer**: Centralize API requests in a thin client utility with basic error normalization.
+- **Public Site**: UI is composed from modular components and utilities orchestrated by lightweight entry scripts.
+- **Admin Panel**: Uses the same modular approach with an event bus and a component manager to coordinate feature-specific components.
+- **Styling**: Use CSS custom properties and BEM for maintainable theming.
+- **Libraries**: Prefer no external libraries. If absolutely needed for complex UI, document them in the README under “Libraries Used”.
 
 ### 2.3. Database (MySQL)
 - **Primary Key**: `products.id` MUST be a string with the format `prod_[uniqid]`.
@@ -55,183 +36,56 @@
  - **Variants**: `products.variants` (JSON/LONGTEXT) may store `{ color: "Red" }` for variant metadata. No separate parent/child tables.
 
 ### 2.4. Project File Structure
-- `/`: Root directory.
-    - `index.html`: Main product gallery page (public).
-    - `product.html`: Single product detail page (public).
-- `/admin/`: Contains all admin-related files.
-    - `login.html`: Admin login page.
-    - `dashboard.php`: Main admin dashboard, assembles components from `/admin/components/`.
-    - `/assets/`: Admin-specific assets directory.
-        - `/css/`: Admin stylesheets.
-            - `admin_style.css`: Main admin stylesheet.
-        - `/js/`: Contains all admin-side JavaScript.
-            - `main.js`: Main entry point.
-            - `EventBus.js`, `ComponentManager.js`: Core architecture.
-            - `/components/`: Reusable UI components (`ProductTableComponent`, `ProductFormComponent`, etc.).
-        - `/lib/`: Admin-specific JavaScript libraries.
-    - `/components/`: Reusable PHP UI parts for the dashboard.
-        - `sidebar.php`, `dashboard_stats.php`, `products_management.php`, `modals.php`.
-- `/api/`: Handles all server-side logic and data processing.
-    - `products.php`: CRUD operations for products.
-    - `categories.php`: Fetches unique product categories.
-    - `login.php`/`logout.php`: Admin authentication.
-    - `check_session.php`: Verifies admin session status.
-    - `dashboard_stats.php`: Provides data for the stats overview.
-    - `utils.php`: Contains helper functions like `json_response()` and `require_auth()`.
-- `/assets/`: Shared resources for the public-facing site.
-- `/images/`: Uploaded product media files.
+- `/`: Public-facing documents and entry points for the site.
+- `/api/`: Server-side PHP endpoints and backend utilities.
+- `/assets/`: Public site assets (JavaScript modules, utilities, components, styles, and shared libraries).
+- `/assets/js/components/`: Reusable, single-responsibility UI components for the public site.
+- `/assets/js/utils/`: Shared client-side utilities (API client, helpers).
+- `/admin/`: Admin-facing pages, assets, and components for catalog management.
+- `/admin/assets/js/components/`: Reusable, modular admin UI components.
+- `/images/`: Uploaded media files managed by the backend.
 
 ## 3. DEVELOPMENT WORKFLOWS
 
-### 3.1. How to Add a New Product
-1.  **Action**: User submits the form in `admin/dashboard.php`.
-2.  **API Call**: `ProductFormComponent` sends a `POST` request to `api/products.php` using a `FormData` object.
-3.  **Backend Logic**:
-    a. Authenticate admin session.
-    b. Generate new `prod_[uniqid]`.
-    c. Handle file uploads: validate, rename, and move to `images/`.
-    d. Store file paths in `media` (JSON array) and set `defaultImage`.
-    e. Insert new product record into the database via prepared statement.
+### 3.1. Create Resource (Generic)
+1. Client component submits a POST request (form or JSON) to a backend endpoint.
+2. Backend authenticates (if required), validates payload, and processes files (if any).
+3. Backend persists data using prepared statements and stores media paths when uploads are present.
+4. Backend responds with a normalized JSON object indicating success or error.
 
-### 3.1.1. Create Variants in One Request
-- In the admin form, add multiple variant rows (color + images).
-- On submit, the client sends:
-  - `variants_meta` JSON with indexes and color names
-  - One or more file lists per variant: `variant_media_{index}[]`
-- The API creates independent product rows; names are suffixed with color to assist grouping.
-
-### 3.2. How to Modify Categories
-- Categories are not stored in a separate table. They are derived from the `DISTINCT category` values in the `products` table.
-- To add a new category, create a new product and assign it the new category name.
-- The frontend navigation and filters will update automatically.
+### 3.2. Read/Update/Delete Resource (Generic)
+- **Read**: Public endpoints support listing and single-resource retrieval with optional filtering.
+- **Update/Delete**: Admin endpoints require authentication and validate input before mutating state.
+- **Derived Data**: Aggregated or derived collections should be computed on demand rather than stored redundantly.
 
 ## 4. CODE STYLE & STANDARDS
-- **PHP**: Follow PSR-12 conventions.
-- **JavaScript**: Use modern ES6+ syntax (classes, modules, `async/await`, imports/exports).
-    - **Admin Panel**: Follow the established modular, component-based architecture. Use `EventBus` for inter-component communication. Create new components by extending `BaseComponent`.
-    - **Public Site**: Use ES6 modules with component-based architecture. Each component should:
-        - Be a self-contained class with clear responsibility
-        - Use import/export syntax for dependencies
-        - Follow consistent naming conventions (PascalCase for classes, camelCase for methods)
-        - Include proper JSDoc documentation
-        - Handle errors gracefully with try/catch blocks
-        - Expose minimal public API and encapsulate internal logic
-- **CSS**: Use CSS custom properties (`var(--variable)`) for theming. Adhere to BEM.
-- **HTML**: Write semantic HTML5.
+- **PHP**: Follow PSR-12. Keep functions small and single-purpose. Use clear naming and avoid magic values.
+- **JavaScript**: ES6+ modules and classes, `async/await`, explicit exports/imports. Encapsulate internals; expose minimal public APIs. Document with concise JSDoc.
+- **CSS/HTML**: Semantic HTML5; use BEM and CSS variables for theming.
+- **Naming & Consistency**: Maintain consistent naming conventions and directory structure across public and admin code.
 
 ## 5. PUBLIC SITE ARCHITECTURE
-The public site uses a modern ES6 module-based architecture with clear separation of concerns:
-
-### 5.1. Component Structure
-- **Components** (`assets/js/components/`): Self-contained classes that handle specific UI functionality
-- **Utils** (`assets/js/utils/`): Shared utilities and helper functions
-- **Entry Points**: Main application coordinators (`script.js`, `product.js`)
-
-### 5.2. Component Guidelines
-- Each component should have a single, well-defined responsibility
-- Components communicate through events, method calls, or shared state
-- Use proper error handling and graceful degradation
-- Include comprehensive JSDoc documentation
-- Follow consistent naming: PascalCase for classes, camelCase for methods and properties
-
-### 5.3. Data Flow
-- Entry points coordinate between components
-- `ApiClient` handles all HTTP communication
-- Components update UI based on data changes
-- Event-driven communication for loosely coupled interactions
+- Build UI from modular components (`assets/js/components/`) coordinated by lightweight entry scripts.
+- Data flows through a centralized API utility; components react to data and events.
+- Favor event-driven interactions and avoid tight coupling between components.
 
 ## 6. ADMIN PANEL ARCHITECTURE
-The admin panel is built on a modular, component-based architecture.
-- **`EventBus.js`**: A central event bus allows components to communicate without direct dependencies.
-- **`ComponentManager.js`**: Initializes and manages all components.
-- **`BaseComponent.js`**: A base class for all components, providing common functionality like element selection and visibility.
-- **Components**: Each component (e.g., `ProductTableComponent`, `ProductFormComponent`) is a self-contained class responsible for a specific part of the UI. They listen for and emit events on the `EventBus`.
+- Use an event bus for cross-component communication and a component manager to control lifecycle.
+- Components are isolated, testable modules that handle specific admin features (tables, forms, modals, etc.).
+- Follow the same module, utility, and styling conventions as the public site.
 
- ## 7. PLAYWRIGHT TESTING EXTERNAL MANAGEMENT
+## 7. TESTING & QUALITY ASSURANCE
+- Prefer external end-to-end testing tools/services; do not store test specs within this repository.
+- Ensure environment validation precedes automated tests (server, database, permissions).
+- Every feature or change should be covered by unit and end-to-end tests managed externally.
+- Keep the application focused on runtime code; testing configuration is minimal and externalized.
 
-### 🚨 CRITICAL DIRECTIVE: NO LOCAL TEST FILES
-
-**When users request Playwright testing, DO NOT create any `.spec.js` or test files within this project.**
-
-Instead:
-1. Use the external `playwright mcp` tool to execute all testing
-2 This project only provides configuration and receives test results
-
-
-
-### 7.1 Testing Environment Requirements
-
-For external testing tools:
-- **Server**: Apache/XAMPP must be running on localhost
-- **Database**: MySQL service active with proper `api/config.php` configuration
-- **Admin Credentials**: Default username: `admin`, password: `admin`
-- **File Permissions**: Ensure `images/` directory has write permissions
-
-### 7.3. Critical Test Scenarios for External Tools
-
-#### Public Site Testing
-- Homepage product grid and navigation (`/index.html`)
-- Product detail page functionality (`/product.html`)
-- ES6 module loading (ProductGrid, MobileNavigation, ImageGallery)
-- API endpoints: `/api/products.php`, `/api/categories.php`
-- Responsive design and mobile navigation
-
-#### Admin Panel Testing  
-- Login flow and session management (`/admin/login.html`)
-- Dashboard functionality (`/admin/dashboard.php`)
-- Product CRUD operations and bulk actions
-- Session expiry handling (401 responses)
-- Toast notification system
-
-#### API Testing
-- Product list retrieval and single product access
-- Admin authentication endpoints
-- Error handling for unauthorized access
-- Response format validation (JSON vs HTML errors)
-
-### 7.4. Integration with External MCP Tool
-
-When using external Playwright MCP tools:
-- External tools manage their own configuration
-- Environment validation before test execution
-- Comprehensive test reporting handled externally
-- No local test file or configuration maintenance required
-
-### 7.5. Prohibited Actions
-
-❌ **DO NOT:**
-- Create any `.spec.js` files in this project
-- Write test code within project files
-- Create test utility functions locally
-- Generate local test reports or results
-
-✅ **DO:**
-- Use external Playwright MCP tool for all testing
-- Maintain basic configuration only
-- Focus on application development
-- Review external test results for issues
-
-## 8. COMMON ISSUES & DEBUGGING CHECKS
-
-### 8.1. Module Loading Issues
-- **Import/Export Errors**: Check browser console for ES6 module syntax errors
-- **CORS Issues**: Ensure server supports ES6 modules (served over HTTP/HTTPS, not file://)
-- **Path Resolution**: Verify relative import paths are correct from the importing file's perspective
-- **Circular Dependencies**: Avoid circular imports between modules
-
-### 8.2. Component Issues
-- **Component Not Initializing**: Check if DOM elements exist before component instantiation
-- **Event Listeners Not Working**: Verify event listeners are attached after DOM elements are created
-- **API Calls Failing**: Check network tab and ensure ApiClient is properly configured
+## 8. COMMON PRINCIPLES FOR DEBUGGING
+- Verify module import paths, avoid circular dependencies, and ensure assets are served over HTTP(S).
+- Confirm DOM availability before component initialization; attach listeners after elements exist.
+- Normalize API errors; ensure all endpoints return JSON with meaningful status and messages.
+- Check database connectivity and credentials when server errors occur; validate file permissions for uploads.
 
 ## 9. MAINTENANCE POLICY
-- Whenever a structural change to the project or a new feature is added, you MUST update both `README.md` and `.cursorrules` to reflect the latest architecture, workflows, and constraints.
-### 8.3. Common Technical Issues
-- **DB Connection Failed**: Verify `api/config.php` credentials and MySQL service status.
-- **Images Not Uploading**: Check `images/` directory permissions (`755`). Verify file type validation.
-- **Admin Login Fails**: Check `session_start()` is present. Check `ADMIN_PASSWORD_HASH`.
-- **API Errors**: Check PHP error logs. Validate JSON format and headers.
-- **JS Component Not Loading**: Check the browser's developer console for errors. For public site, verify ES6 module imports are correct. For admin, ensure the component is correctly registered in `admin/js/main.js`.
-- **Test Failures**: Verify baseURL in `playwright.config.js` matches server configuration. Check network requests in browser dev tools.
-- **Session Expiry Testing**: Use `/api/logout.php` to simulate expired sessions. Verify redirect to login page after 2.5 seconds.
-- **Module Import Errors**: Ensure file extensions (.js) are included in import statements and paths are relative to the importing file.
+- On structural or feature changes, update both `README.md` and `.cursorrules` to reflect architecture, workflows, and constraints.
+- Continuously refactor to reduce duplication, improve naming, and keep modules single-responsibility.

@@ -1,416 +1,189 @@
-// Modern Fashion E-commerce Product Display Script
-class ProductGrid {
-  constructor() {
-    this.products = [];
-    this.filteredProducts = [];
-    this.loading = true;
-    this.currentCategory = 'all';
+ /**
+ * 主页脚本 - 主入口文件
+ * 负责导入和初始化主页相关的组件
+ */
 
-    this.categoryFilter = document.getElementById('category-filter');
-    this.sortFilter = document.getElementById('sort-filter');
-    this.resetBtn = document.getElementById('reset-filters');
+// 导入所需的组件和工具
+import ProductGrid from './components/ProductGrid.js';
+import MobileNavigation from './components/MobileNavigation.js';
+
+/**
+ * 主页应用程序类
+ * 协调各个组件的初始化和交互
+ */
+class MainApp {
+  constructor() {
+    this.productGrid = null;
+    this.mobileNavigation = null;
     
     this.init();
   }
 
+  /**
+   * 初始化应用程序
+   */
   async init() {
-    // Load products and categories in parallel
-    await Promise.all([this.loadProducts(), this.loadCategories()]);
-
-    this.filteredProducts = [...this.products];
-    this.renderProducts();
-    // Navigation filters are setup after categories are rendered
-    this.setupMobileNavigation();
-    this.setupDynamicContent(); // New method for dynamic behaviors
-    this.handleInitialRoute();
-    this.setupBrowserNavigation();
-
-    if (this.categoryFilter && this.sortFilter && this.resetBtn) {
-      this.setupFilters();
-    }
-  }
-
-  async loadProducts() {
     try {
-      const response = await fetch('api/products.php');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // 等待 DOM 完全加载
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => {
+          document.addEventListener('DOMContentLoaded', resolve);
+        });
       }
-      this.products = await response.json();
-      this.loading = false;
+
+      // 初始化各个组件
+      this.initializeComponents();
+      this.setupGlobalHandlers();
+      
+      console.log('Main app initialized successfully');
     } catch (error) {
-      console.error('Failed to load products:', error);
-      this.showError();
+      console.error('Failed to initialize main app:', error);
     }
   }
 
-  async loadCategories() {
-    try {
-      const response = await fetch('api/categories.php');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  /**
+   * 初始化所有组件
+   */
+  initializeComponents() {
+    // 初始化产品网格组件
+    if (document.getElementById('product-list')) {
+      this.productGrid = new ProductGrid();
+    }
+
+    // 初始化移动端导航组件
+    this.mobileNavigation = new MobileNavigation();
+  }
+
+  /**
+   * 设置全局事件处理器
+   */
+  setupGlobalHandlers() {
+    // 返回顶部按钮
+    this.setupBackToTop();
+    
+    // 全局错误处理
+    this.setupGlobalErrorHandling();
+    
+    // 页面可见性变化处理
+    this.setupVisibilityChangeHandling();
+  }
+
+  /**
+   * 设置返回顶部功能
+   */
+  setupBackToTop() {
+    const backToTopBtn = document.getElementById('back-to-top');
+    if (!backToTopBtn) return;
+
+    // 滚动显示/隐藏按钮
+    let isScrolling = false;
+    window.addEventListener('scroll', () => {
+      if (!isScrolling) {
+        window.requestAnimationFrame(() => {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          backToTopBtn.style.display = scrollTop > 300 ? 'block' : 'none';
+          isScrolling = false;
+        });
+        isScrolling = true;
       }
-      const categories = await response.json();
-      this.renderNavigation(categories);
-    } catch (error) {
-      console.error('Failed to load categories:', error);
-      const navContainer = document.querySelector('.main-nav ul');
-      if (navContainer) {
-        navContainer.innerHTML = '<li data-categories="all" class="active"><a href="#">Tutti i Prodotti</a></li>';
-        this.setupNavigationFilters(); 
+    });
+
+    // 点击返回顶部
+    backToTopBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  }
+
+  /**
+   * 设置全局错误处理
+   */
+  setupGlobalErrorHandling() {
+    // 图片加载错误的全局处理
+    document.addEventListener('error', (e) => {
+      if (e.target.tagName === 'IMG') {
+        e.target.src = '/images/placeholder-optimized.svg';
+        e.target.classList.add('error');
       }
-    }
+    }, true);
+
+    // 未捕获的 Promise 错误
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      // 可以在这里添加错误报告逻辑
+    });
   }
 
-  renderNavigation(categories) {
-    const navContainer = document.querySelector('.main-nav ul');
-    if (!navContainer) return;
-
-    const allProductsHTML = '<li data-categories="all" class="active"><a href="#">Tutti i Prodotti</a></li>';
-    const categoriesHTML = categories.map(category => `
-      <li data-categories="${category}"><a href="#">${category}</a></li>
-    `).join('');
-
-    navContainer.innerHTML = allProductsHTML + categoriesHTML;
-    this.setupNavigationFilters(); // Re-setup listeners after dynamic render
-  }
-
-  renderProducts() {
-    const grid = document.getElementById('product-list');
-    if (!grid) {
-      return;
-    }
-    
-    const productsToRender = this.filteredProducts;
-    
-    if (!productsToRender || productsToRender.length === 0) {
-      grid.innerHTML = this.getEmptyState();
-      return;
-    }
-
-    const cardsHTML = productsToRender.map(product => this.createProductCard(product)).join('');
-    grid.innerHTML = cardsHTML;
-    
-    setTimeout(() => {
-      this.verifyAndFixImages();
-    }, 10);
-    
-    // We call setupDynamicContent which includes observing cards for animation
-    this.setupDynamicContent();
-  }
-  
-  verifyAndFixImages() {
-    const grid = document.getElementById('product-list');
-    if (!grid) return;
-    
-    const images = grid.querySelectorAll('img');
-    
-    images.forEach((img) => {
-      if (img.dataset.verified) return;
-      img.dataset.verified = 'true';
-      
-      if (!img.src || img.src === window.location.href || img.src === '') {
-        img.src = './images/placeholder-optimized.svg';
-      }
-      
-      if (img.complete && img.naturalHeight !== 0) {
-        img.classList.add('loaded');
-      } else if (img.complete && img.naturalHeight === 0) {
-        img.src = './images/placeholder-optimized.svg';
-        img.classList.add('error');
+  /**
+   * 设置页面可见性变化处理
+   */
+  setupVisibilityChangeHandling() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时，可以刷新数据或恢复某些功能
+        this.onPageVisible();
+      } else {
+        // 页面变为不可见时，可以暂停某些操作
+        this.onPageHidden();
       }
     });
   }
 
-  createProductCard(product) {
-    const isNew = this.isNewProduct(product);
-    let imageSrc = product.defaultImage || 'images/placeholder-optimized.svg';
-
-    return `
-      <article class="product-card" data-product-id="${product.id}" onclick="window.location.href='product.html?id=${product.id}'">
-        <div class="product-image-container image-container">
-          ${this.createProductBadges(isNew)}
-          <img 
-            src="${imageSrc}" 
-            alt="${product.name}" 
-            class="product-img"
-            loading="lazy"
-            decoding="async"
-            onload="this.classList.add('loaded')"
-            onerror="this.src='images/placeholder-optimized.svg'; this.classList.add('error');"
-          >
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">${product.name}</h3>
-          <p class="product-category">${product.category || ''}</p>
-        </div>
-      </article>
-    `;
+  /**
+   * 页面变为可见时的处理
+   */
+  onPageVisible() {
+    // 可以在这里添加页面重新获得焦点时的逻辑
+    console.log('Page became visible');
   }
 
-  createProductBadges(isNew) {
-    let badges = '';
-    if (isNew) badges += '<span class="product-badge badge-new">New</span>';
-    return badges ? `<div class="product-badges">${badges}</div>` : '';
+  /**
+   * 页面变为隐藏时的处理
+   */
+  onPageHidden() {
+    // 可以在这里添加页面失去焦点时的逻辑
+    console.log('Page became hidden');
   }
 
-  isNewProduct(product) {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return product.createdAt && new Date(product.createdAt) > thirtyDaysAgo;
+  /**
+   * 获取产品网格组件实例
+   * @returns {ProductGrid|null} 产品网格组件
+   */
+  getProductGrid() {
+    return this.productGrid;
   }
 
-  showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.classList.add('show');
-    }, 10);
-
-    setTimeout(() => {
-      toast.classList.remove('show');
-      toast.addEventListener('transitionend', () => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      });
-    }, 3000);
+  /**
+   * 获取移动端导航组件实例
+   * @returns {MobileNavigation|null} 移动端导航组件
+   */
+  getMobileNavigation() {
+    return this.mobileNavigation;
   }
 
-  showError() {
-    const grid = document.getElementById('product-list');
-    if (!grid) return;
-    
-    grid.innerHTML = `
-      <div class="error-state">
-        <div class="error-content">
-          <div class="error-icon">⚠️</div>
-          <h3>Impossibile caricare i prodotti</h3>
-          <p>Controlla la connessione internet e riprova, oppure torna più tardi.</p>
-          <div class="error-actions">
-            <button onclick="location.reload()" class="retry-btn">Ricarica</button>
-            <button onclick="window.history.back()" class="back-btn">Torna Indietro</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  getEmptyState() {
-    return `
-      <div class="empty-state">
-        <div class="empty-state-content">
-          <div class="empty-icon">📦</div>
-          <h3>Nessun prodotto disponibile</h3>
-          <p>Non ci sono prodotti in questa categoria, prova altre categorie o torna più tardi.</p>
-          <div class="empty-actions">
-            <button onclick="document.querySelector('[data-categories=\\"all\\"]').click()" class="show-all-btn">Mostra Tutti i Prodotti</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  setupFilters() {
-    if(!this.categoryFilter || !this.sortFilter || !this.resetBtn) return;
-    this.categoryFilter.addEventListener('change', () => this.applyFilters());
-    this.sortFilter.addEventListener('change', () => this.applyFilters());
-    this.resetBtn.addEventListener('click', () => this.resetFilters());
-  }
-  
-  applyFilters() {
-    const category = this.categoryFilter.value;
-    const sortValue = this.sortFilter.value;
-
-    let tempProducts = [...this.products];
-
-    if (category !== 'all') {
-      tempProducts = tempProducts.filter(p => p.category === category);
-    }
-
-    if (sortValue === 'newest') {
-      tempProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else {
-      // Default sorting
-    }
-
-    this.filteredProducts = tempProducts;
-    this.renderProducts();
-  }
-  
-  resetFilters() {
-    this.categoryFilter.value = 'all';
-    this.sortFilter.value = 'featured';
-    this.filteredProducts = [...this.products];
-    this.renderProducts();
-  }
-
-  setupNavigationFilters() {
-    const navContainer = document.querySelector('.main-nav ul');
-    if(navContainer) {
-      navContainer.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-        if (link) {
-          e.preventDefault();
-          const navItem = link.closest('li');
-          if (navItem && navItem.dataset.categories) {
-            const category = navItem.dataset.categories;
-            this.filterByCategory(category);
-            this.updateNavigationState(navItem);
-            this.updateURL(category);
-          }
-        }
-      });
-    }
-  }
-
-  filterByCategory(category) {
-    this.currentCategory = category || 'all';
-    
-    if (this.currentCategory === 'all') {
-      this.filteredProducts = [...this.products];
-    } else {
-      this.filteredProducts = this.products.filter(product => 
-        product.category === this.currentCategory
-      );
+  /**
+   * 销毁应用程序，清理资源
+   */
+  destroy() {
+    if (this.productGrid) {
+      this.productGrid.destroy?.();
     }
     
-    this.renderProducts();
-  }
-
-  updateNavigationState(activeItem) {
-    document.querySelectorAll('.main-nav ul li').forEach(item => {
-      item.classList.remove('active');
-    });
-    
-    if (activeItem) {
-      activeItem.classList.add('active');
+    if (this.mobileNavigation) {
+      this.mobileNavigation.destroy?.();
     }
-  }
-
-  setupBrowserNavigation() {
-    window.addEventListener('popstate', (event) => {
-      const category = event.state?.category || this.getCategoryFromURL();
-      this.filterByCategory(category);
-      
-      const navItem = document.querySelector(`[data-categories="${category}"]`) || document.querySelector('[data-categories="all"]');
-      
-      if (navItem) {
-        this.updateNavigationState(navItem);
-      }
-    });
-  }
-
-  getCategoryFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('category') || 'all';
-  }
-
-  updateURL(category) {
-    const url = category && category !== 'all' 
-      ? `${window.location.origin}${window.location.pathname}?category=${encodeURIComponent(category)}`
-      : `${window.location.origin}${window.location.pathname}`;
-    
-    window.history.pushState({ category }, '', url);
-  }
-
-  handleInitialRoute() {
-    const category = this.getCategoryFromURL();
-    
-    const navItem = document.querySelector(`[data-categories="${category}"]`) || document.querySelector('[data-categories="all"]');
-    if (navItem) {
-        this.filterByCategory(category);
-        this.updateNavigationState(navItem);
-    }
-  }
-
-  setupMobileNavigation() {
-    const mobileToggle = document.querySelector('.mobile-nav-toggle');
-    const mainNav = document.querySelector('.main-nav');
-    
-    if (mobileToggle && mainNav) {
-      this.handleMobileToggle = (e) => {
-        e.stopPropagation();
-        mainNav.classList.toggle('active');
-        const isActive = mainNav.classList.contains('active');
-        mobileToggle.textContent = isActive ? '✕' : '☰';
-        mobileToggle.setAttribute('aria-expanded', isActive);
-      };
-      
-      mobileToggle.addEventListener('click', this.handleMobileToggle);
-      
-      mainNav.addEventListener('click', (e) => {
-        if (e.target.tagName === 'A') {
-          mainNav.classList.remove('active');
-          mobileToggle.textContent = '☰';
-          mobileToggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-      
-      document.addEventListener('click', () => {
-        if (mainNav.classList.contains('active')) {
-          mainNav.classList.remove('active');
-          mobileToggle.textContent = '☰';
-          mobileToggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-      
-      window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-          mainNav.classList.remove('active');
-          mobileToggle.textContent = '☰';
-          mobileToggle.setAttribute('aria-expanded', 'false');
-        }
-      });
-    }
-  }
-
-  setupDynamicContent() {
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        try {
-          const target = document.querySelector(targetId);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        } catch (error) {
-          console.warn(`Invalid selector for smooth scroll: ${targetId}`);
-        }
-      });
-    });
-
-    // Fade-in animation on scroll
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in-up');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    const elementsToObserve = document.querySelectorAll('.section-title, .section-subtitle, .contact-info-item, .footer-section, .product-card');
-    elementsToObserve.forEach(el => observer.observe(el));
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // The init.js script should be responsible for initializing the app
-  // This avoids race conditions and ensures dependencies are loaded.
-  // We assume init.js will instantiate new ProductGrid();
-});
-
+/**
+ * 工具函数 - 防抖函数
+ * @param {Function} func - 要防抖的函数
+ * @param {number} wait - 等待时间（毫秒）
+ * @returns {Function} 防抖后的函数
+ */
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -422,3 +195,13 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+
+// 创建并启动应用程序
+const mainApp = new MainApp();
+
+// 将应用程序实例暴露到全局，供调试和其他脚本使用
+window.mainApp = mainApp;
+
+// 导出主应用程序类和工具函数
+export { MainApp, debounce };
+export default mainApp;

@@ -462,23 +462,24 @@ body {
 .product-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
-  transition: transform 0.4s cubic-bezier(0.35, 0, 0.2, 1), opacity 0.3s ease;
-  will-change: transform;
+  background-color: #ffffff;
+  transition: opacity 0.3s ease; /* 移除缩放以避免裁剪 */
+  will-change: opacity;
   position: relative;
   z-index: 2;
 }
 
 .product-card:hover .product-img {
-  transform: scale(1.08);
+  transform: none; /* 保证完整展示，不放大以免被容器裁剪 */
 }
 
 /* 产品详情页主图优化 */
 .main-image-container {
   position: relative;
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible; /* 避免裁剪主图 */
   box-shadow: var(--shadow-md);
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   cursor: zoom-in;
@@ -517,14 +518,15 @@ body {
 }
 
 #main-product-image {
-  width: 100%;
+  width: auto; /* 保持原始比例 */
+  max-width: 100%;
   height: auto;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  max-height: 70vh;
+  aspect-ratio: auto;
+  object-fit: contain;
   object-position: center;
   display: block;
-  max-height: 70vh;
-  transition: transform 0.3s ease-out, opacity 0.3s ease;
+  transition: opacity 0.3s ease;
   opacity: 0;
   position: relative;
   z-index: 2;
@@ -535,7 +537,7 @@ body {
 }
 
 .main-image-container:hover #main-product-image.loaded {
-  transform: scale(1.1);
+  transform: none; /* 保证完整展示 */
 }
 
 /* 缩略图优化 */
@@ -549,7 +551,8 @@ body {
 .thumbnail-image {
   width: 80px;
   height: 80px;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #ffffff;
   border-radius: var(--radius-md);
   cursor: pointer;
   border: 2px solid transparent;
@@ -1429,3 +1432,165 @@ button[type="submit"]:hover {
   border-top: 1px solid var(--border-light);
   margin-top: var(--spacing-xl);
 } 
+
+/* Admin/Frontend shared - mini swatches on cards */
+.mini-swatches {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.mini-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border-light);
+  background: var(--background-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mini-swatch img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mini-swatch.active {
+  outline: 2px solid var(--text-primary);
+}
+
+/* Admin table variants dots */
+.product-variants-cell .variants-badges { display: flex; gap: 6px; }
+.product-variants-cell .variant-dot {
+  width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--border-light);
+  display: inline-block;
+}
+
+/* Admin variant form styles */
+.variant-row {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background: var(--background-light);
+}
+
+.variant-fields {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.variant-media-previews {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+}
+
+.variant-media-previews .media-preview-item {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  background: var(--primary-white);
+}
+
+.variant-media-previews .media-preview-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+
+.variant-file-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .variant-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .variant-fields input[type="text"] {
+    max-width: none !important;
+  }
+}
+
+/* Variation Section (Amazon-like swatches) */
+.variation-section {
+  margin-top: var(--spacing-lg);
+}
+
+.color-swatches {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.color-swatches .swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-light);
+  background: var(--background-light);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.color-swatches .swatch:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.color-swatches .swatch.selected {
+  border: 2px solid var(--text-primary);
+}
+
+.color-swatches .swatch.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.swatch-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--primary-white);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.color-swatches .swatch:hover .swatch-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+@media (max-width: 992px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+  }
+}

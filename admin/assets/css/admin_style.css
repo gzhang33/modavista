@@ -610,6 +610,37 @@ body {
     border: 1px solid #e2e8f0;
 }
 
+/* Variants Builder Previews - match product media preview */
+.variant-row {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    margin-top: 10px;
+}
+
+.variant-fields {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.variant-media-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.variant-media-previews img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;

@@ -38,6 +38,7 @@ This system serves as a digital catalog for fashion factories to:
 - **Media Library**: Centralized image management with usage tracking.
 - **Category Management**: Dynamically organize products by clothing types.
 - **Responsive Dashboard**: Manage your store from any device.
+- **Variants Builder**: Add multiple color variants in one submission; each color becomes an independent product record with its own media.
 
 ### ⚡ Performance & Optimization
 - **Image Optimization**: Automatic compression and lazy loading for fast delivery.
@@ -56,10 +57,36 @@ This system serves as a digital catalog for fashion factories to:
 
 ## 🏗️ Architecture
 
-- **Frontend**: HTML5, CSS3, and Vanilla JavaScript (ES6+).
+- **Frontend**: HTML5, CSS3, and Vanilla JavaScript (ES6+ Modules).
 - **Backend**: PHP 7+ RESTful API.
 - **Database**: MySQL.
 - **Authentication**: Secure session-based admin login.
+- **Module System**: ES6 modules with component-based architecture for maintainability.
+
+### 🧩 Modular Architecture
+
+The public site uses a modern ES6 module-based architecture with clear separation of concerns:
+
+#### **Components Structure**
+- **ProductGrid**: Handles product listing, filtering, and navigation on the homepage
+- **MobileNavigation**: Manages mobile navigation menu interactions
+- **ImageGallery**: Handles product image display, zoom, and thumbnail switching
+- **RelatedProducts**: Manages "You might also like" product recommendations
+- **ProductDetails**: Displays product information, variants, and breadcrumbs
+
+#### **Utilities**
+- **ApiClient**: Centralized HTTP client for all API interactions with error handling and request management
+
+#### **Entry Points**
+- **script.js**: Main application coordinator for the homepage (`index.html`)
+- **product.js**: Product page coordinator for product details (`product.html`)
+
+#### **Benefits of This Architecture**
+- **Maintainability**: Each component has a single responsibility
+- **Reusability**: Components can be easily reused across different pages
+- **Testability**: Individual components can be tested in isolation
+- **Performance**: Selective loading and tree-shaking capabilities
+- **Developer Experience**: Clear file naming allows AI tools to quickly understand functionality
 
 ## 🚀 Getting Started
 
@@ -84,15 +111,17 @@ Follow these steps to get the project running on your local machine.
     - Import the database schema by executing the following SQL query:
       ```sql
       CREATE TABLE products (
-          id VARCHAR(50) PRIMARY KEY,
+          id VARCHAR(64) PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
           description TEXT,
           category VARCHAR(100),
-          media JSON,
           defaultImage VARCHAR(255),
-          createdAt DATETIME,
-          views INT DEFAULT 0
-      );
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          variants LONGTEXT NULL,
+          media LONGTEXT NULL,
+          views INT(10) UNSIGNED DEFAULT 0,
+          archived TINYINT(1) DEFAULT 0
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       ```
 
 3.  **Configure Environment**
@@ -143,8 +172,18 @@ htdocs/
 ├── api/                    # PHP backend APIs
 ├── assets/                 # Public site assets
 │   ├── css/                # Public stylesheets
-│   ├── js/                 # Public JavaScript files
-│   │   └── lib/            # Public site libraries
+│   ├── js/                 # Public JavaScript files (ES6 Modules)
+│   │   ├── components/     # Modular UI components
+│   │   │   ├── ProductGrid.js        # Product listing component
+│   │   │   ├── MobileNavigation.js   # Mobile navigation component
+│   │   │   ├── ImageGallery.js       # Product image gallery
+│   │   │   ├── RelatedProducts.js    # Related products component
+│   │   │   └── ProductDetails.js     # Product detail component
+│   │   ├── utils/          # Utility functions and tools
+│   │   │   └── apiClient.js          # Centralized API client
+│   │   ├── lib/            # Public site libraries
+│   │   ├── script.js       # Main app entry point (homepage)
+│   │   └── product.js      # Product page entry point
 └── images/                 # Uploaded product images
 ```
 
@@ -177,3 +216,22 @@ If you encounter issues:
 ## 📄 License
 
 This project is designed for commercial use by fashion factories and manufacturers.
+
+## 🧩 Variants & Color Swatches
+
+- Each color variant is stored as an independent row in `products` (no separate parent/child tables).
+- When creating a product from the admin panel, you can add multiple variants in the “颜色变体” section. For each variant:
+  - Specify a color name (e.g., Red/Blue/Black)
+  - Upload one or more images (they become the variant’s `media` and `defaultImage`)
+- The API `POST /api/products.php` accepts a batch-creation payload using:
+  - `variants_meta`: JSON string like `[{"index":0,"color":"Red"},{"index":1,"color":"Blue"}]`
+  - `variant_media_{index}[]`: Files for each variant (e.g., `variant_media_0[]`)
+- Frontend behaviors:
+  - Home grid: cards show mini color swatches; hovering/clicking switches the card preview image to that variant.
+  - Detail page: color swatches update the gallery and product info without page reload.
+
+## 🧪 Notes on Naming
+
+- To improve automatic grouping of variants, keep a stable base name for a style and put the color at the end, for example:
+  - `Blazer - Red`, `Blazer (Blue)`, or `Blazer | Black`.
+- The system infers the base name by removing trailing color markers `(...)`, `- Color`, or `| Color`.

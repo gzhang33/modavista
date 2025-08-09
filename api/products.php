@@ -66,6 +66,11 @@ function handle_get($conn) {
         $result = $stmt->get_result();
         if ($product = $result->fetch_assoc()) {
             $product['media'] = json_decode($product['media'], true) ?: [];
+            // 返回 variants 字段（如果存在）
+            if (isset($product['variants'])) {
+                $decoded_variants = json_decode($product['variants'], true);
+                $product['variants'] = $decoded_variants ?: null;
+            }
             json_response(200, $product);
         } else {
             json_response(404, ["message" => "产品未找到"]);
@@ -120,6 +125,10 @@ function handle_get($conn) {
     $products = [];
     while ($row = $result->fetch_assoc()) {
         $row['media'] = json_decode($row['media'], true) ?: [];
+        if (isset($row['variants'])) {
+            $decoded_variants = json_decode($row['variants'], true);
+            $row['variants'] = $decoded_variants ?: null;
+        }
         $products[] = $row;
     }
 
@@ -136,12 +145,70 @@ function handle_post($conn) {
     $name = $_POST['name'] ?? null;
     $description = $_POST['description'] ?? null;
     $category = $_POST['category'] ?? null;
+    $variants_meta_json = $_POST['variants_meta'] ?? null; // JSON: [{index:0,color:"Red"},...]
 
     if (empty($name) || empty($category)) {
         json_response(400, ['message' => '产品名称和分类是必填项']);
     }
 
-    // --- 文件上传逻辑 ---
+    // 检测是否为“批量变体创建”
+    $is_variants_create = false;
+    $variants_meta = [];
+    if (!empty($variants_meta_json)) {
+        $decoded = json_decode($variants_meta_json, true);
+        if (is_array($decoded) && count($decoded) > 0) {
+            $variants_meta = $decoded;
+            $is_variants_create = true;
+        }
+    }
+
+    // 如果包含变体，则忽略 id 的更新逻辑，转为批量创建
+    if ($is_variants_create) {
+        $created_ids = [];
+        foreach ($variants_meta as $variant) {
+            $idx = isset($variant['index']) ? (int)$variant['index'] : null;
+            $color = isset($variant['color']) ? trim($variant['color']) : '';
+            if ($idx === null) { continue; }
+
+            // 处理该变体的文件上传：字段名形如 variant_media_0[]
+            $upload_result = handle_upload_for_field("variant_media_{$idx}");
+            $uploaded_media_paths = $upload_result['media'];
+            $defaultImage = $upload_result['default'];
+
+            // 生成名称（附加颜色后缀便于前端聚合识别）
+            $variant_name = $name;
+            if (!empty($color)) {
+                $variant_name = rtrim($name) . ' - ' . $color;
+            }
+
+            $new_id = 'prod_' . uniqid();
+            $createdAt = date('Y-m-d H:i:s');
+            $media_json = json_encode($uploaded_media_paths);
+            $variants_json = json_encode(['color' => $color]);
+
+            $sql = "INSERT INTO products (id, name, description, category, media, defaultImage, createdAt, variants) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            if ($stmt === false) {
+                json_response(500, ['message' => 'SQL prepare failed: ' . $conn->error]);
+            }
+            $stmt->bind_param("ssssssss", $new_id, $variant_name, $description, $category, $media_json, $defaultImage, $createdAt, $variants_json);
+            if ($stmt->execute()) {
+                $created_ids[] = $new_id;
+            } else {
+                json_response(500, ['message' => '变体创建失败: ' . $stmt->error]);
+            }
+            $stmt->close();
+        }
+
+        if (count($created_ids) > 0) {
+            json_response(201, ['message' => '变体批量创建成功', 'ids' => $created_ids]);
+        } else {
+            json_response(400, ['message' => '未检测到有效的变体数据']);
+        }
+        return;
+    }
+
+    // --- 单产品文件上传逻辑 ---
     $uploaded_media_paths = [];
     if (isset($_FILES['media']) && !empty($_FILES['media']['name'][0])) {
         $files = $_FILES['media'];
@@ -217,6 +284,43 @@ function handle_post($conn) {
         }
     }
     $stmt->close();
+}
+
+/**
+ * 处理指定字段名的多文件上传（返回路径数组与默认图）
+ * @param string $field
+ * @return array{media: array, default: ?string}
+ */
+function handle_upload_for_field($field) {
+    $uploaded_media_paths = [];
+    if (isset($_FILES[$field]) && !empty($_FILES[$field]['name'][0])) {
+        $files = $_FILES[$field];
+        $file_count = count($files['name']);
+        $target_dir = UPLOAD_DIR;
+
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0755, true);
+        }
+
+        for ($i = 0; $i < $file_count; $i++) {
+            if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                $file_tmp_name = $files['tmp_name'][$i];
+                $file_name = basename($files['name'][$i]);
+                $imageFileType = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                $allowed_formats = ["jpg", "jpeg", "png", "gif", "webp"];
+                if (!in_array($imageFileType, $allowed_formats)) continue;
+                $unique_name = "media-" . uniqid() . "-" . bin2hex(random_bytes(4)) . "." . $imageFileType;
+                $target_file = $target_dir . $unique_name;
+                if (move_uploaded_file($file_tmp_name, $target_file)) {
+                    $uploaded_media_paths[] = 'images/' . $unique_name;
+                }
+            }
+        }
+    }
+    return [
+        'media' => $uploaded_media_paths,
+        'default' => $uploaded_media_paths[0] ?? null,
+    ];
 }
 
 /**

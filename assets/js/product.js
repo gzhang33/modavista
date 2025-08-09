@@ -1,230 +1,248 @@
-// 全新的、模块化的 product.js
+/**
+ * 产品详情页脚本 - 主入口文件
+ * 负责导入和初始化产品详情页相关的组件
+ */
 
-document.addEventListener('DOMContentLoaded', () => {
-    initProductPage();
-});
+// 导入所需的组件和工具
+import ProductDetails from './components/ProductDetails.js';
+import ImageGallery from './components/ImageGallery.js';
+import RelatedProducts from './components/RelatedProducts.js';
 
 /**
- * 初始化产品详情页
+ * 产品页面应用程序类
+ * 协调产品详情页各个组件的初始化和交互
  */
-async function initProductPage() {
-    const productId = getProductIdFromUrl();
-    if (!productId) {
-        displayError('ID prodotto non valido o mancante.');
-        return;
-    }
+class ProductApp {
+  constructor() {
+    this.productDetails = null;
+    this.imageGallery = null;
+    this.relatedProducts = null;
+    this.currentProduct = null;
+    
+    this.init();
+  }
 
+  /**
+   * 初始化应用程序
+   */
+  async init() {
     try {
-        const product = await fetchProductDetails(productId);
-        renderProductDetails(product);
-        fetchAndRenderRelatedProducts(product.category, product.id);
-    } catch (error) {
-        displayError(error.message);
-    }
-}
+      // 等待 DOM 完全加载
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => {
+          document.addEventListener('DOMContentLoaded', resolve);
+        });
+      }
 
-/**
- * 从 URL 获取产品 ID
- * @returns {string|null} 产品ID
- */
-function getProductIdFromUrl() {
+      // 获取产品 ID
+      const productId = this.getProductIdFromUrl();
+      if (!productId) {
+        this.showError('ID prodotto non valido o mancante.');
+        return;
+      }
+
+      // 初始化组件
+      this.initializeComponents();
+      
+      // 加载产品数据
+      await this.loadProduct(productId);
+      
+      // 设置组件间通信
+      this.setupComponentCommunication();
+      
+      console.log('Product app initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize product app:', error);
+      this.showError(error.message);
+    }
+  }
+
+  /**
+   * 初始化所有组件
+   */
+  initializeComponents() {
+    // 初始化产品详情组件
+    this.productDetails = new ProductDetails();
+    
+    // 初始化图片画廊组件
+    this.imageGallery = new ImageGallery();
+    
+    // 初始化相关产品组件
+    this.relatedProducts = new RelatedProducts();
+  }
+
+  /**
+   * 加载产品数据
+   * @param {string} productId - 产品ID
+   */
+  async loadProduct(productId) {
+    try {
+      // 加载产品详情
+      const product = await this.productDetails.loadAndRender(productId);
+      this.currentProduct = product;
+
+      // 设置图片画廊
+      const images = this.prepareImageData(product);
+      this.imageGallery.setImages(images, product.defaultImage);
+
+      // 加载相关产品
+      await this.relatedProducts.loadAndRender(product.category, product.id);
+
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * 准备图片数据
+   * @param {Object} product - 产品数据
+   * @returns {Array} 图片URL数组
+   */
+  prepareImageData(product) {
+    const images = product.media && product.media.length > 0 ? [...product.media] : [];
+    
+    // 如果有默认图片且不在媒体列表中，添加到开头
+    if (product.defaultImage && !images.includes(product.defaultImage)) {
+      images.unshift(product.defaultImage);
+    }
+    
+    return images;
+  }
+
+  /**
+   * 设置组件间通信
+   */
+  setupComponentCommunication() {
+    // 监听变体切换事件
+    document.addEventListener('variantChanged', (event) => {
+      const { product, variationGroup } = event.detail;
+      this.onVariantChanged(product, variationGroup);
+    });
+
+    // 其他组件间通信可以在这里添加
+  }
+
+  /**
+   * 处理变体切换
+   * @param {Object} newProduct - 新的产品数据
+   * @param {Object} variationGroup - 变体分组数据
+   */
+  onVariantChanged(newProduct, variationGroup) {
+    this.currentProduct = newProduct;
+
+    // 更新图片画廊
+    const images = this.prepareImageData(newProduct);
+    this.imageGallery.setImages(images, newProduct.defaultImage);
+
+    // 更新相关产品
+    this.relatedProducts.loadAndRender(newProduct.category, newProduct.id);
+  }
+
+  /**
+   * 从 URL 获取产品 ID
+   * @returns {string|null} 产品ID
+   */
+  getProductIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('id');
-}
+  }
 
-/** 
- * 从 API 获取单个产品的详细信息
- * @param {string} productId - 产品ID
- * @returns {Promise<Object>} 产品数据
- */
-async function fetchProductDetails(productId) {
-    const response = await fetch(`/api/products.php?id=${productId}`);
-    if (!response.ok) {
-        if (response.status === 404) {
-            throw new Error('Prodotto non trovato.');
-        }
-        throw new Error('Impossibile caricare i dettagli del prodotto.');
-    }
-    return await response.json();
-}
-
-/**
- * 渲染主产品的详细信息
- * @param {Object} product - 产品数据
- */
-function renderProductDetails(product) {
-    const container = document.getElementById('product-details-content');
-    if (!container) return;
-    
-    document.title = `${product.name} - Moda Italiana`;
-
-    const images = product.media && product.media.length > 0 ? product.media : [];
-    if (product.defaultImage && !images.includes(product.defaultImage)) {
-        images.unshift(product.defaultImage);
-    }
-
-    const breadcrumbsHTML = `
-        <div class="breadcrumbs">
-            <a href="/">Home</a> / 
-            <a href="/#collection">Collezione</a> / 
-            <span>${product.name}</span>
-        </div>`;
-
-    const imageGalleryHTML = `
-        <div class="product-gallery">
-            <div class="main-image-container">
-                <img src="${images.length > 0 ? '/' + images[0] : '/images/placeholder.svg'}" alt="Immagine principale di ${product.name}" id="main-product-image" class="main-image loaded">
-            </div>
-            <div class="product-media-thumbnails" id="thumbnail-images">
-                ${images.map((img, index) => `
-                    <img src="/${img}" alt="Miniatura ${index + 1}" class="thumbnail-image ${index === 0 ? 'active' : ''}" data-src="/${img}">
-                `).join('')}
-            </div>
-        </div>`;
-
-    const productInfoHTML = `
-        <div class="product-info">
-            <h1 class="product-title">${product.name}</h1>
-            <div class="product-fabric">
-                <h4>Descrizione</h4>
-                <p class="product-description">${product.description || 'Nessuna descrizione disponibile.'}</p>
-            </div>
-            <div class="product-options">
-                <h4>Categoria</h4>
-                <p>${product.category}</p>
-            </div>
-        </div>`;
-
-    container.innerHTML = `
-        ${breadcrumbsHTML}
-        <div class="product-layout">
-            ${imageGalleryHTML}
-            ${productInfoHTML}
-        </div>
-    `;
-
-    // 渲染完成后再绑定事件
-    setupImageGalleryListeners();
-}
-
-/**
- * 为图片库（主图和缩略图）绑定事件监听
- */
-function setupImageGalleryListeners() {
-    const mainImage = document.getElementById('main-product-image');
-    const thumbnails = document.querySelectorAll('.thumbnail-image');
-
-    // 确保主图片显示（处理错误情况）
-    if (mainImage) {
-        mainImage.onerror = () => { 
-            mainImage.src = '/images/placeholder.svg';
-            mainImage.classList.add('loaded');
-        };
-    }
-
-    thumbnails.forEach(thumb => {
-        // 添加加载完成事件监听
-        thumb.addEventListener('load', () => {
-            thumb.classList.add('loaded');
-        });
-
-        // 如果图片已经加载完成，立即添加loaded类
-        if (thumb.complete && thumb.naturalWidth > 0) {
-            thumb.classList.add('loaded');
-        }
-
-        thumb.addEventListener('click', () => {
-            const newSrc = thumb.dataset.src;
-            if (!mainImage.src.endsWith(newSrc)) {
-                mainImage.classList.remove('loaded');
-                mainImage.style.opacity = '0';
-                setTimeout(() => {
-                    mainImage.src = newSrc;
-                    // 等待新图片加载完成后再显示
-                    mainImage.addEventListener('load', function showNewImage() {
-                        mainImage.classList.add('loaded');
-                        mainImage.style.opacity = '1';
-                        mainImage.removeEventListener('load', showNewImage);
-                    });
-                }, 200);
-            }
-            
-            thumbnails.forEach(t => t.classList.remove('active'));
-            thumb.classList.add('active');
-        });
-
-        // 缩略图错误处理
-        thumb.onerror = () => { 
-            thumb.src = '/images/placeholder.svg'; 
-            thumb.classList.add('loaded'); // 即使错误也显示占位图
-        };
-    });
-}
-
-/**
- * 获取并渲染相关产品
- * @param {string} category - 当前产品的分类
- * @param {string} currentProductId - 当前产品的ID，用于排除
- */
-async function fetchAndRenderRelatedProducts(category, currentProductId) {
-    const container = document.getElementById('related-products-grid');
-    if (!container) return;
-
-    try {
-        const response = await fetch(`/api/products.php?category=${encodeURIComponent(category)}&exclude=${encodeURIComponent(currentProductId)}`);
-        const relatedProducts = await response.json();
-
-        if (relatedProducts && relatedProducts.length > 0) {
-            container.innerHTML = relatedProducts.map(createProductCard).join('');
-        } else {
-            container.innerHTML = '<p>Nessun prodotto correlato trovato.</p>';
-        }
-    } catch (error) {
-        container.innerHTML = '<p>Impossibile caricare i prodotti correlati.</p>';
-    }
-}
-
-/**
- * 创建单个产品卡的HTML
- * @param {Object} product - 产品数据
- * @returns {string} HTML字符串
- */
-function createProductCard(product) {
-    const fallbackFromMedia = Array.isArray(product.media) && product.media.length > 0 ? product.media[0] : null;
-    const chosenPath = product.defaultImage || fallbackFromMedia;
-    const imageSrc = chosenPath ? `/${chosenPath}` : '/images/placeholder.svg';
-    return `
-      <article class="product-card related-product" onclick="window.location.href='product.html?id=${product.id}'">
-        <div class="product-image-container spinner">
-          <img 
-            src="${imageSrc}" 
-            alt="${product.name}" 
-            class="product-img" 
-            loading="lazy"
-            onload="this.closest('.product-image-container').classList.add('loaded');this.closest('.product-image-container').classList.remove('spinner');"
-            onerror="this.onerror=null; this.src='/images/placeholder.svg'; this.closest('.product-image-container').classList.add('loaded'); this.closest('.product-image-container').classList.remove('spinner');"
-          >
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">${product.name}</h3>
-          <p class="product-category">${product.category}</p>
-        </div>
-      </article>
-    `;
-}
-
-/**
- * 在页面上显示错误信息
- * @param {string} message - 要显示的错误信息
- */
-function displayError(message) {
+  /**
+   * 显示错误信息
+   * @param {string} message - 错误消息
+   */
+  showError(message) {
     const container = document.getElementById('product-details-content');
     if (container) {
-        container.innerHTML = `<div class="error-state">${message}</div>`;
+      container.innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">⚠️</div>
+          <h3>Errore</h3>
+          <p>${message}</p>
+          <div class="error-actions">
+            <button onclick="location.reload()" class="retry-btn">Ricarica</button>
+            <button onclick="window.history.back()" class="back-btn">Torna Indietro</button>
+          </div>
+        </div>
+      `;
     }
+
     // 隐藏相关产品部分
     const relatedSection = document.querySelector('.related-products-section');
     if (relatedSection) {
-        relatedSection.style.display = 'none';
+      relatedSection.style.display = 'none';
     }
-} 
+  }
+
+  /**
+   * 获取当前产品数据
+   * @returns {Object|null} 当前产品数据
+   */
+  getCurrentProduct() {
+    return this.currentProduct;
+  }
+
+  /**
+   * 获取产品详情组件实例
+   * @returns {ProductDetails|null} 产品详情组件
+   */
+  getProductDetails() {
+    return this.productDetails;
+  }
+
+  /**
+   * 获取图片画廊组件实例
+   * @returns {ImageGallery|null} 图片画廊组件
+   */
+  getImageGallery() {
+    return this.imageGallery;
+  }
+
+  /**
+   * 获取相关产品组件实例
+   * @returns {RelatedProducts|null} 相关产品组件
+   */
+  getRelatedProducts() {
+    return this.relatedProducts;
+  }
+
+  /**
+   * 刷新产品数据
+   */
+  async refresh() {
+    const productId = this.getProductIdFromUrl();
+    if (productId) {
+      await this.loadProduct(productId);
+    }
+  }
+
+  /**
+   * 销毁应用程序，清理资源
+   */
+  destroy() {
+    if (this.productDetails) {
+      this.productDetails.destroy?.();
+    }
+    
+    if (this.imageGallery) {
+      this.imageGallery.destroy?.();
+    }
+    
+    if (this.relatedProducts) {
+      this.relatedProducts.destroy?.();
+    }
+
+    // 清理事件监听器
+    document.removeEventListener('variantChanged', this.onVariantChanged);
+  }
+}
+
+// 创建并启动应用程序
+const productApp = new ProductApp();
+
+// 将应用程序实例暴露到全局，供调试和其他脚本使用
+window.productApp = productApp;
+
+// 导出应用程序类
+export { ProductApp };
+export default productApp; 

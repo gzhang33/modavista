@@ -11,6 +11,7 @@
         <h3 id="form-title">添加新产品</h3>
         <form id="product-form">
             <input type="hidden" id="product-id" name="id">
+            <input type="hidden" id="variants-meta" name="variants_meta" value="">
             <div class="form-row">
                 <div class="form-group">
                     <label for="name">产品名称</label>
@@ -32,6 +33,16 @@
                 <div id="current-media-previews" class="media-previews"></div>
                 <input type="file" id="media" name="media[]" class="form-control-file" multiple accept="image/*">
                 <small class="form-text">支持多张图片上传，用于产品展示画廊</small>
+            </div>
+
+            <!-- Variants Builder -->
+            <div class="form-group">
+                <label>颜色变体</label>
+                <div id="variants-container" class="variants-container">
+                    <!-- 动态添加每个变体行 -->
+                </div>
+                <button type="button" id="add-variant-row" class="btn btn-secondary btn-sm" style="margin-top:8px;">+ 添加颜色变体</button>
+                <small class="form-text">每个变体会创建为独立产品记录。为每个变体设置颜色名称并上传对应图片。</small>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">
@@ -104,6 +115,7 @@
                         <th>图片</th>
                         <th>产品名称</th>
                         <th>分类</th>
+                        <th>变体</th>
                         <th>描述</th>
                         <th>创建日期</th>
                         <th class="sticky-right">操作</th>

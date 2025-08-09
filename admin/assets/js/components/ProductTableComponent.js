@@ -92,7 +92,7 @@ export default class ProductTableComponent extends BaseComponent {
         
         this.selectAllCheckbox.disabled = false;
 
-        this.all_products.forEach(p => {
+            this.all_products.forEach(p => {
             const image_src = p.defaultImage ? `../${p.defaultImage}` : '../images/placeholder.svg';
             const is_checked = this.selected_product_ids.has(p.id) ? 'checked' : '';
             
@@ -103,11 +103,13 @@ export default class ProductTableComponent extends BaseComponent {
             const archive_btn_text = p.archived == 1 ? '恢复' : '归档';
             const archive_btn_class = p.archived == 1 ? 'unarchive-btn' : 'archive-btn';
             
+            const variants_html = this.render_variants_badges(p);
             row.innerHTML = `
                 <td><input type="checkbox" class="row-checkbox" data-id="${p.id}" ${is_checked}></td>
                 <td><img src="${image_src}" alt="${p.name}" class="product-thumbnail"></td>
                 <td class="product-name-cell">${p.name}</td>
                 <td><span class="product-category-cell">${p.category || '未分类'}</span></td>
+                <td class="product-variants-cell">${variants_html}</td>
                 <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td>
                 <td class="product-created-at-cell">${this.format_created_at(p.createdAt)}</td>
                 <td class="product-actions-cell sticky-right">
@@ -119,6 +121,53 @@ export default class ProductTableComponent extends BaseComponent {
         });
         
         this.update_select_all_checkbox_state();
+    }
+
+    render_variants_badges(product) {
+        // 依据名称基名聚合同列表的兄弟项，显示颜色点
+        if (!Array.isArray(this.all_products) || this.all_products.length === 0) return '';
+        const base = this.get_base_name(product.name);
+        if (!base) return '';
+        const siblings = this.all_products.filter(p => this.get_base_name(p.name) === base);
+        if (siblings.length <= 1) return '';
+        return `<div class="variants-badges">${siblings.map(p => {
+            const color = this.extract_color_label(p.name);
+            const color_hex = this.color_name_to_hex(color);
+            const style = color_hex ? `style=\"background:${color_hex}\"` : '';
+            return `<span class="variant-dot" title="${color || ''}" ${style}></span>`;
+        }).join('')}</div>`;
+    }
+
+    get_base_name(name) {
+        if (!name) return '';
+        let base = String(name).trim();
+        base = base
+            .replace(/\s*\([^)]+\)\s*$/i, '')
+            .replace(/\s*-\s*[^-|()]+$/i, '')
+            .replace(/\s*\|\s*[^-|()]+$/i, '')
+            .trim();
+        return base.toLowerCase();
+    }
+
+    extract_color_label(name) {
+        if (!name) return '';
+        const str = String(name);
+        const by_paren = str.match(/\(([^)]+)\)\s*$/);
+        if (by_paren && by_paren[1]) return by_paren[1].trim();
+        const by_dash = str.match(/-\s*([^-|()]+)\s*$/);
+        if (by_dash && by_dash[1]) return by_dash[1].trim();
+        const by_pipe = str.match(/\|\s*([^-|()]+)\s*$/);
+        if (by_pipe && by_pipe[1]) return by_pipe[1].trim();
+        return '';
+    }
+
+    color_name_to_hex(color_name) {
+        if (!color_name) return null;
+        const map = {
+            black: '#000000', white: '#ffffff', red: '#d0021b', blue: '#2f80ed', green: '#219653', yellow: '#f2c94c', orange: '#f2994a', pink: '#ff7eb6', purple: '#9b51e0', brown: '#8d6e63', gray: '#828282', grey: '#828282', beige: '#f5f5dc', khaki: '#c3b091', navy: '#001f3f', charcoal: '#36454f', silver: '#c0c0c0', gold: '#ffd700'
+        };
+        const key = color_name.toLowerCase();
+        return map[key] || null;
     }
 
     apply_list_animation() {

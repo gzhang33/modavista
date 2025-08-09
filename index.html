@@ -112,13 +112,15 @@
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </a>
 
-  <!-- Add version query to bust cache -->
-  <script src="assets/js/lib/font-loader.js?v=1.1" defer></script>
-  <script src="assets/js/lib/infinityfree-optimizer.js?v=1.1" defer></script>
-  <script src="assets/js/lib/image-optimization.js?v=1.1" defer></script>
-  <script src="assets/js/lib/performance-monitor.js?v=1.1" defer></script>
-  <script src="assets/js/script.js?v=1.1" defer></script>
-  <script src="assets/js/lib/init.js?v=1.1" defer></script>
+  <!-- Load optimization and utility scripts -->
+  <script src="assets/js/lib/font-loader.js?v=2.0" defer></script>
+  <script src="assets/js/lib/infinityfree-optimizer.js?v=2.0" defer></script>
+  <script src="assets/js/lib/image-optimization.js?v=2.0" defer></script>
+  <script src="assets/js/lib/performance-monitor.js?v=2.0" defer></script>
+  <script src="assets/js/lib/init.js?v=2.0" defer></script>
+  
+  <!-- Load main application script as ES6 module -->
+  <script type="module" src="assets/js/script.js?v=2.0"></script>
 
 </body>
 </html>

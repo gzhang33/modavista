@@ -8,6 +8,7 @@
 - **Primary User**: Clients browsing products.
 - **Secondary User**: Admin managing the catalog.
 - **Technology Stack**: Vanilla JS (ES6+, Modules, Class-based), PHP 7+, MySQL. NO frameworks (React, Vue, Laravel, etc.).
+ - **Variants Model**: Each color variant is a standalone row in `products`, sharing the same base name/description/category. Admin panel supports batch creation of variants.
 
 ## 2. TECHNICAL SPECIFICATIONS
 
@@ -17,19 +18,31 @@
 - **Error Handling**: MUST use `json_response()` utility from `api/utils.php` for all API outputs.
 - **Authentication**: All admin endpoints in `api/` (except `login.php` and `GET` requests to `products.php` and `categories.php`) MUST be protected by `require_auth()`.
 - **Configuration**: `api/config.php` stores all credentials. `ADMIN_PASSWORD_HASH` uses `password_hash()` with `PASSWORD_BCRYPT`.
+ - **Variants Creation (POST /api/products.php)**: When `variants_meta` JSON and `variant_media_{index}[]` files are present, create one product per variant. Name is auto-suffixed with `- {color}`.
 
 ### 2.2. Frontend (JavaScript)
-- **Client-Side**:
-    - `assets/js/script.js`: Main script for the public-facing product showcase (`index.html`). Handles product grid, filtering, and navigation.
-    - `assets/js/product.js`: Handles logic for the individual product page (`product.html`), including image gallery and related products.
+- **Client-Side Modular Architecture**:
+    - `assets/js/script.js`: Main entry point for the homepage (`index.html`). Coordinates `ProductGrid` and `MobileNavigation` components.
+    - `assets/js/product.js`: Main entry point for the product detail page (`product.html`). Coordinates `ProductDetails`, `ImageGallery`, and `RelatedProducts` components.
+    - `assets/js/components/`: Directory containing modular UI components for the public site:
+        - `ProductGrid.js`: Handles product listing, filtering, and navigation for homepage.
+        - `MobileNavigation.js`: Manages mobile navigation menu interactions.
+        - `ImageGallery.js`: Handles product image display, zoom, and thumbnail switching.
+        - `RelatedProducts.js`: Manages "You might also like" product recommendations.
+        - `ProductDetails.js`: Displays product information, variants, and breadcrumbs.
+    - `assets/js/utils/`: Utility functions and tools:
+        - `apiClient.js`: Centralized HTTP client for all API interactions with error handling.
 - **Admin-Side**:
     - `admin/assets/js/main.js`: Entry point for the admin dashboard. Initializes `EventBus`, `ComponentManager`, and all components.
     - `admin/assets/js/EventBus.js`: A simple pub/sub system for communication between components.
     - `admin/assets/js/ComponentManager.js`: Registers and manages the lifecycle of all admin components.
     - `admin/assets/js/components/`: Directory containing all modular components for the admin dashboard.
+        - `ProductFormComponent.js`: Supports variant rows with color + images, generates `variants_meta`, previews images.
+        - `ProductTableComponent.js`: Shows a "变体" column with color dots per group (based on base name).
 - **Styling**:
     - `assets/css/style.css`: Main stylesheet for the public site.
     - `admin/assets/css/admin_style.css`: Stylesheet for the admin dashboard.
+- **Module System**: Public site uses ES6 modules for better maintainability, reusability, and developer experience.
  - **Libraries**: 
     - `assets/js/lib/`: Shared JS libraries for the public site.
     - `admin/assets/lib/`: Shared JS libraries for the admin dashboard.
@@ -39,6 +52,7 @@
 - **Primary Key**: `products.id` MUST be a string with the format `prod_[uniqid]`.
 - **Media Storage**: `products.media` field is a JSON array of image file paths.
 - **Default Image**: `products.defaultImage` is the first path from the `media` array.
+ - **Variants**: `products.variants` (JSON/LONGTEXT) may store `{ color: "Red" }` for variant metadata. No separate parent/child tables.
 
 ### 2.4. Project File Structure
 - `/`: Root directory.
@@ -79,6 +93,13 @@
     d. Store file paths in `media` (JSON array) and set `defaultImage`.
     e. Insert new product record into the database via prepared statement.
 
+### 3.1.1. Create Variants in One Request
+- In the admin form, add multiple variant rows (color + images).
+- On submit, the client sends:
+  - `variants_meta` JSON with indexes and color names
+  - One or more file lists per variant: `variant_media_{index}[]`
+- The API creates independent product rows; names are suffixed with color to assist grouping.
+
 ### 3.2. How to Modify Categories
 - Categories are not stored in a separate table. They are derived from the `DISTINCT category` values in the `products` table.
 - To add a new category, create a new product and assign it the new category name.
@@ -86,97 +107,131 @@
 
 ## 4. CODE STYLE & STANDARDS
 - **PHP**: Follow PSR-12 conventions.
-- **JavaScript**: Use modern ES6+ syntax (classes, modules, `async/await`).
+- **JavaScript**: Use modern ES6+ syntax (classes, modules, `async/await`, imports/exports).
     - **Admin Panel**: Follow the established modular, component-based architecture. Use `EventBus` for inter-component communication. Create new components by extending `BaseComponent`.
-    - **Client-Side**: Use class-based structures (`ProductGrid`).
+    - **Public Site**: Use ES6 modules with component-based architecture. Each component should:
+        - Be a self-contained class with clear responsibility
+        - Use import/export syntax for dependencies
+        - Follow consistent naming conventions (PascalCase for classes, camelCase for methods)
+        - Include proper JSDoc documentation
+        - Handle errors gracefully with try/catch blocks
+        - Expose minimal public API and encapsulate internal logic
 - **CSS**: Use CSS custom properties (`var(--variable)`) for theming. Adhere to BEM.
 - **HTML**: Write semantic HTML5.
 
-## 5. ADMIN PANEL ARCHITECTURE
+## 5. PUBLIC SITE ARCHITECTURE
+The public site uses a modern ES6 module-based architecture with clear separation of concerns:
+
+### 5.1. Component Structure
+- **Components** (`assets/js/components/`): Self-contained classes that handle specific UI functionality
+- **Utils** (`assets/js/utils/`): Shared utilities and helper functions
+- **Entry Points**: Main application coordinators (`script.js`, `product.js`)
+
+### 5.2. Component Guidelines
+- Each component should have a single, well-defined responsibility
+- Components communicate through events, method calls, or shared state
+- Use proper error handling and graceful degradation
+- Include comprehensive JSDoc documentation
+- Follow consistent naming: PascalCase for classes, camelCase for methods and properties
+
+### 5.3. Data Flow
+- Entry points coordinate between components
+- `ApiClient` handles all HTTP communication
+- Components update UI based on data changes
+- Event-driven communication for loosely coupled interactions
+
+## 6. ADMIN PANEL ARCHITECTURE
 The admin panel is built on a modular, component-based architecture.
 - **`EventBus.js`**: A central event bus allows components to communicate without direct dependencies.
 - **`ComponentManager.js`**: Initializes and manages all components.
 - **`BaseComponent.js`**: A base class for all components, providing common functionality like element selection and visibility.
 - **Components**: Each component (e.g., `ProductTableComponent`, `ProductFormComponent`) is a self-contained class responsible for a specific part of the UI. They listen for and emit events on the `EventBus`.
 
- ## 6. TESTING RULES & BEST PRACTICES
+ ## 7. PLAYWRIGHT TESTING EXTERNAL MANAGEMENT
 
-### 6.1. Playwright Testing Configuration
-- **Base URL**: MUST use `http://localhost` as baseURL in `playwright.config.js`. DO NOT use `http://localhost/htdocs`.
-- **Test Environment**: Public site accessible via HTTP, admin panel requires special handling for file:// protocol.
-- **API Testing**: Always check response format before parsing JSON - APIs may return HTML error pages.
-- **Test Structure**: Use descriptive test names and group related tests in describe blocks.
+### 🚨 CRITICAL DIRECTIVE: NO LOCAL TEST FILES
 
-### 6.2. Required Test Coverage
-- **Public Site Tests**: 
-  - Page loading and titles
-  - Product list display and count validation
-  - Product detail navigation
-  - Responsive navigation functionality
-  - API endpoints (products.php, categories.php)
-- **Admin Panel Tests**:
-  - Login form validation
-  - Dashboard functionality
-  - Product CRUD operations
-  - Session expiry handling
-  - Toast notifications
-- **Performance Tests**:
-  - Core Web Vitals (LCP, FID, CLS)
-  - Resource loading optimization
-  - Network request validation
+**When users request Playwright testing, DO NOT create any `.spec.js` or test files within this project.**
 
-### 6.3. Test File Organization
-- **`test/public_site_basic.spec.js`**: Core public website functionality
-- **`test/admin_login.spec.js`**: Admin authentication flows
-- **`test/admin_dashboard.spec.js`**: Admin panel features
-- **`test/session_handling.spec.js`**: Session expiry and error handling
-- **`test/run_dashboard_tests.js`**: Test execution script
+Instead:
+1. Use the external `playwright mcp` tool to execute all testing
+2 This project only provides configuration and receives test results
 
-### 6.4. Testing Environment Setup
-- **Server Requirements**: Apache/XAMPP must be running on localhost
+
+
+### 7.1 Testing Environment Requirements
+
+For external testing tools:
+- **Server**: Apache/XAMPP must be running on localhost
 - **Database**: MySQL service active with proper `api/config.php` configuration
+- **Admin Credentials**: Default username: `admin`, password: `admin`
 - **File Permissions**: Ensure `images/` directory has write permissions
-- **Browser Installation**: Run `npx playwright install` before testing
 
-### 6.5. Known Testing Issues & Solutions
-- **Admin Panel Access**: Use file:// protocol for admin pages if HTTP access fails
-- **API Error Handling**: Expect HTML error responses, not JSON, when configuration issues exist
-- **DB_SERVER Constant**: Ensure all database constants are properly defined in `api/config.php`
-- **Session Testing**: Mock session expiry by calling `/api/logout.php` endpoint
-- **Toast Notifications**: Verify `#toast-notification` element exists for error messaging tests
+### 7.3. Critical Test Scenarios for External Tools
 
-### 6.6. Test Execution Commands
-```bash
-# Run all tests
-npx playwright test
+#### Public Site Testing
+- Homepage product grid and navigation (`/index.html`)
+- Product detail page functionality (`/product.html`)
+- ES6 module loading (ProductGrid, MobileNavigation, ImageGallery)
+- API endpoints: `/api/products.php`, `/api/categories.php`
+- Responsive design and mobile navigation
 
-# Run specific test suite
-npx playwright test test/public_site_basic.spec.js
+#### Admin Panel Testing  
+- Login flow and session management (`/admin/login.html`)
+- Dashboard functionality (`/admin/dashboard.php`)
+- Product CRUD operations and bulk actions
+- Session expiry handling (401 responses)
+- Toast notification system
 
-# Generate HTML report
-npx playwright test --reporter=html
+#### API Testing
+- Product list retrieval and single product access
+- Admin authentication endpoints
+- Error handling for unauthorized access
+- Response format validation (JSON vs HTML errors)
 
-# Debug mode (show browser)
-npx playwright test --debug
+### 7.4. Integration with External MCP Tool
 
-# Custom test runner
-node test/run_dashboard_tests.js
-```
+When using external Playwright MCP tools:
+- External tools manage their own configuration
+- Environment validation before test execution
+- Comprehensive test reporting handled externally
+- No local test file or configuration maintenance required
 
-### 6.7. Pre-Test Validation Checklist
-- [ ] Apache/XAMPP services running
-- [ ] MySQL database accessible
-- [ ] `api/config.php` properly configured
-- [ ] Admin credentials set in configuration
-- [ ] Product data exists in database
-- [ ] `images/` directory accessible
-- [ ] Playwright browsers installed
+### 7.5. Prohibited Actions
 
-## 7. COMMON ISSUES & DEBUGGING CHECKS
+❌ **DO NOT:**
+- Create any `.spec.js` files in this project
+- Write test code within project files
+- Create test utility functions locally
+- Generate local test reports or results
+
+✅ **DO:**
+- Use external Playwright MCP tool for all testing
+- Maintain basic configuration only
+- Focus on application development
+- Review external test results for issues
+
+## 8. COMMON ISSUES & DEBUGGING CHECKS
+
+### 8.1. Module Loading Issues
+- **Import/Export Errors**: Check browser console for ES6 module syntax errors
+- **CORS Issues**: Ensure server supports ES6 modules (served over HTTP/HTTPS, not file://)
+- **Path Resolution**: Verify relative import paths are correct from the importing file's perspective
+- **Circular Dependencies**: Avoid circular imports between modules
+
+### 8.2. Component Issues
+- **Component Not Initializing**: Check if DOM elements exist before component instantiation
+- **Event Listeners Not Working**: Verify event listeners are attached after DOM elements are created
+- **API Calls Failing**: Check network tab and ensure ApiClient is properly configured
+
+## 9. MAINTENANCE POLICY
+- Whenever a structural change to the project or a new feature is added, you MUST update both `README.md` and `.cursorrules` to reflect the latest architecture, workflows, and constraints.
+### 8.3. Common Technical Issues
 - **DB Connection Failed**: Verify `api/config.php` credentials and MySQL service status.
 - **Images Not Uploading**: Check `images/` directory permissions (`755`). Verify file type validation.
 - **Admin Login Fails**: Check `session_start()` is present. Check `ADMIN_PASSWORD_HASH`.
 - **API Errors**: Check PHP error logs. Validate JSON format and headers.
-- **JS Component Not Loading**: Check the browser's developer console for errors. Ensure the component is correctly registered in `admin/js/main.js`.
+- **JS Component Not Loading**: Check the browser's developer console for errors. For public site, verify ES6 module imports are correct. For admin, ensure the component is correctly registered in `admin/js/main.js`.
 - **Test Failures**: Verify baseURL in `playwright.config.js` matches server configuration. Check network requests in browser dev tools.
 - **Session Expiry Testing**: Use `/api/logout.php` to simulate expired sessions. Verify redirect to login page after 2.5 seconds.
+- **Module Import Errors**: Ensure file extensions (.js) are included in import statements and paths are relative to the importing file.

@@ -35,8 +35,5 @@ jobs:
         # 目标服务器上的部署目录。InfinityFree 通常是 /htdocs
         server-dir: /htdocs/
         # （可选）排除不想上传的文件或目录
-        # exclude: |
-        #   **/.git*
-        #   **/.git*/**
-        #   **/node_modules/**
-        #   README.md
+         exclude: |
+           api/config.php

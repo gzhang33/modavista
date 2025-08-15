@@ -36,9 +36,9 @@ switch ($method) {
 $conn->close();
 
 function get_categories($conn) {
-    // 假设我们有一个 categories 表，包含 id 和 name 字段
-    // 为了演示，我们先从 products 表中获取所有唯一的分类
-    $stmt = $conn->prepare("SELECT DISTINCT category FROM products ORDER BY category ASC");
+    // 新结构：直接读取 categories 表
+    $sql = 'SELECT id, category_name FROM categories ORDER BY category_name ASC';
+    $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
@@ -48,7 +48,7 @@ function get_categories($conn) {
     $result = $stmt->get_result();
     $categories = [];
     while ($row = $result->fetch_assoc()) {
-        $categories[] = $row['category'];
+        $categories[] = $row['category_name'];
     }
     $stmt->close();
     json_response(200, $categories);
@@ -62,10 +62,26 @@ function add_category($conn) {
         json_response(400, ['message' => '分类名称不能为空']);
     }
     
-    // 注意：这里只是一个示例。在实际应用中，您应该有一个专门的 `categories` 表
-    // 来存储分类，而不是仅仅依赖于 `products` 表。
-    // 由于当前没有 `categories` 表，此功能暂时返回成功信息。
-    json_response(201, ['message' => "分类 '{$name}' 添加成功（模拟）"]);
+    // 新结构：若不存在则创建
+    $check = $conn->prepare('SELECT id FROM categories WHERE category_name = ?');
+    $check->bind_param('s', $name);
+    $check->execute();
+    $res = $check->get_result();
+    if ($res->fetch_assoc()) {
+        $check->close();
+        json_response(200, ['message' => "分类已存在"]);
+    }
+    $check->close();
+
+    $ins = $conn->prepare('INSERT INTO categories (category_name) VALUES (?)');
+    if ($ins === false) {
+        json_response(500, ['message' => '创建分类失败: ' . $conn->error]);
+    }
+    $ins->bind_param('s', $name);
+    $ins->execute();
+    $id = $ins->insert_id;
+    $ins->close();
+    json_response(201, ['message' => "分类 '{$name}' 添加成功", 'id' => (int)$id]);
 }
 
 function delete_category($conn) {
@@ -76,7 +92,18 @@ function delete_category($conn) {
         json_response(400, ['message' => '要删除的分类名称不能为空']);
     }
     
-    // 同样，这是一个模拟操作
-    json_response(200, ['message' => "分类 '{$name}' 删除成功（模拟）"]);
+    $del = $conn->prepare('DELETE FROM categories WHERE category_name = ?');
+    if ($del === false) {
+        json_response(500, ['message' => '删除失败: ' . $conn->error]);
+    }
+    $del->bind_param('s', $name);
+    $del->execute();
+    $affected = $del->affected_rows;
+    $del->close();
+    if ($affected > 0) {
+        json_response(200, ['message' => "分类 '{$name}' 删除成功"]);
+    } else {
+        json_response(404, ['message' => '分类未找到']);
+    }
 }
 ?> 

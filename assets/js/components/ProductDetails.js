@@ -3,6 +3,8 @@
  * 负责展示产品的基本信息、变体选择、面包屑导航等功能
  */
 import apiClient from '../utils/apiClient.js';
+import { get_base_name, extract_color_label } from '../utils/product_name_utils.js';
+import { build_image_src } from '../utils/image_utils.js';
 
 export class ProductDetails {
   constructor() {
@@ -37,9 +39,13 @@ export class ProductDetails {
       const product = await apiClient.getProduct(productId);
       this.currentProduct = product;
 
-      // 并行加载同分类产品以构建变体组
-      const categoryProducts = await apiClient.getProductsByCategory(product.category);
-      this.variationGroup = this.buildVariationGroup(product, categoryProducts);
+      // 优先使用后端返回的同组 siblings 构建变体组；回退到同分类聚合
+      if (Array.isArray(product.siblings) && product.siblings.length > 0) {
+        this.variationGroup = this.buildVariationGroupFromSiblings(product);
+      } else {
+        const categoryProducts = await apiClient.getProductsByCategory(product.category);
+        this.variationGroup = this.buildVariationGroup(product, categoryProducts);
+      }
 
       // 渲染产品详情
       this.renderProductDetails();
@@ -62,7 +68,7 @@ export class ProductDetails {
     const product = this.currentProduct;
     
     // 更新页面标题
-    document.title = `${product.name} - Moda Italiana`;
+    document.title = `${product.base_name || product.name} - Moda Italiana`;
 
     // 准备图片数据
     const images = product.media && product.media.length > 0 ? product.media : [];
@@ -111,14 +117,14 @@ export class ProductDetails {
    * @returns {string} 图片画廊HTML
    */
   renderImageGallery(images, productName) {
-    const mainImageSrc = images.length > 0 ? this.buildImageSrc(images[0]) : this.buildImageSrc('/images/placeholder.svg');
+    const mainImageSrc = images.length > 0 ? build_image_src(images[0]) : build_image_src('/images/placeholder.svg');
     
     const thumbnailsHTML = images.map((img, index) => `
       <img 
-        src="${this.buildImageSrc(img)}" 
+        src="${build_image_src(img)}" 
         alt="Miniatura ${index + 1}" 
         class="thumbnail-image ${index === 0 ? 'active' : ''}" 
-        data-src="${this.buildImageSrc(img)}"
+        data-src="${build_image_src(img)}"
       >
     `).join('');
 
@@ -147,14 +153,13 @@ export class ProductDetails {
   renderProductInfo(product) {
     return `
       <div class="product-info">
-        <h1 class="product-title">${product.name}</h1>
+        <h1 class="product-title">${product.base_name || product.name}</h1>
+        <div class="product-actions">
+          <a class="cta-contact-btn" href="/index.html#contact-us">Contattaci</a>
+        </div>
         <div class="product-fabric">
           <h4>Descrizione</h4>
           <p class="product-description">${product.description || 'Nessuna descrizione disponibile.'}</p>
-        </div>
-        <div class="product-options">
-          <h4>Categoria</h4>
-          <p>${product.category}</p>
         </div>
         ${this.renderVariationSection()}
       </div>
@@ -205,17 +210,17 @@ export class ProductDetails {
   buildVariationGroup(product, categoryProducts) {
     if (!Array.isArray(categoryProducts) || categoryProducts.length === 0) return null;
     
-    const baseKey = this.getBaseName(product.name);
+    const baseKey = get_base_name(product.name);
     if (!baseKey) return null;
 
     const siblings = categoryProducts.filter(p => 
-      p.id !== product.id && this.getBaseName(p.name) === baseKey
+      p.id !== product.id && get_base_name(p.name) === baseKey
     );
 
     const items = [product, ...siblings].map(p => ({
       id: p.id,
       name: p.name,
-      color_label: this.extractColorLabel(p.name),
+      color_label: extract_color_label(p.name),
       image: this.buildImageSrc(p.defaultImage || (Array.isArray(p.media) && p.media[0]) || '/images/placeholder.svg')
     }));
 
@@ -225,44 +230,31 @@ export class ProductDetails {
   }
 
   /**
+   * 依据后端 siblings 构建变体分组
+   * @param {Object} product
+   * @returns {Object|null}
+   */
+  buildVariationGroupFromSiblings(product) {
+    const baseKey = get_base_name(product.name || product.base_name);
+    const list = Array.isArray(product.siblings) ? product.siblings : [];
+    if (!baseKey || list.length === 0) return null;
+    // 保证当前产品在首位
+    const items = [product, ...list.filter(s => s.id !== product.id)].map(p => ({
+      id: p.id,
+      name: p.name,
+      color_label: extract_color_label(p.name),
+      image: this.buildImageSrc(p.defaultImage || (Array.isArray(p.media) && p.media[0]) || '/images/placeholder.svg')
+    }));
+    if (items.length <= 1) return null;
+    return { key: baseKey, items };
+  }
+
+  /**
    * 计算名称"基名"
    * @param {string} name - 产品名称
    * @returns {string} 基名
    */
-  getBaseName(name) {
-    if (!name) return '';
-    let base = String(name).trim();
-    
-    // 常见分隔符：" - ", " | ", 结尾括号标注
-    base = base
-      .replace(/\s*\([^)]+\)\s*$/i, '')
-      .replace(/\s*-\s*[^-|()]+$/i, '')
-      .replace(/\s*\|\s*[^-|()]+$/i, '')
-      .trim();
-      
-    return base.toLowerCase();
-  }
-
-  /**
-   * 从名称中提取颜色标签
-   * @param {string} name - 产品名称
-   * @returns {string} 颜色标签
-   */
-  extractColorLabel(name) {
-    if (!name) return '';
-    const str = String(name);
-    
-    const byParen = str.match(/\(([^)]+)\)\s*$/);
-    if (byParen && byParen[1]) return byParen[1].trim();
-    
-    const byDash = str.match(/-\s*([^-|()]+)\s*$/);
-    if (byDash && byDash[1]) return byDash[1].trim();
-    
-    const byPipe = str.match(/\|\s*([^-|()]+)\s*$/);
-    if (byPipe && byPipe[1]) return byPipe[1].trim();
-    
-    return '';
-  }
+  // name utils 已抽到 utils/product_name_utils.js
 
   /**
    * 绑定变体点击事件
@@ -293,10 +285,13 @@ export class ProductDetails {
    */
   async switchToVariant(variantId) {
     const newProduct = await apiClient.getProduct(variantId);
-    const categoryProducts = await apiClient.getProductsByCategory(newProduct.category);
-    
     this.currentProduct = newProduct;
-    this.variationGroup = this.buildVariationGroup(newProduct, categoryProducts);
+    if (Array.isArray(newProduct.siblings) && newProduct.siblings.length > 0) {
+      this.variationGroup = this.buildVariationGroupFromSiblings(newProduct);
+    } else {
+      const categoryProducts = await apiClient.getProductsByCategory(newProduct.category);
+      this.variationGroup = this.buildVariationGroup(newProduct, categoryProducts);
+    }
     
     // 无刷新更新视图
     this.renderProductDetails();

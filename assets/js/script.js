@@ -6,6 +6,7 @@
 // 导入所需的组件和工具
 import ProductGrid from './components/ProductGrid.js';
 import MobileNavigation from './components/MobileNavigation.js';
+import { build_map_link, sanitize_phone_href } from './utils/map_utils.js';
 
 /**
  * 主页应用程序类
@@ -66,6 +67,9 @@ class MainApp {
     
     // 页面可见性变化处理
     this.setupVisibilityChangeHandling();
+
+    // 联系方式链接（电话、地址）增强
+    this.setupContactLinks();
   }
 
   /**
@@ -162,6 +166,34 @@ class MainApp {
    */
   getMobileNavigation() {
     return this.mobileNavigation;
+  }
+
+  /**
+   * 设置联系方式链接（电话拨号、地图跳转）
+   */
+  setupContactLinks() {
+    // 电话链接：根据展示文本规范化 tel: href
+    document.querySelectorAll('.contact-phone[data-phone]')
+      .forEach((el) => {
+        const raw = el.getAttribute('data-phone') || el.textContent || '';
+        const href = sanitize_phone_href(raw);
+        if (href && el.getAttribute('href') !== href) {
+          el.setAttribute('href', href);
+        }
+      });
+
+    // 地址链接：基于 data-address 构建目标地图链接，支持切换地图提供商
+    document.querySelectorAll('.contact-address[data-address]')
+      .forEach((el) => {
+        const address = el.getAttribute('data-address') || el.textContent || '';
+        const href = build_map_link(address);
+        if (href && el.getAttribute('href') !== href) {
+          el.setAttribute('href', href);
+        }
+        // 默认新窗口打开
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener');
+      });
   }
 
   /**

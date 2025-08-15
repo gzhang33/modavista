@@ -3,6 +3,8 @@
  * 负责获取和渲染产品详情页的"你可能也感兴趣"商品列表
  */
 import apiClient from '../utils/apiClient.js';
+import { get_base_name } from '../utils/product_name_utils.js';
+import { build_image_src } from '../utils/image_utils.js';
 
 export class RelatedProducts {
   constructor() {
@@ -94,7 +96,7 @@ export class RelatedProducts {
   createProductCard(product) {
     const fallbackFromMedia = Array.isArray(product.media) && product.media.length > 0 ? product.media[0] : null;
     const chosenPath = product.defaultImage || fallbackFromMedia;
-    const imageSrc = this.buildImageSrc(chosenPath);
+    const imageSrc = build_image_src(chosenPath);
     const isNew = this.isNewProduct(product);
 
     return `
@@ -158,7 +160,7 @@ export class RelatedProducts {
 
       // 加载错误处理
       img.addEventListener('error', () => {
-        img.src = this.buildImageSrc('/images/placeholder.svg');
+        img.src = build_image_src('/images/placeholder.svg');
         img.classList.add('loaded');
         const wrapper = img.closest('.product-image-container');
         if (wrapper) {

@@ -22,9 +22,7 @@
             });
     </script>
     <div class="dashboard-container">
-        <?php include 'components/sidebar.php'; ?>
         <main class="main-content">
-            <?php include 'components/dashboard_stats.php'; ?>
             <?php include 'components/products_management.php'; ?>
         </main>
     </div>

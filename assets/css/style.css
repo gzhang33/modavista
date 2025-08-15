@@ -96,6 +96,28 @@ body {
   left: 0;
 }
 
+/* Logo modifier: two-line stacked presentation */
+.logo--columns {
+  display: inline-grid;
+  grid-auto-flow: row;
+  grid-template-rows: auto auto;
+  line-height: 1.05;
+  letter-spacing: -0.2px;
+}
+
+.logo__word {
+  display: block;
+}
+
+.logo__word:first-child {
+  opacity: 0.95;
+}
+
+.logo__word:last-child {
+  margin-top: -2px;
+  color: var(--text-secondary);
+}
+
 .main-nav {
   flex: 1;
   display: flex;
@@ -125,18 +147,33 @@ body {
 }
 
 .main-nav a {
-  text-decoration: none;
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 1rem;
-  transition: color var(--transition-fast);
   position: relative;
-  padding-bottom: 4px;
   display: block;
+  text-decoration: underline;
+  text-decoration-color: var(--border-medium);
+  text-underline-offset: 4px;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast), box-shadow var(--transition-fast);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
 }
 
 .main-nav a:hover {
   color: var(--text-primary);
+  text-decoration-color: var(--accent-color);
+}
+
+.main-nav a:focus-visible {
+  outline: none;
+  color: var(--text-primary);
+  text-decoration-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+}
+
+.main-nav a:visited {
+  color: var(--text-secondary);
 }
 
 .main-nav li::after {
@@ -150,12 +187,22 @@ body {
   transition: width var(--transition-normal);
 }
 
+/* Use underline styling instead of animated bar for better readability */
+.main-nav li::after { display: none; }
+
 .main-nav li.active::after {
   width: 100%;
 }
 
 .main-nav a::after {
   display: none; /* 禁用原来的 a 标签伪元素，使用 li 的伪元素 */
+}
+
+/* Active state: keep underline visible with accent color */
+.main-nav li.active a,
+.main-nav li:hover a {
+  color: var(--text-primary);
+  text-decoration-color: var(--accent-color);
 }
 
 /* 分类产品数量样式 */
@@ -354,6 +401,117 @@ body {
   padding: var(--spacing-xxl) 0;
 }
 
+/* Filters Section */
+.section--filters {
+  padding: var(--spacing-lg) 0 var(--spacing-sm);
+  background: var(--primary-white);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.filters-bar__search {
+  flex: 1 1 320px;
+}
+
+.filters-bar__search input[type="search"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.filters-bar__search input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.filters-bar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.filters-bar__controls select {
+  padding: 10px 12px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--primary-white);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.filters-bar__controls button {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-medium);
+  background: var(--background-medium);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.filters-bar__controls button:hover {
+  background: var(--border-light);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+/* Modern minimal search input */
+.modern-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.modern-search input[type="search"] {
+  padding-left: 44px;
+  padding-right: 36px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.modern-search .search-icon {
+  position: absolute;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  color: var(--text-light);
+}
+
+.modern-search .search-clear {
+  position: absolute;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+
+.modern-search .search-clear:hover {
+  color: var(--text-primary);
+}
+
 .section-title {
   font-family: var(--font-secondary);
   font-size: clamp(2rem, 5vw, 3rem);
@@ -518,7 +676,7 @@ body {
   width: 100%;
   height: 100%;
   max-width: 100%;
-  max-height: 70vh; /* 限制最大高度，防止极端图过高 */
+  max-height: 55vh; /* 桌面端更小首屏，便于同时看到标题与按钮 */
   aspect-ratio: auto;
   object-fit: contain;
   object-position: center;
@@ -713,6 +871,58 @@ body {
   word-break: break-all;
 }
 
+/* Contact email link styling for readability & accessibility */
+.contact-email {
+  color: var(--primary-white);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+  font-weight: 600;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast), box-shadow var(--transition-fast);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+}
+
+.contact-email:hover,
+.contact-email:focus-visible {
+  color: var(--accent-color);
+  text-decoration-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+}
+
+.contact-email:visited {
+  color: var(--primary-white);
+}
+
+/* Reuse email link styling for phone and address */
+.contact-phone,
+.contact-address {
+  color: var(--primary-white);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.contact-phone:hover,
+.contact-phone:focus-visible,
+.contact-address:hover,
+.contact-address:focus-visible {
+  color: var(--accent-color);
+  text-decoration-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+}
+
+.contact-phone:visited,
+.contact-address:visited {
+  color: var(--primary-white);
+}
+
 /* Footer */
 .footer {
   background: var(--background-medium);
@@ -740,10 +950,21 @@ body {
   display: block;
   margin-bottom: var(--spacing-xs);
   transition: var(--transition-fast);
+  border-radius: var(--radius-sm);
+  padding: 2px 2px;
 }
 
 .footer-section a:hover {
   color: var(--accent-color);
+}
+
+.footer-section a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+}
+
+.footer-section a:visited {
+  color: var(--text-secondary);
 }
 
 .footer-bottom {
@@ -1338,6 +1559,43 @@ button[type="submit"]:hover {
   flex-direction: column;
 }
 
+.product-actions {
+  margin: 8px 0 16px;
+}
+
+.cta-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--primary-black);
+  color: var(--primary-white);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.cta-contact-btn:hover,
+.cta-contact-btn:focus-visible {
+  background: #111111;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  outline: none;
+}
+
+.cta-contact-btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--border-medium);
+}
+
+.cta-contact-btn--ghost:hover,
+.cta-contact-btn--ghost:focus-visible {
+  border-color: var(--text-primary);
+}
+
 .product-title {
   font-family: var(--font-secondary);
   font-size: clamp(2rem, 5vw, 2.8rem);
@@ -1585,4 +1843,10 @@ button[type="submit"]:hover {
   .product-layout {
     grid-template-columns: 1fr;
   }
+}
+
+/* Ensure product info is visible first on small screens */
+@media (max-width: 768px) {
+  .product-layout .product-info { order: -1; }
+  .filters-bar { align-items: stretch; }
 }

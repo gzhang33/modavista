@@ -14,6 +14,8 @@ export class ProductGrid {
     this.categoryFilter = document.getElementById('category-filter');
     this.sortFilter = document.getElementById('sort-filter');
     this.resetBtn = document.getElementById('reset-filters');
+    this.searchInput = document.getElementById('search-input');
+    this.searchClearBtn = document.getElementById('search-clear');
     
     this.init();
   }
@@ -30,6 +32,10 @@ export class ProductGrid {
 
     if (this.categoryFilter && this.sortFilter && this.resetBtn) {
       this.setupFilters();
+    }
+
+    if (this.searchInput) {
+      this.setupSearch();
     }
   }
 
@@ -53,12 +59,17 @@ export class ProductGrid {
     try {
       const categories = await apiClient.getCategories();
       this.renderNavigation(categories);
+      this.renderCategorySelect(categories);
     } catch (error) {
       console.error('Failed to load categories:', error);
       const navContainer = document.querySelector('.main-nav ul');
       if (navContainer) {
         navContainer.innerHTML = '<li data-categories="all" class="active"><a href="#">Tutti i Prodotti</a></li>';
         this.setupNavigationFilters(); 
+      }
+      // 回退下拉
+      if (this.categoryFilter) {
+        this.categoryFilter.innerHTML = '<option value="all">Tutte le categorie</option>';
       }
     }
   }
@@ -78,6 +89,18 @@ export class ProductGrid {
 
     navContainer.innerHTML = allProductsHTML + categoriesHTML;
     this.setupNavigationFilters();
+  }
+
+  /**
+   * 渲染分类下拉
+   * @param {Array} categories
+   */
+  renderCategorySelect(categories) {
+    if (!this.categoryFilter) return;
+    const options = ['<option value="all">Tutte le categorie</option>']
+      .concat(categories.map(c => `<option value="${c}">${c}</option>`))
+      .join('');
+    this.categoryFilter.innerHTML = options;
   }
 
   /**
@@ -240,10 +263,18 @@ export class ProductGrid {
   applyFilters() {
     const category = this.categoryFilter.value;
     const sortValue = this.sortFilter.value;
+    const term = (this.searchInput?.value || '').trim().toLowerCase();
 
     let tempProducts = [...this.products];
 
-    if (category !== 'all') {
+    if (term) {
+      // 搜索时忽略分类过滤
+      tempProducts = tempProducts.filter(p => {
+        const base = (p.base_name || '').toLowerCase();
+        return base.includes(term);
+      });
+      this.clearNavigationActiveState();
+    } else if (category !== 'all') {
       tempProducts = tempProducts.filter(p => p.category === category);
     }
 
@@ -281,6 +312,15 @@ export class ProductGrid {
             this.filterByCategory(category);
             this.updateNavigationState(navItem);
             this.updateURL(category);
+            // 同步下拉
+            if (this.categoryFilter) {
+              this.categoryFilter.value = category || 'all';
+            }
+            // 清空搜索确保分类生效
+            if (this.searchInput && this.searchInput.value) {
+              this.searchInput.value = '';
+              this.toggleSearchClear(false);
+            }
           }
         }
       });
@@ -300,6 +340,16 @@ export class ProductGrid {
       this.filteredProducts = this.products.filter(product => 
         product.category === this.currentCategory
       );
+    }
+
+    // 如果存在搜索词，继续应用搜索过滤
+    const term = (this.searchInput?.value || '').trim().toLowerCase();
+    if (term) {
+      this.filteredProducts = this.filteredProducts.filter(p => {
+        const base = (p.base_name || '').toLowerCase();
+        return base.includes(term);
+      });
+      this.clearNavigationActiveState();
     }
     
     this.renderProducts();
@@ -366,6 +416,9 @@ export class ProductGrid {
     if (navItem) {
         this.filterByCategory(category);
         this.updateNavigationState(navItem);
+        if (this.categoryFilter) {
+          this.categoryFilter.value = category || 'all';
+        }
     }
   }
 
@@ -430,6 +483,37 @@ export class ProductGrid {
         }
       });
     }, 3000);
+  }
+
+  /**
+   * 实时搜索
+   */
+  setupSearch() {
+    let timer = null;
+    const handler = () => this.applyFilters();
+    this.searchInput.addEventListener('input', () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(handler, 200);
+      this.toggleSearchClear(Boolean(this.searchInput.value.trim()));
+    });
+
+    if (this.searchClearBtn) {
+      this.searchClearBtn.addEventListener('click', () => {
+        this.searchInput.value = '';
+        this.toggleSearchClear(false);
+        this.applyFilters();
+      });
+    }
+  }
+
+  toggleSearchClear(show) {
+    if (!this.searchClearBtn) return;
+    this.searchClearBtn.style.visibility = show ? 'visible' : 'hidden';
+    this.searchClearBtn.style.opacity = show ? '1' : '0';
+  }
+
+  clearNavigationActiveState() {
+    document.querySelectorAll('.main-nav ul li').forEach(item => item.classList.remove('active'));
   }
 }
 

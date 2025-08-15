@@ -5,9 +5,11 @@
 class ApiClient {
   constructor() {
     this.baseUrl = '/api';
-    this.defaultHeaders = {
-      'Content-Type': 'application/json'
-    };
+    this.defaultHeaders = { };
+    this.timeout = 15000;
+    this._categories_cache = null;
+    this._categories_cache_at = 0;
+    this._cache_ttl_ms = 5 * 60 * 1000;
   }
 
   /**
@@ -24,16 +26,17 @@ class ApiClient {
     };
 
     try {
-      const response = await fetch(url, config);
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), this.timeout);
+      const response = await fetch(url, { ...config, signal: controller.signal });
+      clearTimeout(id);
       
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Risorsa non trovata');
-        } else if (response.status >= 500) {
-          throw new Error('Errore del server');
-        } else {
-          throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
-        }
+        const message = response.status === 401 ? '未授权或会话已过期'
+          : response.status === 404 ? '资源未找到'
+          : response.status >= 500 ? '服务器错误'
+          : `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(message);
       }
 
       // 检查响应类型
@@ -45,6 +48,9 @@ class ApiClient {
       }
     } catch (error) {
       console.error(`API request failed for ${endpoint}:`, error);
+      if (error?.name === 'AbortError') {
+        throw new Error('请求超时');
+      }
       throw error;
     }
   }
@@ -68,19 +74,13 @@ class ApiClient {
    * @returns {Promise<any>} API 响应数据
    */
   async post(endpoint, data) {
-    const options = {
-      method: 'POST'
-    };
-
+    const options = { method: 'POST' };
     if (data instanceof FormData) {
-      // FormData 请求不需要设置 Content-Type
-      delete this.defaultHeaders['Content-Type'];
-      options.body = data;
+      options.body = data; // 让浏览器自动设置 multipart 边界
     } else {
       options.body = JSON.stringify(data);
-      options.headers = { ...this.defaultHeaders };
+      options.headers = { 'Content-Type': 'application/json' };
     }
-
     return this.request(endpoint, options);
   }
 
@@ -93,6 +93,7 @@ class ApiClient {
   async put(endpoint, data) {
     return this.request(endpoint, {
       method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
   }
@@ -132,7 +133,8 @@ class ApiClient {
    * @returns {Promise<Array>} 该分类下的产品列表
    */
   async getProductsByCategory(category) {
-    return this.get('/products.php', { category: encodeURIComponent(category) });
+    // 直接传原始分类名，避免重复编码
+    return this.get('/products.php', { category });
   }
 
   /**
@@ -140,7 +142,43 @@ class ApiClient {
    * @returns {Promise<Array>} 分类列表
    */
   async getCategories() {
-    return this.get('/categories.php');
+    const now = Date.now();
+    if (this._categories_cache && (now - this._categories_cache_at) < this._cache_ttl_ms) {
+      return this._categories_cache;
+    }
+    const data = await this.get('/categories.php');
+    if (Array.isArray(data)) {
+      this._categories_cache = data;
+      this._categories_cache_at = now;
+    }
+    return data;
+  }
+
+  /**
+   * 获取所有材质
+   * @returns {Promise<Array>} 材质列表
+   */
+  async getMaterials() {
+    const data = await this.get('/materials.php');
+    return data;
+  }
+
+  /**
+   * 获取所有颜色
+   * @returns {Promise<Array>} 颜色列表
+   */
+  async getColors() {
+    const data = await this.get('/colors.php');
+    return data;
+  }
+
+  /**
+   * 获取分析数据
+   * @param {Object} params - { type: string }
+   * @returns {Promise<any>}
+   */
+  async getAnalytics(params = {}) {
+    return this.get('/analytics.php', params);
   }
 
   /**
@@ -160,7 +198,8 @@ class ApiClient {
    */
   async updateProduct(productId, productData) {
     productData.append('id', productId);
-    return this.put('/products.php', productData);
+    // 后端以 POST 处理更新
+    return this.post('/products.php', productData);
   }
 
   /**

@@ -10,7 +10,7 @@
 function json_response($status_code, $data) {
     header("Content-Type: application/json; charset=UTF-8");
     http_response_code($status_code);
-    echo json_encode($data);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit();
 }
 

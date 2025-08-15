@@ -16,6 +16,9 @@ switch ($method) {
     case 'POST': // 使用 POST 来删除，避免 URL 长度问题和 CSRF
         delete_media($images_dir);
         break;
+    case 'DELETE': // 新增：批量清理孤儿图片
+        cleanup_orphan_handler($images_dir);
+        break;
     default:
         json_response(405, ['message' => '不支持的方法']);
         break;
@@ -24,31 +27,31 @@ switch ($method) {
 function get_media($dir) {
     // 获取所有图片文件
     $files = glob($dir . '{*.jpg,*.jpeg,*.png,*.gif,*.webp}', GLOB_BRACE);
-    
-    // 连接数据库以检查哪些图片正在被使用
+
+    // 查询使用情况：来自 product_variants.default_image 与 product_media.image_path
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    $conn->set_charset('utf8mb4');
     if ($conn->connect_error) {
-        json_response(500, ["message" => "数据库连接失败"]);
+        json_response(500, ['message' => '数据库连接失败']);
     }
-    
     $used_images = [];
-    $stmt = $conn->prepare("SELECT media, defaultImage FROM products");
-    if ($stmt) {
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-            while ($row = $result->fetch_assoc()) {
-                if (!empty($row['defaultImage'])) {
-                    $used_images[$row['defaultImage']] = true;
-                }
-                $media = json_decode($row['media'], true);
-                if (is_array($media)) {
-                    foreach ($media as $img) {
-                        $used_images[$img] = true;
-                    }
-                }
-            }
+
+    $stmt1 = $conn->prepare('SELECT default_image FROM product_variants WHERE default_image IS NOT NULL AND default_image <> ""');
+    if ($stmt1 && $stmt1->execute()) {
+        $res1 = $stmt1->get_result();
+        while ($r = $res1->fetch_assoc()) {
+            $used_images[$r['default_image']] = true;
         }
-        $stmt->close();
+        $stmt1->close();
+    }
+
+    $stmt2 = $conn->prepare('SELECT image_path FROM product_media');
+    if ($stmt2 && $stmt2->execute()) {
+        $res2 = $stmt2->get_result();
+        while ($r = $res2->fetch_assoc()) {
+            $used_images[$r['image_path']] = true;
+        }
+        $stmt2->close();
     }
     $conn->close();
 
@@ -75,7 +78,9 @@ function delete_media($dir) {
     // 安全检查，确保路径在允许的目录下
     $real_base_dir = realpath($dir);
     $real_file_path = realpath('../' . $path_to_delete);
-
+    if ($real_file_path === false) {
+        json_response(404, ['message' => '文件未找到']);
+    }
     if (strpos($real_file_path, $real_base_dir) !== 0) {
         json_response(403, ['message' => '禁止访问']);
     }
@@ -89,5 +94,50 @@ function delete_media($dir) {
     } else {
         json_response(404, ['message' => '文件未找到']);
     }
+}
+
+// 批量清理孤儿图片（当数据库中无引用时删除本地文件）
+function cleanup_orphan_handler($dir) {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    if ($conn->connect_error) {
+        json_response(500, ['message' => '数据库连接失败']);
+    }
+    $conn->set_charset('utf8mb4');
+
+    // 构建引用集
+    $referenced = [];
+    $stmt1 = $conn->prepare('SELECT default_image FROM product_variants WHERE default_image IS NOT NULL AND default_image <> ""');
+    if ($stmt1 && $stmt1->execute()) {
+        $res1 = $stmt1->get_result();
+        while ($r = $res1->fetch_assoc()) { $referenced[$r['default_image']] = true; }
+        $stmt1->close();
+    }
+    $stmt2 = $conn->prepare('SELECT image_path FROM product_media');
+    if ($stmt2 && $stmt2->execute()) {
+        $res2 = $stmt2->get_result();
+        while ($r = $res2->fetch_assoc()) { $referenced[$r['image_path']] = true; }
+        $stmt2->close();
+    }
+
+    $patterns = ['*.jpg','*.jpeg','*.png','*.gif','*.webp'];
+    $base_dir = realpath($dir);
+    if ($base_dir === false) { json_response(200, ['deleted' => 0]); }
+    $deleted = 0;
+    $files = [];
+    foreach ($patterns as $p) { $files = array_merge($files, glob($dir . $p)); }
+    foreach ($files as $file) {
+        $real = realpath($file);
+        if ($real === false) { continue; }
+        if (strpos($real, $base_dir) !== 0) { continue; }
+        $basename = basename($real);
+        if (in_array($basename, ['placeholder.svg','placeholder-optimized.svg'], true)) { continue; }
+        $db_path = 'images/' . $basename;
+        if (!isset($referenced[$db_path])) {
+            @unlink($real);
+            if (!file_exists($real)) { $deleted++; }
+        }
+    }
+    $conn->close();
+    json_response(200, ['deleted' => $deleted]);
 }
 ?> 

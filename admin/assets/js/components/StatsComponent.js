@@ -21,15 +21,11 @@ export default class StatsComponent extends BaseComponent {
         if (!products) return;
 
         const total_products = products.length;
-        const total_views = products.reduce((sum, p) => sum + (p.views || 0), 0);
         const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
         const total_categories = categories.length;
-        const total_media = products.reduce((sum, p) => sum + (p.media ? p.media.length : 0), 0);
 
         this.element.querySelector('#total-products').textContent = total_products;
-        this.element.querySelector('#total-views').textContent = total_views;
         this.element.querySelector('#total-categories').textContent = total_categories;
-        this.element.querySelector('#total-media').textContent = total_media;
 
         this.render_popular_products(products);
         this.render_category_distribution(products);
@@ -39,19 +35,19 @@ export default class StatsComponent extends BaseComponent {
     render_popular_products(products) {
         const container = this.element.querySelector('#popular-products');
         if (!container) return;
-        const popular_products = products.sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
-        if (popular_products.length === 0) {
+        const latest_products = products.filter(p => p.createdAt).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+        if (latest_products.length === 0) {
             container.innerHTML = '<div class="text-center" style="color: #718096; padding: 1rem;">暂无产品数据</div>';
             return;
         }
-        container.innerHTML = popular_products.map(product => `
+        container.innerHTML = latest_products.map(product => `
             <div class="popular-product-item">
                 <img src="${product.defaultImage ? `../${product.defaultImage}` : '../images/placeholder.svg'}" alt="${product.name}" class="popular-product-image">
                 <div class="popular-product-info">
                     <div class="popular-product-name">${product.name}</div>
                     <div class="popular-product-category">${product.category || '未分类'}</div>
                 </div>
-                <div class="popular-product-views">${product.views || 0} 次浏览</div>
+                <div class="popular-product-time">${this.get_time_ago(new Date(product.createdAt))}</div>
             </div>`).join('');
     }
 

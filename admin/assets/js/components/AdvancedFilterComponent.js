@@ -1,5 +1,6 @@
 // htdocs/admin/assets/js/components/AdvancedFilterComponent.js
 import BaseComponent from './BaseComponent.js';
+import apiClient from '/assets/js/utils/apiClient.js';
 
 export default class AdvancedFilterComponent extends BaseComponent {
     constructor(selector, eventBus) {
@@ -42,7 +43,6 @@ export default class AdvancedFilterComponent extends BaseComponent {
             'name': { label: '产品名称', type: 'text' },
             'description': { label: '产品描述', type: 'text' },
             'category': { label: '产品分类', type: 'select' },
-            'views': { label: '浏览量', type: 'number' },
             'createdAt': { label: '创建日期', type: 'date' }
         };
 
@@ -150,8 +150,14 @@ export default class AdvancedFilterComponent extends BaseComponent {
         this.eventBus.emit('toast:show', { message: '筛选已清除', type: 'info' });
     }
     
-    update_categories(products) {
-        this.available_categories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+    async update_categories(products) {
+        try {
+            const categories = await apiClient.getCategories();
+            this.available_categories = categories;
+        } catch (error) {
+            console.error('Failed to load categories:', error);
+            this.available_categories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+        }
         const current_val = this.category_filter.value;
         this.category_filter.innerHTML = '<option value="">所有分类</option>';
         this.available_categories.forEach(category => {

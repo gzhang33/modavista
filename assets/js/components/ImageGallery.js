@@ -2,6 +2,8 @@
  * 图片画廊组件
  * 负责处理产品详情页的图片展示、缩略图切换、缩放等功能
  */
+import { build_image_src } from '../utils/image_utils.js';
+
 export class ImageGallery {
   constructor() {
     this.mainImage = null;
@@ -39,6 +41,8 @@ export class ImageGallery {
    */
   setImages(images, defaultImage = null) {
     this.images = [...images];
+    // 变更后重新抓取最新的 DOM 元素引用
+    this.findGalleryElements();
     
     // 如果有默认图片且不在列表中，添加到开头
     if (defaultImage && !this.images.includes(defaultImage)) {
@@ -69,15 +73,15 @@ export class ImageGallery {
   renderMainImage() {
     if (!this.mainImage) return;
 
-    const imageSrc = this.buildImageSrc(this.images[this.currentImageIndex]);
+    const imageSrc = build_image_src(this.images[this.currentImageIndex]);
     this.mainImage.src = imageSrc;
     this.mainImage.alt = `产品图片 ${this.currentImageIndex + 1}`;
     
     // 设置加载和错误处理
-    this.mainImage.onerror = () => { 
-      this.mainImage.src = this.buildImageSrc('/images/placeholder.svg');
-      this.mainImage.classList.add('loaded');
-    };
+      this.mainImage.onerror = () => { 
+        this.mainImage.src = build_image_src('/images/placeholder.svg');
+        this.mainImage.classList.add('loaded');
+      };
   }
 
   /**
@@ -89,11 +93,11 @@ export class ImageGallery {
 
     const thumbnailsHTML = this.images.map((img, index) => `
       <img 
-        src="${this.buildImageSrc(img)}" 
+        src="${build_image_src(img)}" 
         alt="Miniatura ${index + 1}" 
         class="thumbnail-image ${index === this.currentImageIndex ? 'active' : ''}" 
         data-index="${index}"
-        data-src="${this.buildImageSrc(img)}"
+        data-src="${build_image_src(img)}"
       >
     `).join('');
 
@@ -108,7 +112,7 @@ export class ImageGallery {
    */
   renderNoImages() {
     if (this.mainImage) {
-      this.mainImage.src = this.buildImageSrc('/images/placeholder.svg');
+      this.mainImage.src = build_image_src('/images/placeholder.svg');
       this.mainImage.alt = 'Nessuna immagine disponibile';
     }
 
@@ -125,7 +129,7 @@ export class ImageGallery {
     // 主图错误处理
     if (this.mainImage) {
       this.mainImage.onerror = () => { 
-        this.mainImage.src = this.buildImageSrc('/images/placeholder.svg');
+        this.mainImage.src = build_image_src('/images/placeholder.svg');
         this.mainImage.classList.add('loaded');
       };
     }
@@ -149,7 +153,7 @@ export class ImageGallery {
 
       // 缩略图错误处理
       thumb.onerror = () => { 
-        thumb.src = this.buildImageSrc('/images/placeholder.svg'); 
+        thumb.src = build_image_src('/images/placeholder.svg'); 
         thumb.classList.add('loaded');
       };
     });
@@ -165,7 +169,7 @@ export class ImageGallery {
     }
 
     this.currentImageIndex = index;
-    const newSrc = this.buildImageSrc(this.images[index]);
+    const newSrc = build_image_src(this.images[index]);
     
     // 淡出效果
     if (this.mainImage) {
@@ -267,10 +271,7 @@ export class ImageGallery {
    * @param {string|null|undefined} path - 图片路径
    * @returns {string} 标准化后的图片路径
    */
-  buildImageSrc(path) {
-    if (!path) return '/images/placeholder.svg';
-    return path.startsWith('/') ? path : `/${path}`;
-  }
+  // 标准化图片路径逻辑移至 utils/image_utils.js
 
   /**
    * 上一张图片
@@ -318,7 +319,7 @@ export class ImageGallery {
    * 预加载所有图片
    */
   async preloadAllImages() {
-    const loadPromises = this.images.map(src => this.preloadImage(this.buildImageSrc(src)));
+    const loadPromises = this.images.map(src => this.preloadImage(build_image_src(src)));
     
     try {
       await Promise.all(loadPromises);

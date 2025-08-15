@@ -12,14 +12,20 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 
-// 1. 获取热门产品 (按浏览量)
-$popular_products = [];
-$stmt = $conn->prepare("SELECT id, name, views FROM products ORDER BY views DESC LIMIT 5");
+// 1. 获取最新产品 (按创建时间)
+$latest_products = [];
+$stmt = $conn->prepare("SELECT v.id AS id,
+    CONCAT(p.base_name, ' - ', IFNULL(c.color_name, '')) AS name,
+    v.created_at AS createdAt
+    FROM product_variants v
+    JOIN products p ON v.product_id = p.id
+    LEFT JOIN colors c ON v.color_id = c.id
+    ORDER BY v.created_at DESC LIMIT 5");
 if ($stmt) {
     if ($stmt->execute()) {
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
-            $popular_products[] = $row;
+            $latest_products[] = $row;
         }
     }
     $stmt->close();
@@ -27,7 +33,7 @@ if ($stmt) {
 
 // 2. 获取分类分布
 $category_distribution = [];
-$stmt = $conn->prepare("SELECT category, COUNT(*) as product_count FROM products GROUP BY category");
+$stmt = $conn->prepare("SELECT c.category_name AS category, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id, c.category_name");
 if ($stmt) {
     if ($stmt->execute()) {
         $result = $stmt->get_result();
@@ -40,7 +46,13 @@ if ($stmt) {
 
 // 3. 获取最近更新的产品
 $recent_updates = [];
-$stmt = $conn->prepare("SELECT id, name, createdAt FROM products ORDER BY createdAt DESC LIMIT 5");
+$stmt = $conn->prepare("SELECT v.id AS id,
+    CONCAT(p.base_name, ' - ', IFNULL(c.color_name, '')) AS name,
+    v.created_at AS createdAt
+    FROM product_variants v
+    JOIN products p ON v.product_id = p.id
+    LEFT JOIN colors c ON v.color_id = c.id
+    ORDER BY v.created_at DESC LIMIT 5");
 if ($stmt) {
     if ($stmt->execute()) {
         $result = $stmt->get_result();
@@ -55,7 +67,7 @@ $conn->close();
 
 // 组合所有统计数据
 $stats = [
-    'popular_products' => $popular_products,
+    'latest_products' => $latest_products,
     'category_distribution' => $category_distribution,
     'recent_updates' => $recent_updates
 ];

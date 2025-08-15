@@ -1,237 +1,260 @@
-# 🇮🇹 Fashion Factory Display System
+# Fashion Factory Display System
 
-A sophisticated Italian fashion product display system designed for clothing factories to showcase their collections to clients. This system focuses on elegant product presentation and client engagement rather than direct e-commerce functionality.
+时尚工厂产品展示系统，专为服装工厂向客户展示产品系列而设计。系统专注于优雅的产品展示和客户互动，而非直接电商功能。
 
-## 📋 Table of Contents
+## 📋 目录
 
-- [Purpose](#-purpose)
-- [Key Features](#-key-features)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Configuration](#-configuration)
-- [Customization](#-customization)
-- [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [Support](#-support)
-- [License](#-license)
+- [项目总结](#-项目总结)
+- [项目结构](#-项目结构)
+- [项目技术栈](#-项目技术栈)
+- [项目功能](#-项目功能)
+- [快速开始](#-快速开始)
+- [配置说明](#-配置说明)
+- [自定义设置](#-自定义设置)
+- [许可证](#-许可证)
 
-## 🎯 Purpose
+## 🎯 项目总结
 
-This system serves as a digital catalog for fashion factories to:
-- Showcase clothing collections to potential clients.
-- Enable easy browsing on desktop and mobile devices.
-- Facilitate client contact and ordering processes.
-- Provide real-time product management capabilities.
-- Track client engagement through analytics.
+这个系统是服装批发工厂的数字产品目录，主要用途：
+- 向潜在客户展示服装系列
+- 支持桌面和手机设备浏览
+- 方便客户联系我们
+- 提供实时产品管理功能
+- 通过数据分析跟踪客户互动
 
-## ✨ Key Features
+## 📁 项目结构
 
-### 🖥️ Public Showcase
-- **Elegant Product Display**: Italian fashion-inspired design with category filtering.
-- **Responsive Design**: Optimized for both desktop and mobile viewing.
-- **Product Details**: High-quality image galleries with detailed descriptions.
-- **Contact Integration**: Easy client contact for ordering inquiries.
-- **Italian Language**: Native Italian interface for an authentic experience.
+```
+htdocs/
+├── index.html              # 主产品展示页面
+├── product.html            # 产品详情页面
+├── admin/                  # 管理后台
+│   ├── assets/             # 管理后台资源
+│   │   ├── css/            # 管理后台样式
+│   │   │   └── admin_style.css
+│   │   ├── js/             # 管理后台脚本
+│   │   │   └── components/ # 管理后台组件
+│   ├── components/         # 管理后台PHP组件
+│   ├── dashboard.php       # 主管理面板
+│   └── login.html          # 管理登录页面
+├── api/                    # PHP后端接口
+├── assets/                 # 前台网站资源
+│   ├── css/                # 前台样式文件
+│   │   ├── font-fallback.css
+│   │   └── style.css
+│   ├── js/                 # 前台JavaScript文件
+│   │   ├── components/     # 前台组件
+│   │   ├── utils/          # 工具函数
+│   │   │   └── apiClient.js          # API客户端
+│   │   ├── lib/            # 前台库文件
+│   │   ├── script.js       # 首页入口文件
+│   │   └── product.js      # 产品页入口文件
+└── images/                 # 上传的产品图片
+```
 
-### 🛠️ Admin Management
-- **Product Management**: Full CRUD operations for the product catalog.
-- **Media Library**: Centralized image management with usage tracking.
-- **Category Management**: Dynamically organize products by clothing types.
-- **Responsive Dashboard**: Manage your store from any device.
-- **Variants Builder**: Add multiple color variants in one submission; each color becomes an independent product record with its own media.
+## 🛠️ 项目技术栈
 
-### ⚡ Performance & Optimization
-- **Image Optimization**: Automatic compression and lazy loading for fast delivery.
-- **Performance Monitoring**: Real-time Core Web Vitals tracking in the console.
-- **Optimized Loading**: Custom font and resource loading strategies for speed.
-- **Lightweight & Fast**: Built for a speedy experience, especially on mobile.
+### 前端技术
+- **HTML5**: 语义化页面结构
+- **CSS3**: 现代样式设计，使用CSS变量和BEM方法
+- **JavaScript (ES6+)**: 模块化开发，组件化架构
+- **字体**: Inter + Playfair Display，支持回退方案
 
-### 🔒 Security
-- **Secure Admin**: Session-based authentication for the admin panel.
-- **SQL Injection Prevention**: Prepared statements are used to protect the database.
-- **Secure File Uploads**: Strict validation and unique naming for all uploaded media.
+### 后端技术
+- **PHP 7+**: 服务器端逻辑
+- **MySQL**: 数据库存储
+- **mysqli**: 数据库连接，使用预处理语句防SQL注入
 
-### 📊 Analytics
-- **Dashboard Stats**: Track total products, categories, and media usage.
-- **Client Engagement**: View statistics on popular products and categories.
+### 架构特点
+- **模块化设计**: 每个组件独立，职责单一
+- **事件驱动**: 组件间通过事件总线通信
+- **响应式布局**: 适配桌面和手机设备
+- **性能优化**: 图片懒加载、压缩、字体优化
 
-## 🏗️ Architecture
+## ✨ 项目功能
 
-- **Frontend**: HTML5, CSS3, and Vanilla JavaScript (ES6+ Modules).
-- **Backend**: PHP 7+ RESTful API.
-- **Database**: MySQL.
-- **Authentication**: Secure session-based admin login.
-- **Module System**: ES6 modules with component-based architecture for maintainability.
+### 🖥️ 前台展示功能
+- **产品展示**: 优雅的意大利时尚风格设计，支持分类筛选
+- **响应式设计**: 桌面和手机设备都能良好显示
+- **产品详情**: 高质量图片展示，详细产品描述
+- **联系功能**: 方便客户联系咨询下单
+- **意大利语界面**: 原生意大利语界面，提供真实体验
 
-### 🧩 Modular Architecture
+### 🛠️ 后台管理功能
+- **产品管理**: 完整的增删改查操作
+- **媒体库**: 集中图片管理，使用情况跟踪
+- **分类管理**: 动态组织产品分类
+- **响应式后台**: 任何设备都能管理商店
+- **变体构建器**: 一次提交添加多个颜色变体，每个颜色成为独立产品记录
 
-The public site uses a modern ES6 module-based architecture with clear separation of concerns:
+### ⚡ 性能优化功能
+- **图片优化**: 自动压缩和懒加载，快速加载
+- **性能监控**: 实时核心网页指标跟踪
+- **优化加载**: 自定义字体和资源加载策略
+- **轻量快速**: 专为快速体验设计，特别是手机端
 
-#### **Components Structure**
-- **ProductGrid**: Handles product listing, filtering, and navigation on the homepage
-- **MobileNavigation**: Manages mobile navigation menu interactions
-- **ImageGallery**: Handles product image display, zoom, and thumbnail switching
-- **RelatedProducts**: Manages "You might also like" product recommendations
-- **ProductDetails**: Displays product information, variants, and breadcrumbs
+### 🔒 安全功能
+- **安全管理**: 基于会话的管理员认证
+- **SQL注入防护**: 使用预处理语句保护数据库
+- **安全文件上传**: 严格验证和唯一命名所有上传媒体
 
-#### **Utilities**
-- **ApiClient**: Centralized HTTP client for all API interactions with error handling and request management
+### 📊 数据分析功能
+- **仪表板统计**: 跟踪总产品数、分类数和媒体使用情况
+- **客户互动**: 查看热门产品和分类统计
 
-#### **Entry Points**
-- **script.js**: Main application coordinator for the homepage (`index.html`)
-- **product.js**: Product page coordinator for product details (`product.html`)
+## 🚀 快速开始
 
-#### **Benefits of This Architecture**
-- **Maintainability**: Each component has a single responsibility
-- **Reusability**: Components can be easily reused across different pages
-- **Testability**: Individual components can be tested in isolation
-- **Performance**: Selective loading and tree-shaking capabilities
-- **Developer Experience**: Clear file naming allows AI tools to quickly understand functionality
+按照以下步骤在本地机器上运行项目。
 
-## 🚀 Getting Started
+### 环境要求
+- PHP 7+ 并安装 `mysqli` 扩展
+- MySQL 数据库服务器
+- Apache 或 Nginx 等网页服务器
+- `images/` 目录的写入权限
 
-Follow these steps to get the project running on your local machine.
+### 安装步骤
 
-### Prerequisites
-- PHP 7+ with the `mysqli` extension.
-- MySQL database server.
-- A web server like Apache or Nginx.
-- Write permissions for the `images/` directory.
-
-### Installation Guide
-
-1.  **Clone the Repository**
+1.  **下载项目**
     ```sh
     git clone https://github.com/your-username/fashion-factory-display.git
     ```
-    Or download and extract the project ZIP file into your web server's root directory (e.g., `htdocs` for XAMPP).
+    或下载项目ZIP文件并解压到网页服务器根目录（如XAMPP的 `htdocs`）。
 
-2.  **Database Setup**
-    - Create a new database in MySQL (e.g., `products`).
-    - Import the database schema by executing the following SQL query:
+2.  **数据库设置**
+    - 在MySQL中创建新数据库（如 `products`）
+    - 执行以下SQL查询导入数据库结构（新三表结构）：
       ```sql
-      CREATE TABLE products (
-          id VARCHAR(64) PRIMARY KEY,
-          name VARCHAR(255) NOT NULL,
-          description TEXT,
-          category VARCHAR(100),
-          defaultImage VARCHAR(255),
-          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-          variants LONGTEXT NULL,
-          media LONGTEXT NULL,
-          views INT(10) UNSIGNED DEFAULT 0,
-          archived TINYINT(1) DEFAULT 0
+      CREATE TABLE categories (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        category_name VARCHAR(100) NOT NULL UNIQUE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+      CREATE TABLE products (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        base_name VARCHAR(255) NOT NULL,
+        description TEXT NULL,
+        category_id INT UNSIGNED NULL,
+        CONSTRAINT fk_products_category
+          FOREIGN KEY (category_id) REFERENCES categories(id)
+          ON DELETE SET NULL ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+      CREATE TABLE `colors` (
+        `id` int(11) UNSIGNED NOT NULL,
+        `color_name` varchar(100) NOT NULL COMMENT '颜色名称 (例如: Red, Blue)',
+        `color_code` varchar(7) DEFAULT NULL COMMENT '颜色的HEX代码 (例如: #FF0000)'
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='产品颜色表';
+
+      CREATE TABLE `materials` (
+        `id` int(11) UNSIGNED NOT NULL,
+        `material_name` varchar(100) NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='产品材质表';
+
+      CREATE TABLE `tags` (
+        `id` int(11) UNSIGNED NOT NULL,
+        `tag_name` varchar(100) NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='产品标签表';
+
+      CREATE TABLE product_variants (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        product_id INT UNSIGNED NOT NULL,
+        color_id INT UNSIGNED DEFAULT NULL,
+        material_id INT UNSIGNED DEFAULT NULL,
+        default_image VARCHAR(255) NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_variants_product
+          FOREIGN KEY (product_id) REFERENCES products(id)
+          ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT fk_variant_color
+          FOREIGN KEY (color_id) REFERENCES colors(id)
+          ON DELETE SET NULL ON UPDATE CASCADE,
+        CONSTRAINT fk_variant_material
+          FOREIGN KEY (material_id) REFERENCES materials(id)
+          ON DELETE SET NULL ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+      CREATE TABLE product_media (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        variant_id INT UNSIGNED NOT NULL,
+        image_path VARCHAR(255) NOT NULL,
+        sort_order INT UNSIGNED NOT NULL DEFAULT 0,
+        CONSTRAINT fk_media_variant
+          FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+          ON DELETE CASCADE ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+      CREATE TABLE `product_tags` (
+        `product_id` int(11) UNSIGNED NOT NULL,
+        `tag_id` int(11) UNSIGNED NOT NULL,
+        PRIMARY KEY (`product_id`,`tag_id`),
+        CONSTRAINT `fk_pt_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_pt_tag` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='产品与标签的关联表';
       ```
 
-3.  **Configure Environment**
-    - Open `api/config.php` and update the database credentials:
+3.  **环境配置**
+    - 打开 `api/config.php` 并更新数据库信息（本地 XAMPP 默认配置如下）：
       ```php
-      define('DB_SERVER', 'localhost');
-      define('DB_USERNAME', 'your_username');
-      define('DB_PASSWORD', 'your_password');
+      define('DB_HOST', 'localhost');
+      define('DB_USER', 'root');
+      define('DB_PASS', '');
       define('DB_NAME', 'products');
       ```
 
-4.  **Set Permissions**
-    - Ensure your web server has write permissions for the `images/` directory. On Linux/macOS, you can run:
+4.  **设置权限**
+    - 确保网页服务器对 `images/` 目录有写入权限。在Linux/macOS上可以运行：
       ```sh
       chmod 755 images/
       ```
 
-5.  **Access the Admin Panel**
-    - Navigate to `/admin/login.html` in your browser.
-    - Default credentials:
-        - **Username**: `admin`
-        - **Password**: `admin`
+5.  **访问管理后台**
+    - 在浏览器中访问 `/admin/login.html`
+    - 默认登录信息：
+        - **用户名**: `admin`
+        - **密码**: `admin`
 
-## 🔧 Configuration
+## 🔧 配置说明
 
-- **Database**: All database settings are in `api/config.php`.
-- **Admin Password**: For production, it is **critical** to change the default password. Generate a new hash and update the `ADMIN_PASSWORD_HASH` in `api/config.php`.
+- **数据库**: 所有数据库设置都在 `api/config.php` 中
+- **管理员密码**: 生产环境中必须更改默认密码。生成新哈希并更新 `api/config.php` 中的 `ADMIN_PASSWORD_HASH`
 
-## 🎨 Customization
+## 🎨 自定义设置
 
-- **Styling**: Modify CSS custom properties in `assets/css/style.css` to change the theme.
-- **Content**: Update contact information and branding in `index.html` and other relevant files.
+- **样式**: 修改 `assets/css/style.css` 中的CSS变量来改变主题
+- **内容**: 在 `index.html` 和其他相关文件中更新联系信息和品牌信息
 
-## 📁 Project Structure
-```
-htdocs/
-├── index.html              # Main product showcase
-├── product.html            # Product detail page
-├── admin/                  # Admin dashboard & login
-│   ├── assets/             # Admin-specific assets
-│   │   ├── css/            # Admin stylesheets
-│   │   ├── js/             # Admin JavaScript files
-│   │   │   └── components/ # Admin UI components
-│   │   └── lib/            # Admin-specific libraries
-│   ├── components/         # Admin PHP components
-│   ├── dashboard.php       # Main admin dashboard
-│   └── login.html          # Admin login page
-├── api/                    # PHP backend APIs
-├── assets/                 # Public site assets
-│   ├── css/                # Public stylesheets
-│   ├── js/                 # Public JavaScript files (ES6 Modules)
-│   │   ├── components/     # Modular UI components
-│   │   │   ├── ProductGrid.js        # Product listing component
-│   │   │   ├── MobileNavigation.js   # Mobile navigation component
-│   │   │   ├── ImageGallery.js       # Product image gallery
-│   │   │   ├── RelatedProducts.js    # Related products component
-│   │   │   └── ProductDetails.js     # Product detail component
-│   │   ├── utils/          # Utility functions and tools
-│   │   │   └── apiClient.js          # Centralized API client
-│   │   ├── lib/            # Public site libraries
-│   │   ├── script.js       # Main app entry point (homepage)
-│   │   └── product.js      # Product page entry point
-└── images/                 # Uploaded product images
-```
 
-## 📚 Libraries Policy
+## 📄 许可证
 
-- **Public Site Libraries**: `assets/js/lib/` stores JavaScript libraries for the public site.
-- **Admin Libraries**: `admin/assets/lib/` stores JavaScript libraries for the admin dashboard.
-- **Introduction Principle**: Prefer no new external libraries to keep the project lightweight.
-- **Exception (By Discussion)**: For complex UI components (e.g., data tables), after discussion, you may introduce a lightweight, dependency-free, pure JavaScript library (such as Grid.js) to enhance efficiency and robustness.
-- **Documentation**: Any introduced library must be recorded in the section below.
+本项目专为时尚工厂和制造商商业使用而设计。
 
-### Libraries Used
+## 🔀 变体（Variant）API 扩展
 
-- None at present. If a library is added (e.g., Grid.js for tables), list its name, version, source URL, and purpose here.
+为修复与增强后台“变体”查看/编辑能力，新增/完善以下接口与字段：
 
-## 🤝 Contributing
+- GET `/api/products.php?id={variant_id}`
+  - 新增返回字段：`siblings: Array<{ id, name, defaultImage, createdAt }>`（同一 `product_id` 下的所有变体，用于前/后台无二义地构建变体组）
 
-This project is a solid foundation. Areas for enhancement include:
-- Additional language support.
-- Advanced analytics features.
-- Integration with external client management systems.
+- GET `/api/products.php?product_id={product_id}`
+  - 返回该产品下的所有变体：`[{ id, name, defaultImage, createdAt }]`
 
-## 🆘 Support
+- POST `/api/products.php`（更新变体，传 `id` 即视为更新）
+  - 支持新字段：
+    - `default_image_path: string`（将已存在图片路径直接设为默认图，无需重新上传）
+    - `media_order: string[] | JSON`（对已存在的媒体按数组顺序重排 `sort_order`）
+    - `delete_media: string[] | JSON`（删除指定路径的媒体文件记录）
+  - 兼容原有上传：`media[]` 新增媒体，自动顺序写入 `sort_order`
 
-If you encounter issues:
-1.  Review the `COMMON ISSUES & SOLUTIONS` section in the `.cursorrules` file.
-2.  Double-check that all installation steps and permissions are correct.
-3.  Ensure your server environment meets the prerequisites.
+- POST `/api/products.php`（创建产品及变体）
+  - 批量创建：
+    - `variants_meta: JSON`，形如：`[{ index: 0, color: "Red" }, ...]`
+    - 为每个索引上传图片字段：`variant_media_{index}[]`
+  - 简单创建：
+    - `variants: string[] | JSON`（仅名称，无独立媒体上传）
+  - 单变体创建：
+    - 颜色通过 `color: string` 指定；`media[]` 图片
 
-## 📄 License
-
-This project is designed for commercial use by fashion factories and manufacturers.
-
-## 🧩 Variants & Color Swatches
-
-- Each color variant is stored as an independent row in `products` (no separate parent/child tables).
-- When creating a product from the admin panel, you can add multiple variants in the “颜色变体” section. For each variant:
-  - Specify a color name (e.g., Red/Blue/Black)
-  - Upload one or more images (they become the variant’s `media` and `defaultImage`)
-- The API `POST /api/products.php` accepts a batch-creation payload using:
-  - `variants_meta`: JSON string like `[{"index":0,"color":"Red"},{"index":1,"color":"Blue"}]`
-  - `variant_media_{index}[]`: Files for each variant (e.g., `variant_media_0[]`)
-- Frontend behaviors:
-  - Home grid: cards show mini color swatches; hovering/clicking switches the card preview image to that variant.
-  - Detail page: color swatches update the gallery and product info without page reload.
-
-## 🧪 Notes on Naming
-
-- To improve automatic grouping of variants, keep a stable base name for a style and put the color at the end, for example:
-  - `Blazer - Red`, `Blazer (Blue)`, or `Blazer | Black`.
-- The system infers the base name by removing trailing color markers `(...)`, `- Color`, or `| Color`.
+以上更改确保：
+- 后台编辑页可直接展示与切换同组变体；
+- 已保存媒体可设置默认图、支持删除与拖拽顺序（通过按钮“上移/下移”实现），更新统一走 POST；
+- 前台详情页优先使用后端 `siblings` 构建无二义的变体切换（回退到同分类聚合）。

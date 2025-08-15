@@ -13,4 +13,8 @@ define('ADMIN_PASSWORD_HASH', '$2y$10$bqXiQg5/wn0zYQ3z/ToAhuBAMXhXK/7Iqmp9PkjXSB
 
 // 目录配置
 define('UPLOAD_DIR', '../images/');
+// 上传允许的扩展名
+if (!defined('UPLOAD_ALLOWED_EXTS')) {
+    define('UPLOAD_ALLOWED_EXTS', ['jpg','jpeg','png','gif','webp']);
+}
 ?> 

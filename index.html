@@ -7,14 +7,26 @@
   <meta name="theme-color" content="#ffffff">
   <title>Moda Italiana</title>
   
-  <!-- Preload and asynchronously load CSS to not block rendering -->
-  <link rel="preload" href="assets/css/style.css?v=1.1" as="style">
-  <link rel="stylesheet" href="assets/css/style.css?v=1.1" media="print" onload="this.media='all'">
+  <!-- Open Graph & Twitter Cards -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Moda Italiana">
+  <meta property="og:description" content="Scopri la nostra collezione esclusiva di capi di moda premium. Curata per lo stile di vita moderno.">
+  <meta property="og:url" content="http://localhost/index.html">
+  <meta property="og:image" content="/images/media-689d16ccaa243-aaf7599b.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Moda Italiana">
+  <meta name="twitter:description" content="Scopri la nostra collezione esclusiva di capi di moda premium. Curata per lo stile di vita moderno.">
+  <meta name="twitter:image" content="/images/media-689d16ccaa243-aaf7599b.jpg">
+  
+  <!-- Preload CSS and swap to stylesheet on load to avoid render-blocking & duplicate fetch -->
+  <link rel="preload" href="assets/css/style.css?v=1.1" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="assets/css/style.css?v=1.1"></noscript>
 
   <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Preconnect to CDNJS for Font Awesome -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   
   <!-- Asynchronously load Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -22,11 +34,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   </noscript>
 
+  <!-- Canonical & Favicon (inline data URI to prevent favicon 404 locally) -->
+  <link rel="canonical" href="/index.html">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='Inter, Arial, sans-serif' font-size='14' fill='%23fff'%3EMI%3C/text%3E%3C/svg%3E">
+
+  <!-- Inline critical fixes: skip-link visibility and CLS guard for product images -->
+  <style>
+    .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+    .skip-link:focus { left: 8px; top: 8px; width: auto; height: auto; padding: 8px 12px; background: #000; color: #fff; z-index: 1000; border-radius: 6px; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 0); white-space: nowrap; border: 0; }
+    .product-grid img { aspect-ratio: 1 / 1; width: 100%; height: auto; object-fit: cover; }
+    /* Stabilize title area to avoid reflow when text loads */
+    #product-list h3 { min-height: 2.6rem; line-height: 1.3; }
+  </style>
+
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Salta al contenuto</a>
   <header class="main-header">
     <div class="container">
-      <a href="/" class="logo">Moda Italiana</a>
+      <a href="/" class="logo logo--columns" aria-label="Dream Moda">
+        <span class="logo__word">Dream</span>
+        <span class="logo__word">Moda</span>
+      </a>
       <button class="mobile-nav-toggle" aria-label="Attiva/disattiva navigazione" aria-expanded="false">☰</button>
       <nav class="main-nav">
         <!-- Le categorie verranno caricate dinamicamente qui -->
@@ -34,6 +64,33 @@
       </nav>
     </div>
   </header>
+  <main id="main-content">
+    <h1 class="visually-hidden">Moda Italiana - Collezione</h1>
+  
+  <section class="section section--filters">
+    <div class="container">
+      <div class="filters-bar" role="region" aria-label="Filtri prodotti">
+        <div class="filters-bar__search modern-search">
+          <label for="search-input" class="visually-hidden">Cerca prodotti</label>
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input id="search-input" type="search" placeholder="Cerca prodotti..." aria-label="Cerca prodotti">
+          <button id="search-clear" class="search-clear" type="button" aria-label="Pulisci" title="Pulisci">✕</button>
+        </div>
+        <div class="filters-bar__controls">
+          <label for="category-filter" class="visually-hidden">Categoria</label>
+          <select id="category-filter" aria-label="Filtra per categoria">
+            <option value="all">Tutte le categorie</option>
+          </select>
+          <label for="sort-filter" class="visually-hidden">Ordina</label>
+          <select id="sort-filter" aria-label="Ordina prodotti">
+            <option value="featured">In evidenza</option>
+            <option value="newest">Più recenti</option>
+          </select>
+          <button id="reset-filters" type="button" aria-label="Reimposta filtri">Reset</button>
+        </div>
+      </div>
+    </div>
+  </section>
   
   <section class="section" id="collection">
     <div class="container">
@@ -43,7 +100,7 @@
   </section>
 
   <section class="contact-section" id="contact">
-    <div class="container">
+    <div class="container" id="contact-us">
       <div class="contact-content">
         <h2>Contattaci</h2>
         <p>Se hai domande o proposte di collaborazione, saremo felici di ascoltarti.</p>
@@ -53,26 +110,35 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             </div>
             <h3>Indirizzo Email</h3>
-            <p>info@modaitaliana.com</p>
+            <p><a href="mailto:Hi@DreaModa.store" class="contact-email">Hi@DreaModa.store</a></p>
           </div>
           <div class="contact-info-item">
             <div class="contact-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
             </div>
             <h3>Telefono</h3>
-            <p>+39 02 1234 5678</p>
+            <p><a href="tel:+390212345678" class="contact-phone" data-phone="+39 02 1234 5678">+39 02 1234 5678</a></p>
           </div>
           <div class="contact-info-item">
             <div class="contact-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </div>
             <h3>Indirizzo</h3>
-            <p>Via della Moda, 123<br>20121 Milano, Italia</p>
+            <p>
+              <a href="https://www.google.com/maps/search/?api=1&query=Via%20della%20Moda%2C%20123%2C%2020121%20Milano%2C%20Italia"
+                 class="contact-address"
+                 data-address="Via della Moda, 123, 20121 Milano, Italia"
+                 target="_blank" rel="noopener">
+                Via della Moda, 123<br>20121 Milano, Italia
+              </a>
+            </p>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  </main>
 
   <footer class="footer">
     <div class="container">

@@ -6,54 +6,7 @@
         </button>
     </header>
     
-    <!-- Add/Edit Form Section (Initially Hidden) -->
-    <section id="product-form-section" class="form-section hidden">
-        <h3 id="form-title">添加新产品</h3>
-        <form id="product-form">
-            <input type="hidden" id="product-id" name="id">
-            <input type="hidden" id="variants-meta" name="variants_meta" value="">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="name">产品名称</label>
-                    <input type="text" id="name" name="name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="category">产品分类</label>
-                    <select id="category" name="category" class="form-control" required>
-                        <!-- Options will be populated by JS -->
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="description">产品描述</label>
-                <textarea id="description" name="description" rows="4" class="form-control" required placeholder="描述产品的特点、材质、设计理念等..."></textarea>
-            </div>
-            <div class="form-group">
-                <label for="media">产品媒体</label>
-                <div id="current-media-previews" class="media-previews"></div>
-                <input type="file" id="media" name="media[]" class="form-control-file" multiple accept="image/*">
-                <small class="form-text">支持多张图片上传，用于产品展示画廊</small>
-            </div>
-
-            <!-- Variants Builder -->
-            <div class="form-group">
-                <label>颜色变体</label>
-                <div id="variants-container" class="variants-container">
-                    <!-- 动态添加每个变体行 -->
-                </div>
-                <button type="button" id="add-variant-row" class="btn btn-secondary btn-sm" style="margin-top:8px;">+ 添加颜色变体</button>
-                <small class="form-text">每个变体会创建为独立产品记录。为每个变体设置颜色名称并上传对应图片。</small>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> 保存产品
-                </button>
-                <button type="button" id="cancel-edit-btn" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> 取消
-                </button>
-            </div>
-        </form>
-    </section>
+    <!-- 添加/编辑表单已迁移至 add_product.php 独立页面 -->
 
     <!-- Product List Section -->
     <section id="filters-section" class="product-list-section">
@@ -72,8 +25,6 @@
         <div id="bulk-actions-panel" class="bulk-actions-panel hidden">
             <span id="selection-count">已选择 0 个项目</span>
             <div class="bulk-actions-buttons">
-                <button id="bulk-archive-btn" class="btn bulk-archive-btn btn-sm"><i class="fas fa-archive"></i> 批量归档</button>
-                <button id="bulk-unarchive-btn" class="btn bulk-unarchive-btn btn-sm"><i class="fas fa-undo"></i> 批量恢复</button>
                 <button id="bulk-delete-btn" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> 批量删除</button>
             </div>
         </div>
@@ -114,8 +65,8 @@
                         <th><input type="checkbox" id="select-all-checkbox"></th>
                         <th>图片</th>
                         <th>产品名称</th>
+                        <th>颜色</th>
                         <th>分类</th>
-                        <th>变体</th>
                         <th>描述</th>
                         <th>创建日期</th>
                         <th class="sticky-right">操作</th>

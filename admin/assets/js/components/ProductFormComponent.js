@@ -19,7 +19,7 @@ export default class ProductFormComponent extends BaseComponent {
         this.variant_object_urls = new Map(); // 存储每个变体的URL引用
         this.category_select = this.element.querySelector('#category');
         this.material_select = this.element.querySelector('#material');
-        this.color_select = this.element.querySelector('#variant-name');
+        this.color_select = this.element.querySelector('#color');
         this.add_variant_btn = this.element.querySelector('#add-variant-row');
         this.variants_meta_input = this.element.querySelector('#variants-meta');
         
@@ -324,21 +324,17 @@ export default class ProductFormComponent extends BaseComponent {
     add_variant_row(auto_open = false) {
         const index = this.siblings_panel.querySelectorAll('.variant-row').length;
         const row = document.createElement('div');
-        row.className = 'variant-chip variant-row'; // Add variant-chip class
+        row.className = 'variant-chip variant-row';
         row.innerHTML = `
-            <div class="variant-fields" style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
-                <select class="form-control variant-color-select" name="variant_color[]" style="max-width:180px;min-width:160px;">
-                    <option value="">请选择颜色</option>
-                </select>
-            </div>
+            <button type="button" class="variants__remove" title="移除此变体" aria-label="移除">×</button>
             <div class="upload-dropzone variant-dropzone" role="button" tabindex="0" aria-label="添加颜色图片">
                 <label class="plus" style="cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;height:100%">+</label>
                 <input type="file" class="dropzone-input variant-file-input" name="variant_media_${index}[]" accept="image/*" multiple data-variant-index="${index}">
             </div>
-            <button type="button" class="btn btn-danger btn-sm remove-variant" title="删除">删除</button>
-            <div class="variant-media-previews" id="variant-preview-${index}">
-                <!-- 变体图片预览将显示在这里 -->
-            </div>
+            <div class="variant-media-previews" id="variant-preview-${index}"></div>
+            <select class="form-control variant-color-select" name="variant_color[]" style="max-width:180px;min-width:160px;">
+                <option value="">请选择颜色</option>
+            </select>
         `;
         // Insert new variant before the add-variant-row button
         this.siblings_panel.insertBefore(row, this.add_variant_btn);
@@ -356,7 +352,7 @@ export default class ProductFormComponent extends BaseComponent {
         });
         
         // 绑定事件
-        const remove_btn = row.querySelector('.remove-variant');
+        const remove_btn = row.querySelector('.variants__remove');
         const file_input = row.querySelector('.variant-file-input');
         const dropzone = row.querySelector('.variant-dropzone');
         
@@ -635,23 +631,42 @@ export default class ProductFormComponent extends BaseComponent {
 
         // Render existing sibling chips
         list.forEach(it => {
-            const active = String(it.id) === String(product.id) ? 'active' : '';
+            const is_active = String(it.id) === String(product.id);
             const img = it.defaultImage ? `../${it.defaultImage}` : 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><rect width="50" height="50" fill="#f1f5f9"/></svg>');
-            const chip = document.createElement('button');
-            chip.type = 'button';
-            chip.className = `variant-chip ${active}`;
-            chip.setAttribute('data-id', it.id);
-            chip.title = it.name;
-            chip.innerHTML = `<img src="${img}" alt="${it.name}" />`;
             
-            chip.addEventListener('click', () => {
-                const vid = chip.getAttribute('data-id');
+            // 创建与产品媒体预览相同的结构
+            const wrapper = document.createElement('div');
+            wrapper.className = `media-preview-item${is_active ? ' active' : ''}`;
+            wrapper.setAttribute('data-id', it.id);
+            wrapper.innerHTML = `
+                <img src="${img}" alt="${it.name}">
+                <button type="button" class="media-remove" aria-label="删除" data-id="${it.id}">×</button>
+            `;
+            
+            // 添加点击事件到整个容器
+            wrapper.addEventListener('click', (e) => {
+                // 如果点击的是删除按钮，不跳转
+                if (e.target.classList.contains('media-remove')) {
+                    return;
+                }
+                const vid = wrapper.getAttribute('data-id');
                 if (String(vid) !== String(product.id)) {
                     window.location.href = `add_product.php?id=${vid}`;
                 }
             });
+            
+            // 添加删除按钮事件
+            const removeBtn = wrapper.querySelector('.media-remove');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    // 这里可以添加删除同组颜色的逻辑
+                    this.eventBus.emit('toast:show', { message: '删除同组颜色功能待实现', type: 'info' });
+                });
+            }
+            
             // Insert existing sibling chips before the add-variant-row button
-            this.siblings_panel.insertBefore(chip, this.add_variant_btn);
+            this.siblings_panel.insertBefore(wrapper, this.add_variant_btn);
         });
     }
 

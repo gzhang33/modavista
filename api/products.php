@@ -39,6 +39,11 @@ switch ($method) {
 }
 
 $conn->close();
+function respond_error($http_status, $error_code, $message, $field = null) {
+    $payload = ['error' => ['code' => (string)$error_code, 'message' => (string)$message]];
+    if ($field !== null) { $payload['error']['field'] = (string)$field; }
+    json_response($http_status, $payload);
+}
 
 // === GET ===
 function handle_get($conn) {
@@ -380,6 +385,64 @@ function handle_post($conn) {
             $insert->close();
         }
 
+        // ====== 若在编辑模式下附带新增同组颜色（variants_meta），则为同一产品创建新变体 ======
+        $variants_meta_json = $_POST['variants_meta'] ?? null; // JSON: [{index:0,color:"Red"}, ...]
+        if ($variants_meta_json) {
+            // 查出当前变体所属的 product_id
+            $pid_stmt = $conn->prepare('SELECT product_id FROM product_variants WHERE id = ?');
+            if (!$pid_stmt) { $conn->rollback(); json_response(500, ['message' => '查询产品失败: ' . $conn->error]); }
+            $pid_stmt->bind_param('i', $variant_id);
+            if (!$pid_stmt->execute()) { $pid_stmt->close(); $conn->rollback(); json_response(500, ['message' => '查询产品失败: ' . $conn->error]); }
+            $pid_res = $pid_stmt->get_result();
+            $pid_row = $pid_res->fetch_assoc();
+            $pid_stmt->close();
+            if (!$pid_row || empty($pid_row['product_id'])) { $conn->rollback(); json_response(404, ['message' => '产品不存在']); }
+            $product_id_for_new = (int)$pid_row['product_id'];
+
+            // 解析材质（沿用提交的 material 名称）
+            $material_name_for_new = $_POST['material'] ?? null;
+            $material_id_for_new = null;
+            if ($material_name_for_new) {
+                $material_id_for_new = resolve_material_id($conn, $material_name_for_new);
+            }
+
+            $decoded_meta = json_decode($variants_meta_json, true);
+            if (is_array($decoded_meta) && !empty($decoded_meta)) {
+                foreach ($decoded_meta as $variant_meta) {
+                    $idx = isset($variant_meta['index']) ? (int)$variant_meta['index'] : null;
+                    $key = isset($variant_meta['key']) ? trim((string)$variant_meta['key']) : null;
+                    $color = isset($variant_meta['color']) ? trim($variant_meta['color']) : '';
+                    if ($color === '') {
+                        $conn->rollback();
+                        respond_error(400, 'VARIANT_COLOR_EMPTY', '颜色名称不能为空', $key !== null ? "variants_meta[$key].color" : "variants_meta[$idx].color");
+                    }
+
+                    $variant_color_id = resolve_color_id($conn, $color);
+                    $field = $key !== null && $key !== '' ? ('variant_media_' . $key) : ('variant_media_' . $idx);
+                    $upload = upload_media_for_field($field);
+                    $default_image_new = $upload['default'];
+
+                    $v_ins = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+                    if (!$v_ins) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建变体失败: ' . $conn->error); }
+                    $v_ins->bind_param('iiis', $product_id_for_new, $variant_color_id, $material_id_for_new, $default_image_new);
+                    if (!$v_ins->execute()) { $v_ins->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建变体失败: ' . $conn->error); }
+                    $new_variant_id = $v_ins->insert_id;
+                    $v_ins->close();
+
+                    if (!empty($upload['media'])) {
+                        $m_ins = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
+                        if (!$m_ins) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建媒体失败: ' . $conn->error); }
+                        foreach ($upload['media'] as $index => $path) {
+                            $sort = (int)$index;
+                            $m_ins->bind_param('isi', $new_variant_id, $path, $sort);
+                            if (!$m_ins->execute()) { $m_ins->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建媒体失败: ' . $conn->error, $field); }
+                        }
+                        $m_ins->close();
+                    }
+                }
+            }
+        }
+
         // 提交事务
         if (!$conn->commit()) {
             $conn->rollback();
@@ -465,34 +528,112 @@ function handle_post($conn) {
         }
     }
 
+    // —— 始终先创建主变体（使用主表单的 media[] 与 color） ——
+    $upload_main = upload_media_for_field('media');
+    $default_image_main = $upload_main['default'];
+    $color_main = $_POST['color'] ?? ($_POST['variant_name'] ?? '');
+    if (empty($color_main)) {
+        $conn->rollback();
+        json_response(400, ['message' => '颜色名称不能为空']);
+    }
+    $color_id_main = resolve_color_id($conn, $color_main);
+    $v_main = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+    if (!$v_main) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
+    $v_main->bind_param('iiis', $product_id, $color_id_main, $material_id, $default_image_main);
+    if (!$v_main->execute()) { $v_main->close(); $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
+    $main_variant_id = $v_main->insert_id;
+    $v_main->close();
+    if (!empty($upload_main['media'])) {
+        $m_main = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
+        if (!$m_main) { $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
+        foreach ($upload_main['media'] as $index => $path) {
+            $sort = (int)$index;
+            $m_main->bind_param('isi', $main_variant_id, $path, $sort);
+            if (!$m_main->execute()) { $m_main->close(); $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
+        }
+        $m_main->close();
+    }
+    $created_variant_ids[] = $main_variant_id;
+
+    // —— 再创建同组颜色（如有） ——
     if (!empty($variants_meta)) {
-        // 批量变体创建：字段名 variant_media_{index}[]
+        // 批量变体创建：支持 key 和 index 两种字段命名
         foreach ($variants_meta as $variant_meta) {
             $idx = isset($variant_meta['index']) ? (int)$variant_meta['index'] : null;
+            $key = isset($variant_meta['key']) ? trim((string)$variant_meta['key']) : null;
             $color = isset($variant_meta['color']) ? trim($variant_meta['color']) : '';
-            if (empty($color)) {
+            if ($color === '') {
                 $conn->rollback();
-                json_response(400, ['message' => '颜色名称不能为空']);
+                respond_error(400, 'VARIANT_COLOR_EMPTY', '颜色名称不能为空', $key !== null ? "variants_meta[$key].color" : "variants_meta[$idx].color");
             }
 
-            $field = 'variant_media_' . $idx;
+            // 针对该变体解析颜色 ID（独立于主颜色）
+            $variant_color_id = resolve_color_id($conn, $color);
+
+            // 根据 key 或 index 解析上传字段名
+            $field = $key !== null && $key !== '' ? ('variant_media_' . $key) : ('variant_media_' . $idx);
             $upload = upload_media_for_field($field);
             $default_image = $upload['default'];
 
+            // 读取客户端给的排序与默认：名称映射到保存路径
+            $provided_order = [];
+            $provided_default_name = null;
+            $order_field = $key !== null && $key !== '' ? ('variant_media_order_' . $key) : ('variant_media_order_' . $idx);
+            $default_field = $key !== null && $key !== '' ? ('variant_default_media_' . $key) : ('variant_default_media_' . $idx);
+            if (isset($_POST[$order_field])) {
+                if (is_string($_POST[$order_field])) {
+                    $decoded_order = json_decode($_POST[$order_field], true);
+                    if (is_array($decoded_order)) { $provided_order = $decoded_order; }
+                } elseif (is_array($_POST[$order_field])) {
+                    $provided_order = $_POST[$order_field];
+                }
+                // 仅保留字符串名称
+                $provided_order = array_values(array_filter(array_map('strval', $provided_order), function($v){ return $v !== ''; }));
+            }
+            if (isset($_POST[$default_field])) {
+                $provided_default_name = trim((string)$_POST[$default_field]);
+            }
+
             $v_stmt = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
-            if (!$v_stmt) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
-            $v_stmt->bind_param('iiis', $product_id, $color_id, $material_id, $default_image);
-            if (!$v_stmt->execute()) { $v_stmt->close(); $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
+            if (!$v_stmt) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建变体失败: ' . $conn->error); }
+            $v_stmt->bind_param('iiis', $product_id, $variant_color_id, $material_id, $default_image);
+            if (!$v_stmt->execute()) { $v_stmt->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建变体失败: ' . $conn->error); }
             $variant_id = $v_stmt->insert_id;
             $v_stmt->close();
 
             if (!empty($upload['media'])) {
+                // 如果前端提供顺序名称，则按名称映射保存路径并覆盖顺序
+                $ordered_paths = $upload['media'];
+                if (!empty($provided_order) && isset($upload['media_map']) && is_array($upload['media_map'])) {
+                    $ordered_paths = [];
+                    foreach ($provided_order as $name) {
+                        if (isset($upload['media_map'][$name])) {
+                            $ordered_paths[] = $upload['media_map'][$name];
+                        }
+                    }
+                    // 加入遗漏的
+                    foreach ($upload['media'] as $p) {
+                        if (!in_array($p, $ordered_paths, true)) { $ordered_paths[] = $p; }
+                    }
+                }
+
+                // 如果提供了默认名称，则覆盖默认图
+                if ($provided_default_name && isset($upload['media_map'][$provided_default_name])) {
+                    $default_image = $upload['media_map'][$provided_default_name];
+                    // 更新变体默认图
+                    $upd_def = $conn->prepare('UPDATE product_variants SET default_image = ? WHERE id = ?');
+                    if (!$upd_def) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '更新默认图失败: ' . $conn->error, $default_field); }
+                    $upd_def->bind_param('si', $default_image, $variant_id);
+                    if (!$upd_def->execute()) { $upd_def->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '更新默认图失败: ' . $conn->error, $default_field); }
+                    $upd_def->close();
+                }
+
                 $m_stmt = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
-                if (!$m_stmt) { $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
-                foreach ($upload['media'] as $index => $path) {
+                if (!$m_stmt) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建媒体失败: ' . $conn->error); }
+                foreach ($ordered_paths as $index => $path) {
                     $sort = (int)$index;
                     $m_stmt->bind_param('isi', $variant_id, $path, $sort);
-                    if (!$m_stmt->execute()) { $m_stmt->close(); $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
+                    if (!$m_stmt->execute()) { $m_stmt->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建媒体失败: ' . $conn->error, $field); }
                 }
                 $m_stmt->close();
             }
@@ -516,37 +657,6 @@ function handle_post($conn) {
             $created_variant_ids[] = $v_stmt->insert_id;
         }
         $v_stmt->close();
-    } else {
-        // 单变体创建（兼容旧表单：media[]）
-        $upload = upload_media_for_field('media');
-        $default_image = $upload['default'];
-        $color = $_POST['color'] ?? ($_POST['variant_name'] ?? '');
-        
-        if (empty($color)) {
-            $conn->rollback();
-            json_response(400, ['message' => '颜色名称不能为空']);
-        }
-
-        $color_id = resolve_color_id($conn, $color);
-        $v_stmt = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
-        if (!$v_stmt) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
-        $v_stmt->bind_param('iiis', $product_id, $color_id, $material_id, $default_image);
-        if (!$v_stmt->execute()) { $v_stmt->close(); $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
-        $variant_id = $v_stmt->insert_id;
-        $v_stmt->close();
-
-        if (!empty($upload['media'])) {
-            $m_stmt = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
-            if (!$m_stmt) { $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
-            foreach ($upload['media'] as $index => $path) {
-                $sort = (int)$index;
-                $m_stmt->bind_param('isi', $variant_id, $path, $sort);
-                if (!$m_stmt->execute()) { $m_stmt->close(); $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
-            }
-            $m_stmt->close();
-        }
-
-        $created_variant_ids[] = $variant_id;
     }
 
     // 提交事务
@@ -683,6 +793,7 @@ function resolve_color_id($conn, $color_name) {
 
 function upload_media_for_field($field) {
     $uploaded = [];
+    $name_to_path = [];
     if (isset($_FILES[$field]) && !empty($_FILES[$field]['name'][0])) {
         $files = $_FILES[$field];
         $count = count($files['name']);
@@ -706,7 +817,9 @@ function upload_media_for_field($field) {
             $unique = 'media-' . uniqid() . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
             $target = $dir . $unique;
             if (move_uploaded_file($tmp, $target)) {
-                $uploaded[] = 'images/' . $unique;
+                $db_path = 'images/' . $unique;
+                $uploaded[] = $db_path;
+                $name_to_path[$orig] = $db_path; // 用原始文件名做映射
             }
         }
         if ($finfo) { finfo_close($finfo); }
@@ -714,6 +827,7 @@ function upload_media_for_field($field) {
     return [
         'media' => $uploaded,
         'default' => $uploaded[0] ?? null,
+        'media_map' => $name_to_path,
     ];
 }
 

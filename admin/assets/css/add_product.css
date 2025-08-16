@@ -1,0 +1,218 @@
+/* add_product.php page styles */
+
+/* CSS Custom Properties for consistent sizing */
+:root {
+  --variants-size: 180px;
+  --variants-gap: 5px;
+  --variants-radius: 8px;
+  --variants-border: 1px solid #e5e7eb;
+  
+  /* 图片样式全局变量 */
+  --image-size: 180px;
+  --image-gap: 5px;
+  --image-radius: 8px;
+  --image-border: 1px solid #e5e7eb;
+  --image-object-fit: cover;
+  
+  /* 删除按钮样式全局变量 */
+  --remove-btn-size: 25px;
+  --remove-btn-bg: rgba(0,0,0,0.6);
+  --remove-btn-bg-hover: rgba(0,0,0,0.75);
+  --remove-btn-color: #fff;
+  --remove-btn-font-size: 12px;
+  --remove-btn-position: 4px;
+  
+  /* 激活状态样式 */
+  --active-shadow: 0 0 0 2px #667eea;
+}
+
+/* Upload dropzone */
+.upload-dropzone {
+	background: #f8fafc;
+	border: 2px dashed #cbd5e1;
+	border-radius: 8px;
+	color: #64748b;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	height: var(--variants-size);
+	justify-content: center;
+	position: relative;
+	transition: border-color 120ms ease, background 120ms ease;
+	width: var(--variants-size);
+}
+.upload-dropzone .plus { font-size: 28px; line-height: 1; user-select: none; }
+.upload-dropzone.dragover { background: #eef2ff; border-color: #667eea; }
+.upload-dropzone .dropzone-input { cursor: pointer; height: 100%; inset: 0; opacity: 0; position: absolute; width: 100%; }
+
+/* Media previews - ensure consistent sizing with higher specificity */
+#current-media-previews.media-previews { display: flex; flex-wrap: wrap; gap: var(--image-gap); }
+#current-media-previews .media-preview-item { position: relative; }
+#current-media-previews .media-preview-item img,
+.media-previews .media-preview-item img { 
+  width: var(--image-size) !important; 
+  height: var(--image-size) !important; 
+  object-fit: var(--image-object-fit); 
+  border-radius: var(--image-radius);
+  border: var(--image-border);
+}
+
+/* Media remove button - 使用全局变量 */
+.media-remove {
+  background: var(--remove-btn-bg);
+  border: none;
+  border-radius: 50%;
+  color: var(--remove-btn-color);
+  cursor: pointer;
+  font-size: var(--remove-btn-font-size);
+  height: var(--remove-btn-size);
+  line-height: var(--remove-btn-size);
+  position: absolute;
+  right: var(--remove-btn-position);
+  text-align: center;
+  top: var(--remove-btn-position);
+  width: var(--remove-btn-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.media-remove:hover {
+  background: var(--remove-btn-bg-hover);
+}
+
+/* Variants (BEM) */
+.variants { display: flex; flex-wrap: wrap; gap: var(--variants-gap); }
+.variants--compact { gap: var(--variants-gap); }
+.variants--adding .variants__dropzone--add { visibility: hidden; }
+.variants__chip { background: transparent; border: none; border-radius: var(--variants-radius); cursor: pointer; padding: 0; }
+.variants__chip img { 
+  border: var(--image-border); 
+  border-radius: var(--image-radius); 
+  display: block; 
+  height: var(--image-size); 
+  object-fit: var(--image-object-fit); 
+  width: var(--image-size); 
+}
+.variants__chip--active { box-shadow: var(--active-shadow); }
+.variants__row { align-items: center; background: #fff; border: var(--variants-border); border-radius: var(--variants-radius); display: flex; flex-direction: column; gap: 6px; padding: 12px; position: relative; }
+.variants__dropzone, .variants__dropzone--add { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: var(--variants-radius); color: #64748b; cursor: pointer; display: inline-flex; align-items: center; height: var(--variants-size); justify-content: center; position: relative; transition: border-color 120ms ease, background 120ms ease; width: var(--variants-size); }
+.variants__dropzone .plus, .variants__dropzone--add .plus { font-size: 28px; line-height: 1; user-select: none; }
+.variants__dropzone.dragover, .variants__dropzone--add.dragover { background: #eef2ff; border-color: #667eea; }
+.variants__color-select { max-width: 180px; width: 100%; }
+.variants__remove { 
+  background: var(--remove-btn-bg); 
+  border: none; 
+  border-radius: 50%; 
+  color: var(--remove-btn-color); 
+  cursor: pointer; 
+  font-size: var(--remove-btn-font-size); 
+  height: var(--remove-btn-size); 
+  line-height: var(--remove-btn-size); 
+  position: absolute; 
+  right: var(--remove-btn-position); 
+  text-align: center; 
+  top: var(--remove-btn-position); 
+  width: var(--remove-btn-size); 
+}
+.variant-row .variants__remove { 
+  right: var(--remove-btn-position); 
+  top: var(--remove-btn-position); 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 700; 
+}
+.variant-row .variants__remove:hover { 
+  background: var(--remove-btn-bg-hover); 
+}
+.variants__media { display: flex; flex-wrap: wrap; gap: 10px; }
+.variants__media img { 
+  border: var(--image-border); 
+  border-radius: var(--image-radius); 
+  height: var(--image-size); 
+  object-fit: var(--image-object-fit); 
+  width: var(--image-size); 
+}
+
+/* 确保同组颜色上传框与预览缩略图尺寸与产品媒体一致 - 使用全局变量 */
+#siblings-panel .variant-media-previews { display: flex; flex-wrap: wrap; gap: var(--image-gap); margin-top: 6px; }
+#siblings-panel .variant-media-previews .media-preview-item img,
+.variant-media-previews .media-preview-item img { 
+  width: var(--image-size) !important; 
+  height: var(--image-size) !important; 
+  object-fit: var(--image-object-fit); 
+  border-radius: var(--image-radius); 
+}
+#siblings-panel .variant-dropzone,
+.variant-dropzone { width: var(--image-size); height: var(--image-size); }
+
+/* 同组颜色预览项样式 - 使用全局变量 */
+#siblings-panel .media-preview-item {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+#siblings-panel .media-preview-item:hover {
+  transform: scale(1.05);
+}
+#siblings-panel .media-preview-item img {
+  width: var(--image-size) !important;
+  height: var(--image-size) !important;
+  object-fit: var(--image-object-fit);
+  border-radius: var(--image-radius);
+  border: var(--image-border);
+}
+/* 当前选中的同组颜色高亮 */
+#siblings-panel .media-preview-item[data-id].active img {
+  box-shadow: var(--active-shadow);
+}
+
+/* Backward compatibility for old classes used by JS */
+.variants-container .variant-chip img { 
+  border: var(--image-border); 
+  border-radius: var(--image-radius); 
+  height: var(--image-size); 
+  object-fit: var(--image-object-fit); 
+  width: var(--image-size); 
+}
+.variants-container .variant-chip { background: transparent; border: none; border-radius: var(--variants-radius); padding: 0; }
+.variant-row { background: #fff; border: var(--variants-border); border-radius: var(--variants-radius); margin-top: 10px; padding: 12px; }
+.add-variant-dropzone { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: var(--variants-radius); color: #64748b; cursor: pointer; display: inline-flex; align-items: center; height: var(--variants-size); justify-content: center; position: relative; transition: border-color 120ms ease, background 120ms ease; width: var(--variants-size); }
+.add-variant-dropzone .plus { font-size: 28px; line-height: 1; user-select: none; }
+.add-variant-dropzone.dragover { background: #eef2ff; border-color: #667eea; }
+.variant-chip.active { box-shadow: var(--active-shadow); }
+.variant-chip.variant-row { background: #fff; border: var(--variants-border); border-radius: var(--variants-radius); display: flex; flex-direction: column; gap: 4px; align-items: center; padding: 6px; position: relative; }
+.variant-chip.variant-row .remove-variant { 
+  background: var(--remove-btn-bg); 
+  border: none; 
+  border-radius: 50%; 
+  color: var(--remove-btn-color); 
+  cursor: pointer; 
+  font-size: var(--remove-btn-font-size); 
+  height: var(--remove-btn-size); 
+  line-height: var(--remove-btn-size); 
+  position: absolute; 
+  right: var(--remove-btn-position); 
+  text-align: center; 
+  top: var(--remove-btn-position); 
+  width: var(--remove-btn-size); 
+}
+.variant-chip.variant-row .variant-color-select { max-width: 180px; margin-top: 4px; width: 100%; }
+
+/* Upload progress */
+.upload-progress__bar { background: #e5e7eb; border-radius: 4px; height: 6px; overflow: hidden; }
+.upload-progress__bar-inner { background: #16a34a; height: 100%; transition: width .2s ease; width: 0; }
+.upload-progress__text { color: #6b7280; font-size: 12px; margin-top: 4px; }
+
+@media (max-width: 768px) {
+	.media-previews { justify-content: center; }
+	.media-previews img { height: 60px; width: 60px; }
+	.toast { left: 1rem; max-width: none; right: 1rem; transform: none; }
+}
+
+@media (max-width: 480px) {
+	.form-section { padding: 0.75rem; }
+}
+
+

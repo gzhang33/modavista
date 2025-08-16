@@ -1,0 +1,68 @@
+/* Styles specific to add_product.php */
+
+/* Upload dropzone */
+.upload-dropzone {
+	width: 80px;
+	height: 80px;
+	border: 2px dashed #cbd5e1;
+	border-radius: 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #64748b;
+	background: #f8fafc;
+	cursor: pointer;
+	position: relative;
+	transition: border-color 120ms ease, background 120ms ease;
+}
+.upload-dropzone .plus { font-size: 28px; line-height: 1; user-select: none; }
+.upload-dropzone.dragover { border-color: #667eea; background: #eef2ff; }
+.upload-dropzone .dropzone-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+/* Variants (BEM) */
+.variants { display: flex; flex-wrap: wrap; gap: var(--variants-gap); }
+.variants--compact { gap: var(--variants-gap); }
+.variants--adding .variants__dropzone--add { visibility: hidden; }
+.variants__chip { padding: 0; border: none; background: transparent; border-radius: var(--variants-radius); cursor: pointer; }
+.variants__chip img { width: var(--variants-size); height: var(--variants-size); object-fit: cover; border-radius: var(--variants-radius); border: var(--variants-border); display: block; }
+.variants__chip--active { box-shadow: 0 0 0 2px #667eea; }
+.variants__row { border: var(--variants-border); border-radius: var(--variants-radius); padding: 12px; background: #fff; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
+.variants__dropzone, .variants__dropzone--add { width: var(--variants-size); height: var(--variants-size); border: 2px dashed #cbd5e1; border-radius: var(--variants-radius); display: inline-flex; align-items: center; justify-content: center; color: #64748b; background: #f8fafc; cursor: pointer; position: relative; transition: border-color 120ms ease, background 120ms ease; }
+.variants__dropzone .plus, .variants__dropzone--add .plus { font-size: 28px; line-height: 1; user-select: none; }
+.variants__dropzone.dragover, .variants__dropzone--add.dragover { border-color: #667eea; background: #eef2ff; }
+.variants__color-select { width: 100%; max-width: 180px; }
+.variants__remove { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; }
+.variants__media { display: flex; flex-wrap: wrap; gap: 10px; }
+.variants__media img { width: var(--variants-size); height: var(--variants-size); object-fit: cover; border-radius: var(--variants-radius); border: var(--variants-border); }
+
+/* Backward compatibility for old classes used by JS */
+.variants-container .variant-chip img { width: var(--variants-size); height: var(--variants-size); object-fit: cover; border-radius: var(--variants-radius); border: var(--variants-border); }
+.variants-container .variant-chip { padding: 0; border: none; background: transparent; border-radius: var(--variants-radius); }
+.variant-row { border: var(--variants-border); border-radius: var(--variants-radius); padding: 12px; background: #fff; margin-top: 10px; }
+.add-variant-dropzone { width: var(--variants-size); height: var(--variants-size); border: 2px dashed #cbd5e1; border-radius: var(--variants-radius); display: inline-flex; align-items: center; justify-content: center; color: #64748b; background: #f8fafc; cursor: pointer; position: relative; transition: border-color 120ms ease, background 120ms ease; }
+.add-variant-dropzone .plus { font-size: 28px; line-height: 1; user-select: none; }
+.add-variant-dropzone.dragover { border-color: #667eea; background: #eef2ff; }
+.variant-chip.active { box-shadow: 0 0 0 2px #667eea; }
+.variant-chip.variant-row { border: var(--variants-border); border-radius: var(--variants-radius); padding: 6px; background: #fff; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+.variant-chip.variant-row .remove-variant { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; }
+.variant-chip.variant-row .variant-color-select { width: 100%; margin-top: 4px; max-width: 180px; }
+
+/* Upload progress */
+.upload-progress__bar { height: 6px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+.upload-progress__bar-inner { height: 100%; width: 0; background: #16a34a; transition: width .2s ease; }
+.upload-progress__text { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+img {
+  width: 79.9922px;
+  height: 79.9922px;
+}
+
+@media (max-width: 768px) {
+	.media-previews { justify-content: center; }
+	.media-previews img { width: 60px; height: 60px; }
+	.toast { left: 1rem; right: 1rem; transform: none; max-width: none; }
+}
+
+@media (max-width: 480px) {
+	.form-section { padding: 0.75rem; }
+}

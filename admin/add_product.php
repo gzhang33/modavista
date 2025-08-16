@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>添加新产品</title>
-    <link rel="stylesheet" href="assets/css/admin_style.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/add_product.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -23,7 +24,7 @@
             <h3 id="form-title" style="margin-top:0">添加新产品</h3>
             <form id="product-form">
                 <input type="hidden" id="product-id" name="id">
-                <input type="hidden" id="variants-meta" name="variants_meta" value="">
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="name">产品名称</label>
@@ -42,8 +43,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="variant-name">颜色</label>
-                        <select id="variant-name" name="color" class="form-control" required>
+                        <label for="color">颜色</label>
+                        <select id="color" name="color" class="form-control" required>
                             <option value="">请选择颜色</option>
                         </select>
                     </div>
@@ -64,10 +65,10 @@
                 </div>
                 <div class="form-group">
                     <label>同组颜色</label>
-                    <div id="siblings-panel" class="variants-container compact" style="display:flex;gap:6px;flex-wrap:wrap">
+                    <div id="siblings-panel" class="variants variants--compact" role="listbox" aria-label="同组颜色列表">
                         <!-- Existing sibling chips will be rendered here -->
-                        <div class="upload-dropzone add-variant-dropzone" id="add-variant-row" role="button" tabindex="0" aria-label="添加颜色">
-                            <span class="plus">+</span>
+                        <div class="variants__dropzone variants__dropzone--add" id="add-variant-row" role="button" tabindex="0" aria-label="添加颜色">
+                            <span class="plus" aria-hidden="true">+</span>
                         </div>
                     </div>
                     <small class="form-text">点击任一颜色卡片可快速切换到该颜色进行编辑。点击 [+] 添加新的颜色变体。</small>
@@ -75,6 +76,12 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> 保存产品</button>
                     <a href="dashboard.php" class="btn btn-secondary"><i class="fas fa-times"></i> 取消</a>
+                </div>
+                <div id="upload-progress" class="upload-progress" aria-live="polite" style="display:none;margin-top:8px">
+                    <div class="upload-progress__bar" style="height:6px;background:#e5e7eb;border-radius:4px;overflow:hidden">
+                        <div class="upload-progress__bar-inner" style="height:100%;width:0;background:#16a34a;transition:width .2s ease"></div>
+                    </div>
+                    <div class="upload-progress__text" style="font-size:12px;color:#6b7280;margin-top:4px">准备上传…</div>
                 </div>
             </form>
         </section>

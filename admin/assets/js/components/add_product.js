@@ -1,4 +1,4 @@
-// htdocs/admin/assets/js/components/ProductFormComponent.js
+// htdocs/admin/assets/js/components/add_product.js
 import BaseComponent from './BaseComponent.js';
 import apiClient from '/assets/js/utils/apiClient.js';
 import { handle_session_expired } from '../utils/session.js';
@@ -17,6 +17,7 @@ export default class ProductFormComponent extends BaseComponent {
         this.media_to_delete = new Set();
         this.object_urls = [];
         this.variant_object_urls = new Map(); // 存储每个变体的URL引用
+        this.main_dropzone_url = null; // 记录主上传框的临时 URL，便于替换与释放
         this.category_select = this.element.querySelector('#category');
         this.material_select = this.element.querySelector('#material');
         this.color_select = this.element.querySelector('#color');
@@ -400,7 +401,45 @@ export default class ProductFormComponent extends BaseComponent {
 
     handle_variant_media_change(event, variant_index) {
         const files = Array.from(event.target.files || []);
-        this.render_variant_media_previews(files, variant_index);
+        // 清除旧的变体预览与URL
+        this.clear_variant_preview_urls_by_index(variant_index);
+        const preview_container = document.getElementById(`variant-preview-${variant_index}`);
+        if (preview_container) {
+            preview_container.innerHTML = '';
+        }
+        // 将变体上传按钮与预览合并：在有文件时用首图填充上传框，点击可替换
+        const row = this.siblings_panel?.querySelector(`#variant-preview-${variant_index}`)?.closest('.variant-row');
+        if (row) {
+            const dropzone = row.querySelector('.variant-dropzone');
+            const file_input = row.querySelector('.variant-file-input');
+            if (dropzone && file_input) {
+                if (files.length > 0) {
+                    const url = files[0] ? URL.createObjectURL(files[0]) : '';
+                    dropzone.classList.add('has-preview');
+                    dropzone.style.backgroundImage = `url('${url}')`;
+                    dropzone.style.backgroundSize = 'cover';
+                    dropzone.style.backgroundPosition = 'center';
+                    const plus = dropzone.querySelector('.plus');
+                    if (plus) plus.style.visibility = 'hidden';
+                    // 预览模式下禁用覆盖全区域的 input，避免原生与自定义点击同时触发
+                    const overlay_input = dropzone.querySelector('.dropzone-input') || file_input;
+                    if (overlay_input) overlay_input.style.pointerEvents = 'none';
+                    // 点击预览替换文件
+                    const open_picker = () => file_input.click();
+                    dropzone.onclick = open_picker;
+                } else {
+                    // 无文件时恢复默认上传按钮
+                    dropzone.classList.remove('has-preview');
+                    dropzone.style.backgroundImage = '';
+                    const plus = dropzone.querySelector('.plus');
+                    if (plus) plus.style.visibility = '';
+                    // 恢复 input 的事件能力
+                    const overlay_input = dropzone.querySelector('.dropzone-input') || file_input;
+                    if (overlay_input) overlay_input.style.pointerEvents = '';
+                    dropzone.onclick = null;
+                }
+            }
+        }
     }
 
     render_variant_media_previews(files, variant_index) {
@@ -440,6 +479,18 @@ export default class ProductFormComponent extends BaseComponent {
         if (preview_container) {
             preview_container.innerHTML = '';
         }
+        // 同步恢复对应上传框的外观
+        const row = preview_container ? preview_container.closest('.variant-row') : null;
+        if (row) {
+            const dropzone = row.querySelector('.variant-dropzone');
+            if (dropzone) {
+                dropzone.classList.remove('has-preview');
+                dropzone.style.backgroundImage = '';
+                dropzone.onclick = null;
+                const plus = dropzone.querySelector('.plus');
+                if (plus) plus.style.visibility = '';
+            }
+        }
     }
 
     clear_all_variant_previews() {
@@ -455,6 +506,15 @@ export default class ProductFormComponent extends BaseComponent {
         const preview_containers = this.siblings_panel?.querySelectorAll('.variant-media-previews') || [];
         preview_containers.forEach(container => {
             container.innerHTML = '';
+        });
+        // 恢复所有变体上传框为默认外观
+        const dropzones = this.siblings_panel?.querySelectorAll('.variant-dropzone') || [];
+        dropzones.forEach(dropzone => {
+            dropzone.classList.remove('has-preview');
+            dropzone.style.backgroundImage = '';
+            dropzone.onclick = null;
+            const plus = dropzone.querySelector('.plus');
+            if (plus) plus.style.visibility = '';
         });
     }
 
@@ -562,7 +622,39 @@ export default class ProductFormComponent extends BaseComponent {
     // 处理文件选择并展示即时预览
     handle_media_change(event) {
         const files = Array.from(event.target.files || []);
-        this.render_selected_media_previews(files);
+        // 不再渲染额外“新选择的图片预览”，直接与上传按钮合并
+        this.clear_new_media_previews();
+        // 将主产品上传按钮与预览合并：在有文件时用首图填充上传框，点击可替换
+        if (this.media_dropzone) {
+            if (files.length > 0) {
+                // 释放旧 URL
+                if (this.main_dropzone_url) {
+                    try { URL.revokeObjectURL(this.main_dropzone_url); } catch (_) {}
+                    this.main_dropzone_url = null;
+                }
+                const url = files[0] ? URL.createObjectURL(files[0]) : '';
+                this.main_dropzone_url = url;
+                this.media_dropzone.classList.add('has-preview');
+                this.media_dropzone.style.backgroundImage = `url('${url}')`;
+                this.media_dropzone.style.backgroundSize = 'cover';
+                this.media_dropzone.style.backgroundPosition = 'center';
+                const plus = this.media_dropzone.querySelector('.plus');
+                if (plus) plus.style.visibility = 'hidden';
+                // 预览模式下禁用覆盖全区域的 input，避免原生与自定义点击同时触发
+                const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
+                if (overlay_input) overlay_input.style.pointerEvents = 'none';
+                const open_picker = () => this.media_input && this.media_input.click();
+                this.media_dropzone.onclick = open_picker;
+            } else {
+                this.media_dropzone.classList.remove('has-preview');
+                this.media_dropzone.style.backgroundImage = '';
+                const plus = this.media_dropzone.querySelector('.plus');
+                if (plus) plus.style.visibility = '';
+                const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
+                if (overlay_input) overlay_input.style.pointerEvents = '';
+                this.media_dropzone.onclick = null;
+            }
+        }
     }
 
     // 渲染新选择的图片预览（与已保存图片并列显示在其下方）
@@ -678,6 +770,14 @@ export default class ProductFormComponent extends BaseComponent {
         this.object_urls = [];
         if (this.new_media_previews) {
             this.new_media_previews.innerHTML = '';
+        }
+        // 恢复主上传框外观
+        if (this.media_dropzone) {
+            this.media_dropzone.classList.remove('has-preview');
+            this.media_dropzone.style.backgroundImage = '';
+            this.media_dropzone.onclick = null;
+            const plus = this.media_dropzone.querySelector('.plus');
+            if (plus) plus.style.visibility = '';
         }
     }
     

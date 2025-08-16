@@ -172,14 +172,7 @@ class ApiClient {
     return data;
   }
 
-  /**
-   * 获取分析数据
-   * @param {Object} params - { type: string }
-   * @returns {Promise<any>}
-   */
-  async getAnalytics(params = {}) {
-    return this.get('/analytics.php', params);
-  }
+
 
   /**
    * 创建新产品（管理员功能）

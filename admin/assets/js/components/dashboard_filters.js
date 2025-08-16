@@ -1,4 +1,4 @@
-// htdocs/admin/assets/js/components/AdvancedFilterComponent.js
+// htdocs/admin/assets/js/components/dashboard_filters.js
 import BaseComponent from './BaseComponent.js';
 import apiClient from '/assets/js/utils/apiClient.js';
 

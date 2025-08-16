@@ -1,4 +1,4 @@
-<section id="products-management-section" class="content-section" data-section="products">
+<section id="products-management-section">
     <header class="main-header">
         <h2><i class="fas fa-box"></i> 产品展示管理</h2>
         <button id="add-product-btn" class="btn btn-primary">

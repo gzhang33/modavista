@@ -44,6 +44,9 @@
 .upload-dropzone .plus { font-size: 28px; line-height: 1; user-select: none; }
 .upload-dropzone.dragover { background: #eef2ff; border-color: #667eea; }
 .upload-dropzone .dropzone-input { cursor: pointer; height: 100%; inset: 0; opacity: 0; position: absolute; width: 100%; }
+/* 当有预览时，使用背景图展示并隐藏加号 */
+.upload-dropzone.has-preview { border-style: solid; background-size: cover; background-position: center; color: transparent; }
+.upload-dropzone.has-preview .plus { visibility: hidden; }
 
 /* Media previews - ensure consistent sizing with higher specificity */
 #current-media-previews.media-previews { display: flex; flex-wrap: wrap; gap: var(--image-gap); }
@@ -146,6 +149,8 @@
 }
 #siblings-panel .variant-dropzone,
 .variant-dropzone { width: var(--image-size); height: var(--image-size); }
+/* 变体上传框在有预览时也改为背景图显示 */
+.variant-dropzone.has-preview { border-style: solid; background-size: cover; background-position: center; color: transparent; }
 
 /* 同组颜色预览项样式 - 使用全局变量 */
 #siblings-panel .media-preview-item {

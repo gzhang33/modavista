@@ -91,7 +91,7 @@
 
     <script type="module">
         import EventBus from './assets/js/EventBus.js';
-        import ProductFormComponent from './assets/js/components/ProductFormComponent.js';
+        import ProductFormComponent from './assets/js/components/add_product.js';
         import ToastComponent from './assets/js/components/ToastComponent.js';
         // 仅初始化表单与通知
         const eventBus = new EventBus();

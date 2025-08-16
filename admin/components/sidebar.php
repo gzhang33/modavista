@@ -4,7 +4,7 @@
         展示管理
     </h1>
     <nav class="sidebar-nav">
-        <a href="#products" id="current_products_nav" class="nav-item active" data-section="products">
+        <a href="#" id="current_products_nav" class="nav-item active">
             <i class="fas fa-box"></i>
             商品列表
         </a>

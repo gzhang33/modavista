@@ -1,4 +1,4 @@
-// htdocs/admin/assets/js/components/ProductTableComponent.js
+// htdocs/admin/assets/js/components/dashboard_products.js
 import BaseComponent from './BaseComponent.js';
 import apiClient from '/assets/js/utils/apiClient.js';
 import { get_base_name, extract_color_label, color_name_to_hex } from '/assets/js/utils/product_name_utils.js';
@@ -23,8 +23,6 @@ export default class ProductTableComponent extends BaseComponent {
         this.bulkActionsPanel = document.querySelector('#bulk-actions-panel');
         this.selectionCountSpan = document.querySelector('#selection-count');
         this.bulkDeleteBtn = document.querySelector('#bulk-delete-btn');
-        this.bulkArchiveBtn = document.querySelector('#bulk-archive-btn');
-        this.bulkUnarchiveBtn = document.querySelector('#bulk-unarchive-btn');
         
         this.api_url = '../api/products.php';
         this.all_products = [];
@@ -39,9 +37,7 @@ export default class ProductTableComponent extends BaseComponent {
 
     init_listeners() {
         this.eventBus.on('products:reload', () => {
-            const current_hash = window.location.hash;
-            const archived = current_hash === '#products-archived' ? 1 : 0;
-            this.load_products({ archived });
+            this.load_products({ archived: 0 });
         });
 
         this.eventBus.on('products:filter-changed', (filters) => {
@@ -52,20 +48,13 @@ export default class ProductTableComponent extends BaseComponent {
         this.selectAllCheckbox.addEventListener('change', () => this.handle_select_all());
         this.bulkDeleteBtn.addEventListener('click', () => this.handle_bulk_delete());
         
-        if (this.bulkArchiveBtn) {
-            this.bulkArchiveBtn.addEventListener('click', () => this.handle_bulk_archive('archive'));
-        }
-        if (this.bulkUnarchiveBtn) {
-            this.bulkUnarchiveBtn.addEventListener('click', () => this.handle_bulk_archive('unarchive'));
-        }
+
         
         // Listen for the custom event from main.js
         this.element.addEventListener('loadProducts', (e) => {
             this.load_products(e.detail);
         });
-        this.element.addEventListener('productsViewChanged', () => {
-            this.update_bulk_actions_panel();
-        });
+
     }
 
     async load_products(filters = { archived: 0 }) {
@@ -262,9 +251,6 @@ export default class ProductTableComponent extends BaseComponent {
     
     update_bulk_actions_panel() {
         const count = this.selected_product_ids.size;
-        // 隐藏归档相关按钮
-        if (this.bulkArchiveBtn) this.bulkArchiveBtn.classList.add('hidden');
-        if (this.bulkUnarchiveBtn) this.bulkUnarchiveBtn.classList.add('hidden');
 
         if (count > 0) {
             this.bulkActionsPanel.classList.remove('hidden');
@@ -301,7 +287,6 @@ export default class ProductTableComponent extends BaseComponent {
     }
 
     async bulk_delete_products(ids) {
-        const current_archived_status = window.location.hash === '#products-archived' ? 1 : 0;
         try {
             const result = await apiClient.request('/products.php', {
                 method: 'DELETE',
@@ -311,23 +296,13 @@ export default class ProductTableComponent extends BaseComponent {
             this.eventBus.emit('toast:show', { message: `成功删除 ${result.deleted_count || 0} 个产品`, type: 'success' });
             this.selected_product_ids.clear();
             this.update_bulk_actions_panel();
-            this.load_products({ archived: current_archived_status });
+            this.load_products({ archived: 0 });
         } catch (error) {
             this.eventBus.emit('toast:show', { message: `批量删除失败: ${error.message}`, type: 'error' });
         }
     }
     
-    handle_archive_filter_change() {
-        this.selected_product_ids.clear();
-        this.update_bulk_actions_panel();
-        this.load_products();
-    }
-    
-    handle_bulk_archive(action) { /* no-op after removing archive feature */ }
-    
-    get_filtered_ids_for_action(ids, action) { return []; }
-    
-    async bulk_archive_products(ids, action) { /* no-op */ }
+
     
     // 统一由 utils/session.js 处理
 }

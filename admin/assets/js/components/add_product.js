@@ -162,7 +162,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_categories(products) {
         let categories = [];
         try {
-            categories = await apiClient.getCategories();
+            // add_product 页面下拉统一显示中文
+            categories = await apiClient.getCategories('zh');
         } catch (error) {
             console.error('Failed to load categories:', error);
             categories = Array.isArray(products)
@@ -184,7 +185,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_materials(products) {
         let materials = [];
         try {
-            materials = await apiClient.getMaterials();
+            // add_product 页面下拉统一显示中文
+            materials = await apiClient.getMaterials('zh');
         } catch (error) {
             console.error('Failed to load materials:', error);
             materials = Array.isArray(products)
@@ -196,8 +198,8 @@ export default class ProductFormComponent extends BaseComponent {
         this.material_select.innerHTML = '<option value="">请选择材质</option>';
         materials.forEach(material => {
             const option = document.createElement('option');
-            option.value = material;
-            option.textContent = material;
+            option.value = material.name_en; // 使用英文名作为值
+            option.textContent = material.name; // 使用本地化名称作为显示文本
             this.material_select.appendChild(option);
         });
         this.material_select.value = current_val;
@@ -206,7 +208,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_colors(products) {
         let colors = [];
         try {
-            colors = await apiClient.getColors();
+            const lang = 'zh';
+            colors = await apiClient.getColors(lang);
         } catch (error) {
             console.error('Failed to load colors:', error);
             colors = Array.isArray(products)
@@ -218,25 +221,28 @@ export default class ProductFormComponent extends BaseComponent {
             this.color_select.innerHTML = '<option value="">请选择颜色</option>';
             colors.forEach(color => {
                 const option = document.createElement('option');
-                option.value = color.name || color; // 兼容字符串数组回退
+                const value_en = (color && color.names && color.names.en) ? color.names.en : (color.name || color);
+                option.value = value_en;
                 option.textContent = color.name || color;
                 this.color_select.appendChild(option);
             });
             this.color_select.value = current_val;
         }
         // 更新所有变体行的颜色选项
-        this.update_all_variant_color_options(colors.map(c => (typeof c === 'string' ? { name: c } : c)));
+        this.update_all_variant_color_options(colors.map(c => (typeof c === 'string' ? { name: c, names: { en: c, zh: c, it: c } } : c)));
     }
     
     async populate_variant_color_options(row) {
         try {
-            const colors = await apiClient.getColors();
+            const lang = 'zh';
+            const colors = await apiClient.getColors(lang);
             const color_select = row.querySelector('.variant-color-select');
             if (color_select) {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
                 colors.forEach(color => {
                     const option = document.createElement('option');
-                    option.value = color.name;
+                    const value_en = color?.names?.en || color.name;
+                    option.value = value_en;
                     option.textContent = color.name;
                     color_select.appendChild(option);
                 });
@@ -255,7 +261,8 @@ export default class ProductFormComponent extends BaseComponent {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
                 colors.forEach(color => {
                     const option = document.createElement('option');
-                    option.value = color.name;
+                    const value_en = color?.names?.en || color.name;
+                    option.value = value_en;
                     option.textContent = color.name;
                     color_select.appendChild(option);
                 });
@@ -308,9 +315,9 @@ export default class ProductFormComponent extends BaseComponent {
 
             this.hide_form();
             this.eventBus.emit('toast:show', { message: product_id ? '产品更新成功！' : '产品添加成功！', type: 'success' });
-            // 在独立页面完成后自动返回列表
+            // 在独立页面完成后自动返回列表（新增与编辑页面都返回列表）
             const path = (window && window.location && window.location.pathname) ? window.location.pathname : '';
-            if (path.indexOf('/admin/add_product.php') !== -1) {
+            if (path.indexOf('/admin/add_product.php') !== -1 || path.indexOf('/admin/edit_product.php') !== -1) {
                 setTimeout(() => { window.location.href = 'dashboard.php#products'; }, 600);
                 return;
             }
@@ -556,7 +563,7 @@ export default class ProductFormComponent extends BaseComponent {
                     wrapper.setAttribute('data-path', m);
                     wrapper.setAttribute('draggable', 'true');
                     wrapper.innerHTML = `
-                        <img src="../${m}" alt="media">
+                        <img src="${m && m.startsWith('/') ? m : ('/' + m)}" alt="media">
                         <button type="button" class="media-remove" aria-label="删除" data-path="${m}">×</button>
                     `;
                     fragment.appendChild(wrapper);
@@ -724,7 +731,7 @@ export default class ProductFormComponent extends BaseComponent {
         // Render existing sibling chips
         list.forEach(it => {
             const is_active = String(it.id) === String(product.id);
-            const img = it.defaultImage ? `../${it.defaultImage}` : 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><rect width="50" height="50" fill="#f1f5f9"/></svg>');
+            const img = it.defaultImage ? (it.defaultImage.startsWith('/') ? it.defaultImage : `/${it.defaultImage}`) : 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><rect width="50" height="50" fill="#f1f5f9"/></svg>');
             
             // 创建与产品媒体预览相同的结构
             const wrapper = document.createElement('div');
@@ -743,7 +750,7 @@ export default class ProductFormComponent extends BaseComponent {
                 }
                 const vid = wrapper.getAttribute('data-id');
                 if (String(vid) !== String(product.id)) {
-                    window.location.href = `add_product.php?id=${vid}`;
+                    window.location.href = `edit_product.php?id=${vid}`;
                 }
             });
             
@@ -789,7 +796,10 @@ ProductFormComponent.prototype.setup_dropzone = function(dropzone, file_input, o
     // 简单的防抖，避免同一次交互触发两次文件选择
     let last_open_ts = 0;
     const open_picker = (e) => { 
-        // 不阻止默认点击，避免某些浏览器阻断文件选择器弹出
+        // 当处于预览模式时，避免与“预览点击替换”的自定义处理重复触发
+        if (dropzone.classList.contains('has-preview')) {
+            return;
+        }
         const now = Date.now();
         if (now - last_open_ts < 300) return;
         // 若点击来源是嵌套的 <input type="file">，不再重复触发

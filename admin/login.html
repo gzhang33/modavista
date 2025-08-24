@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="login-container">
-        <form id="login-form" class="login-form">
+        <form id="login-form" class="login-form" autocomplete="off">
             <div style="text-align: center; margin-bottom: 2rem;">
                 <i class="fas fa-store" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
                 <h2>展示管理系统</h2>
@@ -25,7 +25,7 @@
                 <label for="password">
                     <i class="fas fa-lock"></i> 密码
                 </label>
-                <input type="password" id="password" name="password" required value="admin123" placeholder="请输入密码">
+                <input type="password" id="password" name="password" required autocomplete="off" placeholder="请输入密码">
             </div>
             <button type="submit" class="btn btn-primary" id="login-button">
                 <i class="fas fa-sign-in-alt"></i> <span>登录系统</span>

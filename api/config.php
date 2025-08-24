@@ -11,10 +11,10 @@ define('DB_NAME', 'products');
 // 默认密码是: admin
 define('ADMIN_PASSWORD_HASH', '$2y$10$bqXiQg5/wn0zYQ3z/ToAhuBAMXhXK/7Iqmp9PkjXSBBOMeBZevYEy');
 
-// 目录配置
-define('UPLOAD_DIR', '../images/');
+// 上传目录配置
+define('UPLOAD_DIR', dirname(__DIR__) . '/images/');
 // 上传允许的扩展名
 if (!defined('UPLOAD_ALLOWED_EXTS')) {
     define('UPLOAD_ALLOWED_EXTS', ['jpg','jpeg','png','gif','webp']);
 }
-?> 
+?>

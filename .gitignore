@@ -73,21 +73,7 @@ phpMyAdmin/
 .cursorignore
 
 
-# WordPress (installed locally under /wp)
-wp/
-wp-admin/
-wp-includes/
-wp-content/
-wp-config.php
-
-# WordPress caches and generated files (in case wp-content is partially tracked)
-wp-content/uploads/
-wp-content/cache/
-wp-content/litespeed/
-wp-content/upgrade/
-wp-content/debug.log
-
-# phpMyAdmin (already covered, keep explicit)
+# phpMyAdmin
 phpMyAdmin/
 
 # Images and media uploads (keep repo slim). Track a placeholder if needed.

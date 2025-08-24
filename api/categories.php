@@ -36,19 +36,38 @@ switch ($method) {
 $conn->close();
 
 function get_categories($conn) {
-    // 新结构：直接读取 categories 表
-    $sql = 'SELECT id, category_name FROM categories ORDER BY category_name ASC';
+    // 语言参数处理：支持所有欧洲语言
+    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
+    $valid_languages = ['en', 'it', 'fr', 'de', 'es', 'pt', 'nl', 'pl'];
+    if (!in_array($lang, $valid_languages, true)) { $lang = 'en'; }
+
+    // 构建动态SQL查询以支持所有语言字段
+    // 根据实际数据库结构构建查询
+    $sql = 'SELECT id, category_name_en, category_name_zh, category_name_it FROM categories ORDER BY category_name_en ASC';
+    
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
+    
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
+    
     $result = $stmt->get_result();
     $categories = [];
     while ($row = $result->fetch_assoc()) {
-        $categories[] = $row['category_name'];
+        $name_en = $row['category_name_en'];
+        $localized_name = $name_en; // 默认使用英文
+        
+        // 根据语言选择本地化名称
+        if ($lang === 'zh' && !empty($row['category_name_zh'])) {
+            $localized_name = $row['category_name_zh'];
+        } elseif ($lang === 'it' && !empty($row['category_name_it'])) {
+            $localized_name = $row['category_name_it'];
+        }
+        
+        $categories[] = $localized_name;
     }
     $stmt->close();
     json_response(200, $categories);
@@ -56,7 +75,9 @@ function get_categories($conn) {
 
 function add_category($conn) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $name = $data['name'] ?? null;
+    $name = $data['name'] ?? null; // 英文
+    $name_zh = $data['name_zh'] ?? null;
+    $name_it = $data['name_it'] ?? null;
 
     if (empty($name)) {
         json_response(400, ['message' => '分类名称不能为空']);
@@ -73,11 +94,11 @@ function add_category($conn) {
     }
     $check->close();
 
-    $ins = $conn->prepare('INSERT INTO categories (category_name) VALUES (?)');
+    $ins = $conn->prepare('INSERT INTO categories (category_name, category_name_zh, category_name_it) VALUES (?, ?, ?)');
     if ($ins === false) {
         json_response(500, ['message' => '创建分类失败: ' . $conn->error]);
     }
-    $ins->bind_param('s', $name);
+    $ins->bind_param('sss', $name, $name_zh, $name_it);
     $ins->execute();
     $id = $ins->insert_id;
     $ins->close();

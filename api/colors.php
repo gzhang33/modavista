@@ -36,21 +36,40 @@ switch ($method) {
 $conn->close();
 
 function get_colors($conn) {
-    $sql = 'SELECT id, color_name, color_code FROM colors ORDER BY color_name ASC';
+    // 语言参数：en | zh | it，默认 en
+    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
+    if (!in_array($lang, ['en', 'zh', 'it'], true)) { $lang = 'en'; }
+
+    // 选择排序列，避免 NULL 导致排序异常，优先使用对应语言名，否则回退英文
+    $sql = 'SELECT id, color_name, color_name_zh, color_name_it, color_code FROM colors ORDER BY 
+            CASE WHEN (? = "zh") THEN COALESCE(color_name_zh, color_name)
+                 WHEN (? = "it") THEN COALESCE(color_name_it, color_name)
+                 ELSE color_name END ASC';
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
+    $stmt->bind_param('ss', $lang, $lang);
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
     $result = $stmt->get_result();
     $colors = [];
     while ($row = $result->fetch_assoc()) {
+        // 组装多语言
+        $name_en = $row['color_name'];
+        $name_zh = $row['color_name_zh'] ?? null;
+        $name_it = $row['color_name_it'] ?? null;
+        $name = $lang === 'zh' ? ($name_zh ?: $name_en) : ($lang === 'it' ? ($name_it ?: $name_en) : $name_en);
         $colors[] = [
             'id' => (int)$row['id'],
-            'name' => $row['color_name'],
-            'code' => $row['color_code']
+            'name' => $name,
+            'code' => $row['color_code'],
+            'names' => [
+                'en' => $name_en,
+                'zh' => $name_zh ?: $name_en,
+                'it' => $name_it ?: $name_en,
+            ],
         ];
     }
     $stmt->close();
@@ -59,7 +78,9 @@ function get_colors($conn) {
 
 function add_color($conn) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $name = $data['name'] ?? null;
+    $name = $data['name'] ?? null; // 英文名（兼容原接口）
+    $name_zh = $data['name_zh'] ?? null;
+    $name_it = $data['name_it'] ?? null;
     $code = $data['code'] ?? null;
 
     if (empty($name)) {
@@ -77,11 +98,12 @@ function add_color($conn) {
     }
     $check->close();
 
-    $ins = $conn->prepare('INSERT INTO colors (color_name, color_code) VALUES (?, ?)');
+    // 支持多语言字段的插入（列可能在迁移前不存在，若不存在会报错，需先执行迁移脚本）
+    $ins = $conn->prepare('INSERT INTO colors (color_name, color_name_zh, color_name_it, color_code) VALUES (?, ?, ?, ?)');
     if ($ins === false) {
         json_response(500, ['message' => '创建颜色失败: ' . $conn->error]);
     }
-    $ins->bind_param('ss', $name, $code);
+    $ins->bind_param('ssss', $name, $name_zh, $name_it, $code);
     $ins->execute();
     $id = $ins->insert_id;
     $ins->close();

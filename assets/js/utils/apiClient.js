@@ -1,35 +1,58 @@
 /**
  * API 客户端工具类
  * 提供统一的 API 请求接口，用于处理所有后端数据交互
+ * 集成缓存和性能优化功能
  */
+
+// 导入性能工具
+import { cacheManager, performanceTracker } from './performance_utils.js';
+
 class ApiClient {
   constructor() {
     this.baseUrl = '/api';
     this.defaultHeaders = { };
     this.timeout = 15000;
-    this._categories_cache = null;
-    this._categories_cache_at = 0;
-    this._cache_ttl_ms = 5 * 60 * 1000;
+    this.enableCache = true;
+    this.defaultCacheTTL = 5 * 60 * 1000; // 5分钟
   }
 
   /**
-   * 发送 HTTP 请求的基础方法
+   * 发送 HTTP 请求的基础方法（集成缓存）
    * @param {string} endpoint - API 端点
    * @param {Object} options - 请求选项
+   * @param {number} cacheTTL - 缓存时间（毫秒）
    * @returns {Promise<any>} API 响应数据
    */
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, cacheTTL = null) {
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
       headers: { ...this.defaultHeaders, ...options.headers },
+      credentials: 'same-origin',
       ...options
     };
+
+    // 对GET请求启用缓存
+    if (this.enableCache && (!options.method || options.method === 'GET') && cacheTTL !== 0) {
+      try {
+        return await cacheManager.cachedFetch(url, config, cacheTTL || this.defaultCacheTTL);
+      } catch (error) {
+        console.error(`Cached request failed for ${endpoint}:`, error);
+        throw error;
+      }
+    }
+
+    // 性能监控
+    const markName = `api-${endpoint.replace(/[^\w]/g, '-')}`;
+    performanceTracker.mark(`${markName}-start`);
 
     try {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), this.timeout);
       const response = await fetch(url, { ...config, signal: controller.signal });
       clearTimeout(id);
+      
+      performanceTracker.mark(`${markName}-end`);
+      performanceTracker.measure(markName, `${markName}-start`, `${markName}-end`);
       
       if (!response.ok) {
         const message = response.status === 401 ? '未授权或会话已过期'
@@ -59,16 +82,17 @@ class ApiClient {
    * GET 请求
    * @param {string} endpoint - API 端点
    * @param {Object} params - 查询参数
+   * @param {number} cacheTTL - 缓存时间（毫秒）
    * @returns {Promise<any>} API 响应数据
    */
-  async get(endpoint, params = {}) {
+  async get(endpoint, params = {}, cacheTTL = null) {
     const searchParams = new URLSearchParams(params);
     const url = searchParams.toString() ? `${endpoint}?${searchParams}` : endpoint;
-    return this.request(url, { method: 'GET' });
+    return this.request(url, { method: 'GET' }, cacheTTL);
   }
 
   /**
-   * POST 请求
+   * POST 请求（禁用缓存）
    * @param {string} endpoint - API 端点
    * @param {any} data - 请求数据
    * @returns {Promise<any>} API 响应数据
@@ -81,11 +105,11 @@ class ApiClient {
       options.body = JSON.stringify(data);
       options.headers = { 'Content-Type': 'application/json' };
     }
-    return this.request(endpoint, options);
+    return this.request(endpoint, options, 0); // 禁用缓存
   }
 
   /**
-   * PUT 请求
+   * PUT 请求（禁用缓存）
    * @param {string} endpoint - API 端点
    * @param {any} data - 请求数据
    * @returns {Promise<any>} API 响应数据
@@ -95,16 +119,16 @@ class ApiClient {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
-    });
+    }, 0); // 禁用缓存
   }
 
   /**
-   * DELETE 请求
+   * DELETE 请求（禁用缓存）
    * @param {string} endpoint - API 端点
    * @returns {Promise<any>} API 响应数据
    */
   async delete(endpoint) {
-    return this.request(endpoint, { method: 'DELETE' });
+    return this.request(endpoint, { method: 'DELETE' }, 0); // 禁用缓存
   }
 
   // === 产品相关的 API 方法 ===
@@ -112,10 +136,11 @@ class ApiClient {
   /**
    * 获取所有产品
    * @param {Object} filters - 过滤条件
+   * @param {string} lang - 语言代码
    * @returns {Promise<Array>} 产品列表
    */
-  async getProducts(filters = {}) {
-    return this.get('/products.php', filters);
+  async getProducts(filters = {}, lang = 'en') {
+    return this.get('/products.php', { ...filters, lang });
   }
 
   /**
@@ -138,28 +163,20 @@ class ApiClient {
   }
 
   /**
-   * 获取所有产品分类
+   * 获取所有产品分类（使用长期缓存）
    * @returns {Promise<Array>} 分类列表
    */
-  async getCategories() {
-    const now = Date.now();
-    if (this._categories_cache && (now - this._categories_cache_at) < this._cache_ttl_ms) {
-      return this._categories_cache;
-    }
-    const data = await this.get('/categories.php');
-    if (Array.isArray(data)) {
-      this._categories_cache = data;
-      this._categories_cache_at = now;
-    }
-    return data;
+  async getCategories(lang = 'en') {
+    // 分类数据相对稳定，使用15分钟缓存
+    return this.get('/categories.php', { lang }, 15 * 60 * 1000);
   }
 
   /**
    * 获取所有材质
    * @returns {Promise<Array>} 材质列表
    */
-  async getMaterials() {
-    const data = await this.get('/materials.php');
+  async getMaterials(lang = 'en') {
+    const data = await this.get('/materials.php', { lang });
     return data;
   }
 
@@ -167,8 +184,8 @@ class ApiClient {
    * 获取所有颜色
    * @returns {Promise<Array>} 颜色列表
    */
-  async getColors() {
-    const data = await this.get('/colors.php');
+  async getColors(lang = 'en') {
+    const data = await this.get('/colors.php', { lang });
     return data;
   }
 

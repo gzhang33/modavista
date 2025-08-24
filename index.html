@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Scopri la nostra collezione esclusiva di capi di moda premium. Curata per lo stile di vita moderno.">
+  <meta name="description" content="Discover our exclusive fashion collection with premium quality materials" data-translate="site_description">
   <meta name="theme-color" content="#ffffff">
-  <title>Moda Italiana</title>
+  <title data-translate="site_title">Fashion Collection</title>
   
   <!-- Open Graph & Twitter Cards -->
   <meta property="og:type" content="website">
@@ -20,7 +20,11 @@
   
   <!-- Preload CSS and swap to stylesheet on load to avoid render-blocking & duplicate fetch -->
   <link rel="preload" href="assets/css/style.css?v=1.1" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="assets/css/style.css?v=1.1"></noscript>
+  <link rel="preload" href="assets/css/language-switcher.css?v=1.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="assets/css/style.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/language-switcher.css?v=1.0">
+  </noscript>
 
   <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,7 +47,7 @@
     .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
     .skip-link:focus { left: 8px; top: 8px; width: auto; height: auto; padding: 8px 12px; background: #000; color: #fff; z-index: 1000; border-radius: 6px; }
     .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 0); white-space: nowrap; border: 0; }
-    .product-grid img { aspect-ratio: 1 / 1; width: 100%; height: auto; object-fit: cover; }
+    .product-grid img { aspect-ratio: 1 / 1; width: 100%; height: auto; object-fit: contain; }
     /* Stabilize title area to avoid reflow when text loads */
     #product-list h3 { min-height: 2.6rem; line-height: 1.3; }
   </style>
@@ -57,40 +61,20 @@
         <span class="logo__word">Dream</span>
         <span class="logo__word">Moda</span>
       </a>
-      <button class="mobile-nav-toggle" aria-label="Attiva/disattiva navigazione" aria-expanded="false">☰</button>
+      <div class="header-controls">
+        <div id="language-switcher-container"></div>
+        <button class="mobile-nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+      </div>
       <nav class="main-nav">
-        <!-- Le categorie verranno caricate dinamicamente qui -->
+        <!-- Categories will be loaded dynamically here -->
         <ul></ul>
       </nav>
     </div>
   </header>
   <main id="main-content">
-    <h1 class="visually-hidden">Moda Italiana - Collezione</h1>
+    <h1 class="visually-hidden" data-translate="site_title">Fashion Collection</h1>
   
-  <section class="section section--filters">
-    <div class="container">
-      <div class="filters-bar" role="region" aria-label="Filtri prodotti">
-        <div class="filters-bar__search modern-search">
-          <label for="search-input" class="visually-hidden">Cerca prodotti</label>
-          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input id="search-input" type="search" placeholder="Cerca prodotti..." aria-label="Cerca prodotti">
-          <button id="search-clear" class="search-clear" type="button" aria-label="Pulisci" title="Pulisci">✕</button>
-        </div>
-        <div class="filters-bar__controls">
-          <label for="category-filter" class="visually-hidden">Categoria</label>
-          <select id="category-filter" aria-label="Filtra per categoria">
-            <option value="all">Tutte le categorie</option>
-          </select>
-          <label for="sort-filter" class="visually-hidden">Ordina</label>
-          <select id="sort-filter" aria-label="Ordina prodotti">
-            <option value="featured">In evidenza</option>
-            <option value="newest">Più recenti</option>
-          </select>
-          <button id="reset-filters" type="button" aria-label="Reimposta filtri">Reset</button>
-        </div>
-      </div>
-    </div>
-  </section>
+
   
   <section class="section" id="collection">
     <div class="container">
@@ -102,8 +86,8 @@
   <section class="contact-section" id="contact">
     <div class="container" id="contact-us">
       <div class="contact-content">
-        <h2>Contattaci</h2>
-        <p>Se hai domande o proposte di collaborazione, saremo felici di ascoltarti.</p>
+        <h2 data-translate="nav_contact">Contact</h2>
+        <p data-translate="contact_description">If you have questions or collaboration proposals, we would be happy to hear from you.</p>
         <div class="contact-info-grid">
           <div class="contact-info-item">
             <div class="contact-icon">
@@ -186,7 +170,7 @@
   <script src="assets/js/lib/init.js?v=2.0" defer></script>
   
   <!-- Load main application script as ES6 module -->
-  <script type="module" src="assets/js/script.js?v=2.0"></script>
+  <script type="module" src="assets/js/script.js?v=2.1&t=1755984000000"></script>
 
 </body>
 </html>

@@ -9,15 +9,13 @@ export class ProductGrid {
     this.products = [];
     this.filteredProducts = [];
     this.loading = true;
-    this.currentCategory = 'all';
+    this.currentLanguage = 'en';
 
-    this.categoryFilter = document.getElementById('category-filter');
-    this.sortFilter = document.getElementById('sort-filter');
-    this.resetBtn = document.getElementById('reset-filters');
-    this.searchInput = document.getElementById('search-input');
-    this.searchClearBtn = document.getElementById('search-clear');
+    this.searchInput = null; // 搜索功能已移除
+    this.searchClearBtn = null; // 搜索功能已移除
     
     this.init();
+    this.setupLanguageListener();
   }
 
   async init() {
@@ -29,14 +27,6 @@ export class ProductGrid {
     this.setupDynamicContent();
     this.handleInitialRoute();
     this.setupBrowserNavigation();
-
-    if (this.categoryFilter && this.sortFilter && this.resetBtn) {
-      this.setupFilters();
-    }
-
-    if (this.searchInput) {
-      this.setupSearch();
-    }
   }
 
   /**
@@ -44,7 +34,7 @@ export class ProductGrid {
    */
   async loadProducts() {
     try {
-      this.products = await apiClient.getProducts();
+      this.products = await apiClient.getProducts({}, this.currentLanguage);
       this.loading = false;
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -57,21 +47,39 @@ export class ProductGrid {
    */
   async loadCategories() {
     try {
-      const categories = await apiClient.getCategories();
+      const categories = await apiClient.getCategories(this.currentLanguage);
       this.renderNavigation(categories);
-      this.renderCategorySelect(categories);
     } catch (error) {
       console.error('Failed to load categories:', error);
       const navContainer = document.querySelector('.main-nav ul');
       if (navContainer) {
-        navContainer.innerHTML = '<li data-categories="all" class="active"><a href="#">Tutti i Prodotti</a></li>';
-        this.setupNavigationFilters(); 
-      }
-      // 回退下拉
-      if (this.categoryFilter) {
-        this.categoryFilter.innerHTML = '<option value="all">Tutte le categorie</option>';
+        navContainer.innerHTML = '<li class="active"><a href="#collection">All Products</a></li>';
       }
     }
+  }
+
+  /**
+   * 设置语言切换监听器
+   */
+  setupLanguageListener() {
+    // 监听语言切换事件
+    if (window.EventBus) {
+      window.EventBus.on('language_changed', async (data) => {
+        this.currentLanguage = data.language_code;
+        await this.reloadData();
+      });
+    }
+  }
+
+  /**
+   * 重新加载数据
+   */
+  async reloadData() {
+    this.loading = true;
+    await Promise.all([this.loadProducts(), this.loadCategories()]);
+    this.filteredProducts = [...this.products];
+    this.renderProducts();
+    this.loading = false;
   }
 
   /**
@@ -82,25 +90,26 @@ export class ProductGrid {
     const navContainer = document.querySelector('.main-nav ul');
     if (!navContainer) return;
 
-    const allProductsHTML = '<li data-categories="all" class="active"><a href="#">Tutti i Prodotti</a></li>';
+    // 根据当前语言获取"所有产品"的文本
+    const allProductsText = this.getLocalizedText('nav_products', 'All Products');
+    const allProductsHTML = `<li class="active"><a href="#collection">${allProductsText}</a></li>`;
     const categoriesHTML = categories.map(category => `
-      <li data-categories="${category}"><a href="#">${category}</a></li>
+      <li><a href="#collection">${category}</a></li>
     `).join('');
 
     navContainer.innerHTML = allProductsHTML + categoriesHTML;
-    this.setupNavigationFilters();
   }
 
   /**
-   * 渲染分类下拉
-   * @param {Array} categories
+   * 获取本地化文本
+   * @param {string} key - 翻译键
+   * @param {string} fallback - 默认文本
+   * @returns {string} 本地化文本
    */
-  renderCategorySelect(categories) {
-    if (!this.categoryFilter) return;
-    const options = ['<option value="all">Tutte le categorie</option>']
-      .concat(categories.map(c => `<option value="${c}">${c}</option>`))
-      .join('');
-    this.categoryFilter.innerHTML = options;
+  getLocalizedText(key, fallback) {
+    // 这里可以集成翻译系统
+    // 暂时返回默认文本
+    return fallback;
   }
 
   /**
@@ -247,179 +256,30 @@ export class ProductGrid {
     `;
   }
 
-  /**
-   * 设置筛选器事件监听
-   */
-  setupFilters() {
-    if(!this.categoryFilter || !this.sortFilter || !this.resetBtn) return;
-    this.categoryFilter.addEventListener('change', () => this.applyFilters());
-    this.sortFilter.addEventListener('change', () => this.applyFilters());
-    this.resetBtn.addEventListener('click', () => this.resetFilters());
-  }
+
   
-  /**
-   * 应用筛选器
-   */
-  applyFilters() {
-    const category = this.categoryFilter.value;
-    const sortValue = this.sortFilter.value;
-    const term = (this.searchInput?.value || '').trim().toLowerCase();
 
-    let tempProducts = [...this.products];
-
-    if (term) {
-      // 搜索时忽略分类过滤
-      tempProducts = tempProducts.filter(p => {
-        const base = (p.base_name || '').toLowerCase();
-        return base.includes(term);
-      });
-      this.clearNavigationActiveState();
-    } else if (category !== 'all') {
-      tempProducts = tempProducts.filter(p => p.category === category);
-    }
-
-    if (sortValue === 'newest') {
-      tempProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
-
-    this.filteredProducts = tempProducts;
-    this.renderProducts();
-  }
   
-  /**
-   * 重置筛选器
-   */
-  resetFilters() {
-    this.categoryFilter.value = 'all';
-    this.sortFilter.value = 'featured';
-    this.filteredProducts = [...this.products];
-    this.renderProducts();
-  }
+
+
+
+
+
+
+
 
   /**
-   * 设置导航筛选器
-   */
-  setupNavigationFilters() {
-    const navContainer = document.querySelector('.main-nav ul');
-    if(navContainer) {
-      navContainer.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-        if (link) {
-          e.preventDefault();
-          const navItem = link.closest('li');
-          if (navItem && navItem.dataset.categories) {
-            const category = navItem.dataset.categories;
-            this.filterByCategory(category);
-            this.updateNavigationState(navItem);
-            this.updateURL(category);
-            // 同步下拉
-            if (this.categoryFilter) {
-              this.categoryFilter.value = category || 'all';
-            }
-            // 清空搜索确保分类生效
-            if (this.searchInput && this.searchInput.value) {
-              this.searchInput.value = '';
-              this.toggleSearchClear(false);
-            }
-          }
-        }
-      });
-    }
-  }
-
-  /**
-   * 按分类筛选
-   * @param {string} category - 分类名称
-   */
-  filterByCategory(category) {
-    this.currentCategory = category || 'all';
-    
-    if (this.currentCategory === 'all') {
-      this.filteredProducts = [...this.products];
-    } else {
-      this.filteredProducts = this.products.filter(product => 
-        product.category === this.currentCategory
-      );
-    }
-
-    // 如果存在搜索词，继续应用搜索过滤
-    const term = (this.searchInput?.value || '').trim().toLowerCase();
-    if (term) {
-      this.filteredProducts = this.filteredProducts.filter(p => {
-        const base = (p.base_name || '').toLowerCase();
-        return base.includes(term);
-      });
-      this.clearNavigationActiveState();
-    }
-    
-    this.renderProducts();
-  }
-
-  /**
-   * 更新导航状态
-   * @param {Element} activeItem - 激活的导航项
-   */
-  updateNavigationState(activeItem) {
-    document.querySelectorAll('.main-nav ul li').forEach(item => {
-      item.classList.remove('active');
-    });
-    
-    if (activeItem) {
-      activeItem.classList.add('active');
-    }
-  }
-
-  /**
-   * 设置浏览器导航
+   * 设置浏览器导航（简化版）
    */
   setupBrowserNavigation() {
-    window.addEventListener('popstate', (event) => {
-      const category = event.state?.category || this.getCategoryFromURL();
-      this.filterByCategory(category);
-      
-      const navItem = document.querySelector(`[data-categories="${category}"]`) || document.querySelector('[data-categories="all"]');
-      
-      if (navItem) {
-        this.updateNavigationState(navItem);
-      }
-    });
+    // 导航功能已简化
   }
 
   /**
-   * 从 URL 获取分类
-   * @returns {string} 分类名称
-   */
-  getCategoryFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('category') || 'all';
-  }
-
-  /**
-   * 更新 URL
-   * @param {string} category - 分类名称
-   */
-  updateURL(category) {
-    const url = category && category !== 'all' 
-      ? `${window.location.origin}${window.location.pathname}?category=${encodeURIComponent(category)}`
-      : `${window.location.origin}${window.location.pathname}`;
-    
-    window.history.pushState({ category }, '', url);
-  }
-
-  /**
-   * 处理初始路由
+   * 处理初始路由（简化版）
    */
   handleInitialRoute() {
-    const category = this.getCategoryFromURL();
-    
-    const navItem = document.querySelector(`[data-categories="${category}"]`) || document.querySelector('[data-categories="all"]');
-    if (navItem) {
-        this.filterByCategory(category);
-        this.updateNavigationState(navItem);
-        if (this.categoryFilter) {
-          this.categoryFilter.value = category || 'all';
-        }
-    }
+    // 路由功能已简化
   }
 
   /**
@@ -485,32 +345,7 @@ export class ProductGrid {
     }, 3000);
   }
 
-  /**
-   * 实时搜索
-   */
-  setupSearch() {
-    let timer = null;
-    const handler = () => this.applyFilters();
-    this.searchInput.addEventListener('input', () => {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(handler, 200);
-      this.toggleSearchClear(Boolean(this.searchInput.value.trim()));
-    });
 
-    if (this.searchClearBtn) {
-      this.searchClearBtn.addEventListener('click', () => {
-        this.searchInput.value = '';
-        this.toggleSearchClear(false);
-        this.applyFilters();
-      });
-    }
-  }
-
-  toggleSearchClear(show) {
-    if (!this.searchClearBtn) return;
-    this.searchClearBtn.style.visibility = show ? 'visible' : 'hidden';
-    this.searchClearBtn.style.opacity = show ? '1' : '0';
-  }
 
   clearNavigationActiveState() {
     document.querySelectorAll('.main-nav ul li').forEach(item => item.classList.remove('active'));

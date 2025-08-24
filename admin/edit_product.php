@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>添加新产品</title>
+    <title>编辑产品</title>
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/add_product.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
     <script>
@@ -14,14 +15,14 @@
     </script>
     <main class="main-content">
         <header class="main-header">
-            <h2><i class="fas fa-plus"></i> 添加新产品</h2>
+            <h2><i class="fas fa-pen"></i> 编辑产品</h2>
             <div class="header-actions">
                 <a class="btn btn-secondary" href="dashboard.php"><i class="fas fa-arrow-left"></i> 返回列表</a>
             </div>
         </header>
 
         <section id="product-form-section" class="form-section">
-            <h3 id="form-title" style="margin-top:0">添加新产品</h3>
+            <h3 id="form-title" style="margin-top:0">编辑产品</h3>
             <form id="product-form">
                 <input type="hidden" id="product-id" name="id">
                 
@@ -74,7 +75,7 @@
                     <small class="form-text">点击任一颜色卡片可快速切换到该颜色进行编辑。点击 [+] 添加新的颜色变体。</small>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> 保存产品</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> 保存修改</button>
                     <a href="dashboard.php" class="btn btn-secondary"><i class="fas fa-times"></i> 取消</a>
                 </div>
                 <div id="upload-progress" class="upload-progress" aria-live="polite" style="display:none;margin-top:8px">
@@ -93,10 +94,18 @@
         import EventBus from './assets/js/EventBus.js';
         import ProductFormComponent from './assets/js/components/add_product.js';
         import ToastComponent from './assets/js/components/ToastComponent.js';
-        // 仅初始化表单与通知（新增专用，不处理编辑模式）
         const eventBus = new EventBus();
         new ToastComponent('#toast-notification', eventBus);
-        new ProductFormComponent('#product-form-section', eventBus);
+        const formComp = new ProductFormComponent('#product-form-section', eventBus);
+        // 强制编辑模式：需要 URL 中的 id
+        const sp = new URLSearchParams(location.search);
+        const id = sp.get('id');
+        if (id) {
+            formComp.show_form({ id: id });
+        } else {
+            // 无 id 时返回列表
+            location.href = 'dashboard.php#products';
+        }
     </script>
 </body>
 </html>

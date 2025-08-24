@@ -6,6 +6,9 @@
 // 导入所需的组件和工具
 import ProductGrid from './components/ProductGrid.js';
 import MobileNavigation from './components/MobileNavigation.js';
+import ContactForm from './components/ContactForm.js';
+// import LanguageSwitcher from './components/LanguageSwitcher.js';
+import EventBus from './EventBus.js';
 import { build_map_link, sanitize_phone_href } from './utils/map_utils.js';
 
 /**
@@ -16,6 +19,7 @@ class MainApp {
   constructor() {
     this.productGrid = null;
     this.mobileNavigation = null;
+    this.languageSwitcher = null;
     
     this.init();
   }
@@ -46,6 +50,13 @@ class MainApp {
    * 初始化所有组件
    */
   initializeComponents() {
+    // 初始化语言切换组件
+    // if (document.getElementById('language-switcher-container')) {
+    //   this.languageSwitcher = new LanguageSwitcher(
+    //     document.getElementById('language-switcher-container')
+    //   );
+    // }
+
     // 初始化产品网格组件
     if (document.getElementById('product-list')) {
       this.productGrid = new ProductGrid();

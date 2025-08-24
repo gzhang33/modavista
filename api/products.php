@@ -47,6 +47,35 @@ function respond_error($http_status, $error_code, $message, $field = null) {
 
 // === GET ===
 function handle_get($conn) {
+    // language param for localized display fields - 支持所有欧洲语言
+    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
+    $valid_languages = ['en', 'it', 'fr', 'de', 'es', 'pt', 'nl', 'pl'];
+    if (!in_array($lang, $valid_languages, true)) { $lang = 'en'; }
+
+    // Helper to detect if a column exists; prevents SQL errors if migrations not applied
+    $column_exists = function($table, $column) use ($conn) {
+        $sql = 'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1';
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) return false;
+        $db = DB_NAME;
+        $stmt->bind_param('sss', $db, $table, $column);
+        if (!$stmt->execute()) { $stmt->close(); return false; }
+        $res = $stmt->get_result();
+        $exists = (bool)$res->fetch_row();
+        $stmt->close();
+        return $exists;
+    };
+    
+    // 检查所有语言字段是否存在
+    $has_cat_lang = $column_exists('categories', "category_name_$lang");
+    $has_col_lang = $column_exists('colors', "color_name_$lang");
+    $has_mat_lang = $column_exists('materials', "material_name_$lang");
+    $has_desc_lang = $column_exists('products', "description_$lang");
+    
+    // 根据实际数据库结构调整字段名
+    $cat_field = $has_cat_lang ? "category_name_$lang" : "category_name_en";
+    $col_field = $has_col_lang ? "color_name_$lang" : "color_name";
+    $mat_field = $has_mat_lang ? "material_name_$lang" : "material_name";
     // 单个变体详情（保持前端兼容字段名；不再依赖已删除的 v.variant_name 字段）
     if (isset($_GET['id'])) {
         $variant_id = (int)$_GET['id'];
@@ -58,9 +87,9 @@ function handle_get($conn) {
                     p.base_name       AS base_name,
                     p.description     AS description,
                     p.category_id     AS category_id,
-                    c.category_name   AS category_name,
-                    clr.color_name    AS color_name,
-                    m.material_name   AS material_name
+                    c.' . $cat_field . ' AS category_name,
+                    clr.' . $col_field . ' AS color_name,
+                    m.' . $mat_field . ' AS material_name
                 FROM product_variants v
                 JOIN products p ON v.product_id = p.id
                 LEFT JOIN categories c ON p.category_id = c.id
@@ -192,22 +221,22 @@ function handle_get($conn) {
 
     // 分类（按名称，以保持前端兼容）
     if (!empty($_GET['category'])) {
-        $where[] = 'c.category_name = ?';
+        $where[] = "c.$cat_field = ?";
         $params[] = $_GET['category'];
         $types .= 's';
     }
 
     $sql = 'SELECT 
                 v.id            AS id,
-                CONCAT(p.base_name, " - ", clr.color_name) AS name,
+                CONCAT_WS(" - ", p.base_name, clr.' . $col_field . ') AS name,
                 v.default_image AS default_image,
                 v.created_at    AS created_at,
                 p.base_name     AS base_name,
                 p.description   AS description,
                 p.id            AS product_id,
-                c.category_name AS category,
-                clr.color_name  AS color,
-                m.material_name AS material
+                c.' . $cat_field . ' AS category,
+                clr.' . $col_field . ' AS color,
+                m.' . $mat_field . ' AS material
             FROM product_variants v
             JOIN products p ON v.product_id = p.id
             LEFT JOIN categories c ON p.category_id = c.id

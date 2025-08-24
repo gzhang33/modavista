@@ -36,18 +36,31 @@ switch ($method) {
 $conn->close();
 
 function get_materials($conn) {
-    $sql = 'SELECT id, material_name FROM materials ORDER BY material_name ASC';
+    // 语言参数处理：en | zh | it
+    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
+    if (!in_array($lang, ['en', 'zh', 'it'], true)) { $lang = 'en'; }
+
+    $sql = 'SELECT id, material_name, material_name_zh, material_name_it FROM materials ORDER BY 
+            CASE WHEN (? = "zh") THEN COALESCE(material_name_zh, material_name)
+                 WHEN (? = "it") THEN COALESCE(material_name_it, material_name)
+                 ELSE material_name END ASC';
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
+    $stmt->bind_param('ss', $lang, $lang);
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
     $result = $stmt->get_result();
     $materials = [];
     while ($row = $result->fetch_assoc()) {
-        $materials[] = $row['material_name'];
+        $name_en = $row['material_name'];
+        $name_zh = $row['material_name_zh'] ?? null;
+        $name_it = $row['material_name_it'] ?? null;
+        $name = $lang === 'zh' ? ($name_zh ?: $name_en) : ($lang === 'it' ? ($name_it ?: $name_en) : $name_en);
+        // 返回包含英文名和本地化名称的对象
+        $materials[] = ['id' => $row['id'], 'name' => $name, 'name_en' => $name_en];
     }
     $stmt->close();
     json_response(200, $materials);
@@ -55,7 +68,9 @@ function get_materials($conn) {
 
 function add_material($conn) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $name = $data['name'] ?? null;
+    $name = $data['name'] ?? null; // 英文
+    $name_zh = $data['name_zh'] ?? null;
+    $name_it = $data['name_it'] ?? null;
 
     if (empty($name)) {
         json_response(400, ['message' => '材质名称不能为空']);
@@ -72,11 +87,11 @@ function add_material($conn) {
     }
     $check->close();
 
-    $ins = $conn->prepare('INSERT INTO materials (material_name) VALUES (?)');
+    $ins = $conn->prepare('INSERT INTO materials (material_name, material_name_zh, material_name_it) VALUES (?, ?, ?)');
     if ($ins === false) {
         json_response(500, ['message' => '创建材质失败: ' . $conn->error]);
     }
-    $ins->bind_param('s', $name);
+    $ins->bind_param('sss', $name, $name_zh, $name_it);
     $ins->execute();
     $id = $ins->insert_id;
     $ins->close();

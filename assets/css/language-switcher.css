@@ -1,0 +1,176 @@
+/* Language Switcher Styles */
+.language-switcher {
+    position: relative;
+    display: inline-block;
+    font-family: var(--font-family-base);
+}
+
+.language-switcher__current {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.language-switcher__current:hover {
+    background: var(--color-background-hover);
+    border-color: var(--color-primary);
+}
+
+.language-switcher__flag {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+/* 国旗样式 */
+.language-switcher__flag--en {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><clipPath id="a"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(%23a)"><path d="M0 0v30h60V0z" fill="%23012169"/><path d="M0 0L60 30m0-30L0 30" stroke="%23fff" stroke-width="6"/><path d="M0 0L60 30m0-30L0 30" clip-path="url(%23b)" stroke="%23C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="%23fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="%23C8102E" stroke-width="6"/></g></svg>');
+}
+
+.language-switcher__flag--it {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="3" height="2" fill="%23009246"/><rect width="2" height="2" x="1" fill="%23fff"/><rect width="1" height="2" x="2" fill="%23CE2B37"/></svg>');
+}
+
+.language-switcher__flag--fr {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="3" height="2" fill="%23ED2939"/><rect width="2" height="2" x="1" fill="%23fff"/><rect width="1" height="2" x="2" fill="%23002395"/></svg>');
+}
+
+.language-switcher__flag--de {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3"><rect width="5" height="3" fill="%23FFCE00"/><rect width="5" height="2" y="1" fill="%23D00"/><rect width="5" height="1" y="2" fill="%23000"/></svg>');
+}
+
+.language-switcher__flag--es {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 500"><rect width="750" height="500" fill="%23c60b1e"/><rect width="750" height="250" y="125" fill="%23ffc400"/></svg>');
+}
+
+.language-switcher__flag--pt {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23006600"/><rect width="600" height="200" y="100" fill="%23ffcc00"/><circle cx="300" cy="200" r="80" fill="%23cc0000"/></svg>');
+}
+
+.language-switcher__flag--nl {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="9" height="6" fill="%23AE1C28"/><rect width="9" height="4" y="2" fill="%23fff"/><rect width="9" height="2" y="4" fill="%2321486B"/></svg>');
+}
+
+.language-switcher__flag--pl {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 10"><rect width="16" height="10" fill="%23fff"/><rect width="16" height="5" y="5" fill="%23dc143c"/></svg>');
+}
+
+.language-switcher__name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    flex: 1;
+    text-align: left;
+}
+
+.language-switcher__arrow {
+    color: var(--color-text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.language-switcher__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    list-style: none;
+    margin: 4px 0 0 0;
+    padding: 8px 0;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+}
+
+.language-switcher__dropdown--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.language-switcher__dropdown--open + .language-switcher__current .language-switcher__arrow {
+    transform: rotate(180deg);
+}
+
+.language-switcher__item {
+    margin: 0;
+}
+
+.language-switcher__item--active {
+    background: var(--color-primary-light);
+}
+
+.language-switcher__button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+.language-switcher__button:hover {
+    background: var(--color-background-hover);
+}
+
+.language-switcher__item--active .language-switcher__button {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .language-switcher__current {
+        min-width: 100px;
+        padding: 6px 8px;
+    }
+    
+    .language-switcher__name {
+        font-size: 12px;
+    }
+    
+    .language-switcher__flag {
+        width: 16px;
+        height: 12px;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .language-switcher__current {
+        background: var(--color-background-dark);
+        border-color: var(--color-border-dark);
+    }
+    
+    .language-switcher__dropdown {
+        background: var(--color-background-dark);
+        border-color: var(--color-border-dark);
+    }
+    
+    .language-switcher__button:hover {
+        background: var(--color-background-hover-dark);
+    }
+}
+

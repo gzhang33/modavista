@@ -29,10 +29,15 @@ export default class ProductTableComponent extends BaseComponent {
         this.filtered_products = null;
         this.selected_product_ids = new Set();
 
+        // color map for zh display
+        this.color_en_to_zh = new Map();
+
         this.init_listeners();
         
-        // 初始加载（不区分归档）
-        this.load_products({ archived: 0 });
+        // 预加载颜色映射后再加载产品，确保中文颜色显示
+        this.load_colors_map().finally(() => {
+            this.load_products({ archived: 0 });
+        });
     }
 
     init_listeners() {
@@ -57,9 +62,35 @@ export default class ProductTableComponent extends BaseComponent {
 
     }
 
+    async load_colors_map() {
+        try {
+            const colors = await apiClient.get('/colors.php', { lang: 'zh' });
+            if (Array.isArray(colors)) {
+                colors.forEach(c => {
+                    const en = (c.color_name || '').trim();
+                    const zh = (c.color_name_zh || c.color_name || '').trim();
+                    if (en) {
+                        this.color_en_to_zh.set(en.toLowerCase(), zh);
+                    }
+                });
+            }
+        } catch (e) {
+            // ignore mapping failure; fallback to original values
+        }
+    }
+
+    translate_color_to_zh(color_value) {
+        if (!color_value) return '—';
+        // 如果已包含中文字符，直接返回
+        if (/[\u4e00-\u9fa5]/.test(color_value)) return color_value;
+        const mapped = this.color_en_to_zh.get(String(color_value).toLowerCase());
+        return mapped || color_value;
+    }
+
     async load_products(filters = { archived: 0 }) {
         try {
-            this.all_products = await apiClient.get('/products.php', { archived: filters.archived });
+            // 默认中文
+            this.all_products = await apiClient.get('/products.php', { archived: filters.archived, lang: 'zh' });
             this.filtered_products = null;
             this.render();
             this.apply_list_animation();
@@ -87,15 +118,18 @@ export default class ProductTableComponent extends BaseComponent {
         this.selectAllCheckbox.disabled = false;
 
         list.forEach(p => {
-            const image_src = p.defaultImage ? `../${p.defaultImage}` : PLACEHOLDER_IMAGE;
+            const raw = p.defaultImage || '';
+            const image_src = raw ? (raw.startsWith('http') ? raw : (raw.startsWith('/') ? raw : `/${raw}`)) : PLACEHOLDER_IMAGE;
             const is_checked = this.selected_product_ids.has(p.id) ? 'checked' : '';
             
             const row = document.createElement('tr');
             row.dataset.id = p.id;
             if(is_checked) row.classList.add('selected');
 
-            // 获取颜色名称
-            const color_name = p.color || this.extract_color_label(p.name) || '—';
+            // 获取颜色名称（优先 API 返回，再回退解析；最后映射到中文）
+            const color_raw = p.color || this.extract_color_label(p.name) || '—';
+            const color_name = this.translate_color_to_zh(color_raw);
+            const material_name = p.material || '—';
             const name = p.base_name; // Use only base_name
             
             row.innerHTML = `
@@ -103,12 +137,13 @@ export default class ProductTableComponent extends BaseComponent {
                 <td><img src="${image_src}" alt="${p.name}" class="product-thumbnail"></td>
                 <td class="product-name-cell">${name}</td>
                 <td class="product-color-cell">${color_name}</td>
+                <td class="product-material-cell">${material_name}</td>
                 <td><span class="product-category-cell">${p.category || '未分类'}</span></td>
                 <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td>
                 <td class="product-created-at-cell">${this.format_created_at(p.createdAt)}</td>
                 <td class="product-actions-cell sticky-right">
-                    <button class="action-btn edit-btn" data-id="${p.id}">编辑</button>
-                    <button class="action-btn delete-btn" data-id="${p.id}">删除</button>
+                    <a class="button button-small edit-btn" data-id="${p.id}" href="/admin/edit_product.php?id=${p.id}">编辑</a>
+                    <button class="button button-small delete-btn" data-id="${p.id}">删除</button>
                 </td>`;
             this.tableBody.appendChild(row);
         });
@@ -182,15 +217,16 @@ export default class ProductTableComponent extends BaseComponent {
         const product_id_num = product_id ? parseInt(product_id, 10) : null;
 
         if (target.classList.contains('edit-btn')) {
-            const product = this.all_products.find(p => p.id === product_id_num);
-            if (product_id_num != null) {
-                // 重定向到独立编辑页（复用 add_product.php）
-                window.location.href = `add_product.php?id=${product_id_num}`;
-            }
+            // 跳转到产品编辑页面
+            const url = `/admin/edit_product.php?id=${product_id_num}`;
+            window.location.href = url;
         } else if (target.classList.contains('delete-btn')) {
             const product = this.all_products.find(p => p.id === product_id_num);
             if (product && confirm(`确定要删除产品 "${product.name}" 吗？`)) {
-                this.delete_product(product_id_num);
+                this.delete_product(product_id_num).then(()=>{
+                  // 重新加载产品列表
+                  this.load_products();
+                });
             }
         } else if (target.classList.contains('row-checkbox')) {
             this.toggle_row_selection(product_id);

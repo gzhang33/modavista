@@ -36,40 +36,36 @@ switch ($method) {
 $conn->close();
 
 function get_colors($conn) {
-    // 语言参数：en | zh | it，默认 en
-    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
-    if (!in_array($lang, ['en', 'zh', 'it'], true)) { $lang = 'en'; }
+    // 支持两位语言码或完整 locale，统一规范化
+    $raw = $_GET['lang'] ?? null;
+    $locale = normalize_language_code($raw);
 
-    // 选择排序列，避免 NULL 导致排序异常，优先使用对应语言名，否则回退英文
-    $sql = 'SELECT id, color_name, color_name_zh, color_name_it, color_code FROM colors ORDER BY 
-            CASE WHEN (? = "zh") THEN COALESCE(color_name_zh, color_name)
-                 WHEN (? = "it") THEN COALESCE(color_name_it, color_name)
-                 ELSE color_name END ASC';
+    // 使用新的 i18n 结构查询颜色
+    $sql = 'SELECT
+                c.id,
+                COALESCE(ci.name, c.color_name) AS name,
+                c.color_code,
+                c.color_name AS name_en
+            FROM color c
+            LEFT JOIN color_i18n ci ON c.id = ci.color_id AND ci.locale = ?
+            ORDER BY COALESCE(ci.name, c.color_name) ASC';
+
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
-    $stmt->bind_param('ss', $lang, $lang);
+    $stmt->bind_param('s', $locale);
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
     $result = $stmt->get_result();
     $colors = [];
     while ($row = $result->fetch_assoc()) {
-        // 组装多语言
-        $name_en = $row['color_name'];
-        $name_zh = $row['color_name_zh'] ?? null;
-        $name_it = $row['color_name_it'] ?? null;
-        $name = $lang === 'zh' ? ($name_zh ?: $name_en) : ($lang === 'it' ? ($name_it ?: $name_en) : $name_en);
         $colors[] = [
             'id' => (int)$row['id'],
-            'name' => $name,
+            'name' => $row['name'],
             'code' => $row['color_code'],
-            'names' => [
-                'en' => $name_en,
-                'zh' => $name_zh ?: $name_en,
-                'it' => $name_it ?: $name_en,
-            ],
+            'name_en' => $row['name_en'],
         ];
     }
     $stmt->close();
@@ -78,17 +74,16 @@ function get_colors($conn) {
 
 function add_color($conn) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $name = $data['name'] ?? null; // 英文名（兼容原接口）
-    $name_zh = $data['name_zh'] ?? null;
-    $name_it = $data['name_it'] ?? null;
+    $name = $data['name'] ?? null; // 英文名称
     $code = $data['code'] ?? null;
+    $translations = $data['translations'] ?? []; // 多语言翻译
 
     if (empty($name)) {
         json_response(400, ['message' => '颜色名称不能为空']);
     }
-    
-    // 检查是否已存在
-    $check = $conn->prepare('SELECT id FROM colors WHERE color_name = ?');
+
+    // 检查颜色是否已存在
+    $check = $conn->prepare('SELECT id FROM color WHERE color_name = ?');
     $check->bind_param('s', $name);
     $check->execute();
     $res = $check->get_result();
@@ -98,16 +93,58 @@ function add_color($conn) {
     }
     $check->close();
 
-    // 支持多语言字段的插入（列可能在迁移前不存在，若不存在会报错，需先执行迁移脚本）
-    $ins = $conn->prepare('INSERT INTO colors (color_name, color_name_zh, color_name_it, color_code) VALUES (?, ?, ?, ?)');
+    // 开始事务
+    $conn->begin_transaction();
+
+    // 创建主颜色记录（颜色代码验证由触发器处理）
+    $ins = $conn->prepare('INSERT INTO color (color_name, color_code) VALUES (?, ?)');
     if ($ins === false) {
+        $conn->rollback();
         json_response(500, ['message' => '创建颜色失败: ' . $conn->error]);
     }
-    $ins->bind_param('ssss', $name, $name_zh, $name_it, $code);
-    $ins->execute();
-    $id = $ins->insert_id;
+    $ins->bind_param('ss', $name, $code);
+    if (!$ins->execute()) {
+        $ins->close();
+        $conn->rollback();
+        json_response(500, ['message' => '创建颜色失败: ' . $conn->error]);
+    }
+    $color_id = $ins->insert_id;
     $ins->close();
-    json_response(201, ['message' => "颜色 '{$name}' 添加成功", 'id' => (int)$id]);
+
+    // 添加英文翻译
+    $i18n_stmt = $conn->prepare('INSERT INTO color_i18n (color_id, locale, name) VALUES (?, ?, ?)');
+    if (!$i18n_stmt) {
+        $conn->rollback();
+        json_response(500, ['message' => '创建颜色翻译失败: ' . $conn->error]);
+    }
+
+    $locale = 'en-GB';
+    $i18n_stmt->bind_param('iss', $color_id, $locale, $name);
+    if (!$i18n_stmt->execute()) {
+        $i18n_stmt->close();
+        $conn->rollback();
+        json_response(500, ['message' => '创建英文翻译失败: ' . $conn->error]);
+    }
+
+    // 添加其他语言翻译
+    foreach ($translations as $lang => $translation) {
+        if (empty($translation)) continue;
+
+        $locale_map = ['zh' => 'zh-CN', 'it' => 'it-IT'];
+        $locale = $locale_map[$lang] ?? null;
+        if (!$locale) continue;
+
+        $i18n_stmt->bind_param('iss', $color_id, $locale, $translation);
+        if (!$i18n_stmt->execute()) {
+            $i18n_stmt->close();
+            $conn->rollback();
+            json_response(500, ['message' => "创建 {$lang} 翻译失败: " . $conn->error]);
+        }
+    }
+    $i18n_stmt->close();
+
+    $conn->commit();
+    json_response(201, ['message' => "颜色 '{$name}' 添加成功", 'id' => (int)$color_id]);
 }
 
 function delete_color($conn) {
@@ -117,8 +154,9 @@ function delete_color($conn) {
     if (empty($name)) {
         json_response(400, ['message' => '要删除的颜色名称不能为空']);
     }
-    
-    $del = $conn->prepare('DELETE FROM colors WHERE color_name = ?');
+
+    // 删除颜色（外键约束会自动删除相关的 i18n 记录）
+    $del = $conn->prepare('DELETE FROM color WHERE color_name = ?');
     if ($del === false) {
         json_response(500, ['message' => '删除失败: ' . $conn->error]);
     }

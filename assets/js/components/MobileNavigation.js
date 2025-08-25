@@ -72,8 +72,19 @@ export class MobileNavigation {
    */
   setupOutsideClickHandler() {
     document.addEventListener('click', (e) => {
-      // 如果点击的不是导航相关元素，则关闭导航
-      if (!this.mainNav.contains(e.target) && !this.mobileToggle.contains(e.target)) {
+      // 检查是否点击了语言切换器区域
+      const languageSwitcher = document.getElementById('language-switcher-container');
+      const isLanguageSwitcherClick = languageSwitcher && languageSwitcher.contains(e.target);
+
+      // 如果点击的不是导航相关元素且不是语言切换器，则关闭导航
+      if (!this.mainNav.contains(e.target) &&
+          !this.mobileToggle.contains(e.target) &&
+          !isLanguageSwitcherClick) {
+        this.closeNavigation();
+      }
+
+      // 如果点击了语言切换器，关闭移动导航（互斥逻辑）
+      if (isLanguageSwitcherClick && this.isNavigationOpen()) {
         this.closeNavigation();
       }
     });

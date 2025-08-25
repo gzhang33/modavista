@@ -13,7 +13,7 @@ export class ProductGrid {
 
     this.searchInput = null; // 搜索功能已移除
     this.searchClearBtn = null; // 搜索功能已移除
-    
+
     this.init();
     this.setupLanguageListener();
   }
@@ -90,14 +90,93 @@ export class ProductGrid {
     const navContainer = document.querySelector('.main-nav ul');
     if (!navContainer) return;
 
+    // 去除重复分类并限制数量（最多显示8个分类）
+    const uniqueCategories = [...new Set(categories)].slice(0, 8);
+
     // 根据当前语言获取"所有产品"的文本
-    const allProductsText = this.getLocalizedText('nav_products', 'All Products');
-    const allProductsHTML = `<li class="active"><a href="#collection">${allProductsText}</a></li>`;
-    const categoriesHTML = categories.map(category => `
-      <li><a href="#collection">${category}</a></li>
+    const allProductsText = this.getLocalizedText('nav_products', 'Tutti i Prodotti');
+    const allProductsHTML = `<li data-categories="all" class="active">
+      <a href="#collection">
+        ${allProductsText}
+      </a>
+    </li>`;
+
+    const categoriesHTML = uniqueCategories.map(category => `
+      <li data-categories="${category}">
+        <a href="#collection">
+          ${category}
+        </a>
+      </li>
     `).join('');
 
     navContainer.innerHTML = allProductsHTML + categoriesHTML;
+
+    // 添加导航点击事件处理
+    this.setupNavigationHandlers();
+  }
+
+  /**
+   * 设置导航点击事件处理器
+   */
+  setupNavigationHandlers() {
+    const navContainer = document.querySelector('.main-nav ul');
+    if (!navContainer) return;
+
+    navContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const clickedItem = e.target.closest('li');
+      if (!clickedItem) return;
+
+      // 移除所有活动状态
+      navContainer.querySelectorAll('li').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // 添加活动状态到点击的项目
+      clickedItem.classList.add('active');
+
+      // 获取分类并过滤产品
+      const category = clickedItem.getAttribute('data-categories');
+      this.filterByCategory(category);
+
+      // 更新面包屑导航
+      this.updateBreadcrumb(category);
+
+      // 滚动到产品区域
+      const productSection = document.getElementById('collection');
+      if (productSection) {
+        productSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
+  /**
+   * 根据分类过滤产品
+   * @param {string} category - 分类名称，'all' 表示显示所有产品
+   */
+  async filterByCategory(category) {
+    try {
+      this.showLoading();
+
+      let products;
+      if (category === 'all') {
+        // 修复参数顺序：filters对象在前，语言在后
+        products = await apiClient.getProducts({}, this.currentLanguage);
+      } else {
+        // 为分类过滤也添加语言支持
+        products = await apiClient.get('/products.php', {
+          category: category,
+          lang: this.currentLanguage
+        });
+      }
+
+      this.filteredProducts = products;
+      this.renderProducts();
+    } catch (error) {
+      console.error('Failed to filter products by category:', error);
+      this.showError('Failed to load products. Please try again.');
+    }
   }
 
   /**
@@ -113,14 +192,24 @@ export class ProductGrid {
   }
 
   /**
+   * 获取分类图标
+   * @param {string} category - 分类名称
+   * @returns {string} 空字符串（已移除emoji图标）
+   */
+  getCategoryIcon(category) {
+    // 已移除emoji图标，返回空字符串
+    return '';
+  }
+
+  /**
    * 渲染产品列表
    */
   renderProducts() {
     const grid = document.getElementById('product-list');
     if (!grid) return;
-    
+
     const productsToRender = this.filteredProducts;
-    
+
     if (!productsToRender || productsToRender.length === 0) {
       grid.innerHTML = this.getEmptyState();
       return;
@@ -128,12 +217,12 @@ export class ProductGrid {
 
     const cardsHTML = productsToRender.map(product => this.createProductCard(product)).join('');
     grid.innerHTML = cardsHTML;
-    
+
     // 延迟验证图片
     setTimeout(() => {
       this.verifyAndFixImages();
     }, 10);
-    
+
     this.setupDynamicContent();
   }
 
@@ -143,17 +232,17 @@ export class ProductGrid {
   verifyAndFixImages() {
     const grid = document.getElementById('product-list');
     if (!grid) return;
-    
+
     const images = grid.querySelectorAll('img');
-    
+
     images.forEach((img) => {
       if (img.dataset.verified) return;
       img.dataset.verified = 'true';
-      
+
       if (!img.src || img.src === window.location.href || img.src === '') {
         img.src = './images/placeholder-optimized.svg';
       }
-      
+
       if (img.complete && img.naturalHeight !== 0) {
         img.classList.add('loaded');
       } else if (img.complete && img.naturalHeight === 0) {
@@ -176,9 +265,9 @@ export class ProductGrid {
       <article class="product-card" data-product-id="${product.id}" onclick="window.location.href='product.html?id=${product.id}'">
         <div class="product-image-container image-container">
           ${this.createProductBadges(isNew)}
-          <img 
-            src="${imageSrc}" 
-            alt="${product.name}" 
+          <img
+            src="${imageSrc}"
+            alt="${product.name}"
             class="product-img"
             loading="lazy"
             decoding="async"
@@ -217,22 +306,37 @@ export class ProductGrid {
 
   /**
    * 显示错误状态
+   * @param {string} message 可选的错误消息
    */
-  showError() {
+  showError(message = 'Impossibile caricare i prodotti') {
     const grid = document.getElementById('product-list');
     if (!grid) return;
-    
+
     grid.innerHTML = `
       <div class="error-state">
         <div class="error-content">
           <div class="error-icon">⚠️</div>
-          <h3>Impossibile caricare i prodotti</h3>
+          <h3>${message}</h3>
           <p>Controlla la connessione internet e riprova, oppure torna più tardi.</p>
           <div class="error-actions">
-            <button onclick="location.reload()" class="retry-btn">Ricarica</button>
-            <button onclick="window.history.back()" class="back-btn">Torna Indietro</button>
+            <button onclick=\"location.reload()\" class="retry-btn">Ricarica</button>
+            <button onclick=\"window.history.back()\" class="back-btn">Torna Indietro</button>
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  /**
+   * 显示加载状态
+   */
+  showLoading() {
+    const grid = document.getElementById('product-list');
+    if (!grid) return;
+    grid.innerHTML = `
+      <div class="loading-state">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-text">Caricamento in corso…</div>
       </div>
     `;
   }
@@ -249,7 +353,7 @@ export class ProductGrid {
           <h3>Nessun prodotto disponibile</h3>
           <p>Non ci sono prodotti in questa categoria, prova altre categorie o torna più tardi.</p>
           <div class="empty-actions">
-            <button onclick="document.querySelector('[data-categories=\\"all\\"]').click()" class="show-all-btn">Mostra Tutti i Prodotti</button>
+            <button onclick=\"document.querySelector('[data-categories=\\\"all\\\"]').click()\" class="show-all-btn">Mostra Tutti i Prodotti</button>
           </div>
         </div>
       </div>
@@ -257,9 +361,9 @@ export class ProductGrid {
   }
 
 
-  
 
-  
+
+
 
 
 
@@ -349,6 +453,46 @@ export class ProductGrid {
 
   clearNavigationActiveState() {
     document.querySelectorAll('.main-nav ul li').forEach(item => item.classList.remove('active'));
+  }
+
+  /**
+   * 更新面包屑导航
+   * @param {string} category - 当前选中的分类，'all' 表示所有产品
+   */
+  updateBreadcrumb(category) {
+    const breadcrumbList = document.getElementById('breadcrumb-list');
+    if (!breadcrumbList) return;
+
+    const homeItem = `
+      <li class="breadcrumb-item">
+        <a href="/" class="breadcrumb-link">
+          Home
+        </a>
+      </li>
+    `;
+
+    if (category === 'all') {
+      // 显示所有产品
+      breadcrumbList.innerHTML = homeItem + `
+        <li class="breadcrumb-item active" aria-current="page">
+          <span class="breadcrumb-text">Collezione</span>
+        </li>
+      `;
+    } else {
+      // 显示特定分类
+      breadcrumbList.innerHTML = homeItem + `
+        <li class="breadcrumb-item">
+          <a href="#collection" class="breadcrumb-link" onclick="document.querySelector('[data-categories=\\"all\\"]').click()">
+            Collezione
+          </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          <span class="breadcrumb-text">
+            ${category}
+          </span>
+        </li>
+      `;
+    }
   }
 }
 

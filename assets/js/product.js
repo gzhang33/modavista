@@ -7,6 +7,7 @@
 import ProductDetails from './components/ProductDetails.js';
 import ImageGallery from './components/ImageGallery.js';
 import RelatedProducts from './components/RelatedProducts.js';
+import LanguageSwitcher from './components/LanguageSwitcher.js';
 
 /**
  * 产品页面应用程序类
@@ -18,7 +19,7 @@ class ProductApp {
     this.imageGallery = null;
     this.relatedProducts = null;
     this.currentProduct = null;
-    
+
     this.init();
   }
 
@@ -43,13 +44,13 @@ class ProductApp {
 
       // 初始化组件
       this.initializeComponents();
-      
+
       // 加载产品数据
       await this.loadProduct(productId);
-      
+
       // 设置组件间通信
       this.setupComponentCommunication();
-      
+
       console.log('Product app initialized successfully');
     } catch (error) {
       console.error('Failed to initialize product app:', error);
@@ -63,10 +64,17 @@ class ProductApp {
   initializeComponents() {
     // 初始化产品详情组件
     this.productDetails = new ProductDetails();
-    
+
     // 初始化图片画廊组件
     this.imageGallery = new ImageGallery();
-    
+
+      // 初始化语言切换组件（与首页一致）
+      const langContainer = document.getElementById('language-switcher-container');
+      if (langContainer) {
+        // eslint-disable-next-line no-new
+        new LanguageSwitcher(langContainer);
+      }
+
     // 初始化相关产品组件
     this.relatedProducts = new RelatedProducts();
   }
@@ -100,12 +108,12 @@ class ProductApp {
    */
   prepareImageData(product) {
     const images = product.media && product.media.length > 0 ? [...product.media] : [];
-    
+
     // 如果有默认图片且不在媒体列表中，添加到开头
     if (product.defaultImage && !images.includes(product.defaultImage)) {
       images.unshift(product.defaultImage);
     }
-    
+
     return images;
   }
 
@@ -223,11 +231,11 @@ class ProductApp {
     if (this.productDetails) {
       this.productDetails.destroy?.();
     }
-    
+
     if (this.imageGallery) {
       this.imageGallery.destroy?.();
     }
-    
+
     if (this.relatedProducts) {
       this.relatedProducts.destroy?.();
     }
@@ -245,4 +253,4 @@ window.productApp = productApp;
 
 // 导出应用程序类
 export { ProductApp };
-export default productApp; 
+export default productApp;

@@ -74,14 +74,37 @@ export class ImageGallery {
     if (!this.mainImage) return;
 
     const imageSrc = build_image_src(this.images[this.currentImageIndex]);
+
+    // 重置状态
+    this.mainImage.classList.remove('loaded');
+
     this.mainImage.src = imageSrc;
     this.mainImage.alt = `产品图片 ${this.currentImageIndex + 1}`;
-    
-    // 设置加载和错误处理
-      this.mainImage.onerror = () => { 
-        this.mainImage.src = build_image_src('/images/placeholder.svg');
-        this.mainImage.classList.add('loaded');
-      };
+
+    // 设置加载成功处理
+    this.mainImage.onload = () => {
+      this.mainImage.classList.add('loaded');
+      if (this.mainImageContainer) {
+        this.mainImageContainer.classList.add('image-loaded');
+      }
+    };
+
+    // 设置加载错误处理
+    this.mainImage.onerror = () => {
+      this.mainImage.src = build_image_src('/images/placeholder.svg');
+      this.mainImage.classList.add('loaded');
+      if (this.mainImageContainer) {
+        this.mainImageContainer.classList.add('image-loaded');
+      }
+    };
+
+    // 如果图片已经加载完成（缓存），立即添加loaded类
+    if (this.mainImage.complete && this.mainImage.naturalWidth > 0) {
+      this.mainImage.classList.add('loaded');
+      if (this.mainImageContainer) {
+        this.mainImageContainer.classList.add('image-loaded');
+      }
+    }
   }
 
   /**

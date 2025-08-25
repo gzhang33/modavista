@@ -43,9 +43,9 @@
   --transition-slow: 0.5s ease-out;
 
   /* Media sizing (unify sizes within each page) */
-  --product-card-aspect: 3/4;   /* index.html 卡片比例 */
-  --product-detail-aspect: 3/4; /* product.html 大图比例，可改为 1/1 */
-  --thumb-size: 80px;           /* 缩略图统一尺寸 */
+  --product-card-aspect: 4/5;   /* index.html 卡片比例 - 更紧凑 */
+  --product-detail-aspect: 1/1; /* product.html 大图比例 - 正方形 */
+  --thumb-size: 45px;           /* 缩略图统一尺寸 - 调整为更小 */
 }
 
 /* Reset & Base Styles */
@@ -84,13 +84,20 @@ body {
   display: flex;
   align-items: center;
   position: relative;
+  justify-content: space-between;
 }
 
 .header-controls {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-left: auto;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  min-width: 0; /* 防止内容溢出 */
+  flex-shrink: 0; /* 保持控件不被压缩 */
 }
 
 .logo {
@@ -99,8 +106,7 @@ body {
   font-weight: 700;
   text-decoration: none;
   color: var(--text-primary);
-  position: absolute;
-  left: 0;
+  flex-shrink: 0;
 }
 
 /* Logo modifier: two-line stacked presentation */
@@ -129,6 +135,8 @@ body {
   flex: 1;
   display: flex;
   justify-content: center;
+  margin: 0 auto;
+  max-width: calc(100% - 400px); /* 为logo和controls留出空间 */
 }
 
 .main-nav ul {
@@ -228,6 +236,65 @@ body {
   color: var(--text-secondary);
 }
 
+/* 面包屑导航样式 */
+.breadcrumb-nav {
+  background: var(--background-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: var(--spacing-sm) 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item:not(:last-child)::after {
+  content: '›';
+  margin: 0 var(--spacing-xs);
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+
+.breadcrumb-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+}
+
+.breadcrumb-link:hover {
+  color: var(--accent-color);
+  background-color: rgba(var(--accent-color-rgb), 0.1);
+}
+
+.breadcrumb-item.active .breadcrumb-text {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.breadcrumb-icon {
+  font-size: 0.8rem;
+}
+
+/* 导航图标样式 */
+.nav-icon {
+  font-size: 0.9rem;
+  margin-right: var(--spacing-xs);
+}
+
 /* 移动端导航栏优化 */
 .mobile-nav-toggle {
   display: none;
@@ -245,7 +312,7 @@ body {
   line-height: 1;
   min-width: 44px;
   min-height: 44px;
-  display: flex;
+  /* display set via media query for mobile; keep hidden on desktop */
   align-items: center;
   justify-content: center;
 }
@@ -263,16 +330,34 @@ body {
   .main-header .container {
     position: relative;
     padding: var(--spacing-sm) var(--spacing-md);
+    justify-content: space-between; /* logo 左侧，controls 右侧 */
+    align-items: center;
   }
-  
+
+  .header-controls {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    gap: 0.75rem; /* 稍微缩小间距 */
+    flex-shrink: 0;
+  }
+
   .logo {
     position: static;
     flex-shrink: 0;
     font-size: 1.5rem;
   }
-  
+
   .mobile-nav-toggle {
     display: flex;
+  }
+
+  /* 移动端导航按钮聚焦样式增强 */
+  .mobile-nav-toggle:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    background-color: var(--background-light);
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.15);
   }
   
   .main-nav {
@@ -482,10 +567,14 @@ body {
 /* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 320px);
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
   justify-content: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--spacing-md);
 }
 
 .product-card {
@@ -578,20 +667,30 @@ body {
   transform: none; /* 保证完整展示，不放大以免被容器裁剪 */
 }
 
-/* 产品详情页主图优化 */
+/* 产品详情页主图优化 - 确保主图大于缩略图 */
 .main-image-container {
   position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden; /* 容器以统一外观大小，内部图片用 contain 完整展示 */
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   cursor: zoom-in;
   display: flex;
   align-items: center;
   justify-content: center;
   aspect-ratio: var(--product-detail-aspect);
-  min-height: 0;
-  transition: background-color 0.3s ease;
+  min-height: 300px; /* 确保最小高度大于缩略图 */
+  min-width: 300px;  /* 确保最小宽度大于缩略图 */
+  max-width: 500px;  /* 增加最大宽度 */
+  width: 100%;
+  transition: all 0.3s ease;
+  margin: 0 auto; /* 居中显示 */
+}
+
+/* 当图片加载完成后，容器适应图片尺寸 */
+.main-image-container.image-loaded {
+  background: #ffffff;
+  box-shadow: var(--shadow-md);
 }
 
 .main-image-container.image-loaded {
@@ -625,7 +724,7 @@ body {
   width: 100%;
   height: 100%;
   max-width: 100%;
-  max-height: 55vh; /* 桌面端更小首屏，便于同时看到标题与按钮 */
+  max-height: 100%; /* 移除高度限制，让容器控制尺寸 */
   aspect-ratio: auto;
   object-fit: contain;
   object-position: center;
@@ -648,16 +747,16 @@ body {
 .thumbnail-container {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
 }
 
 .thumbnail-image {
-  width: 80px;
-  height: 80px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
   object-fit: contain;
   background-color: #ffffff;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   border: 2px solid transparent;
   transition: all 0.3s ease;
@@ -714,7 +813,7 @@ body {
 }
 
 .product-info {
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .product-name {
@@ -874,10 +973,11 @@ body {
 
 /* Footer */
 .footer {
-  background: var(--background-medium);
+  background: var(--primary-black);
+  color: var(--primary-white);
   padding: var(--spacing-xl) 0 var(--spacing-lg);
   text-align: center;
-  border-top: 1px solid var(--border-light);
+  border-top: none;
 }
 
 .footer-content {
@@ -890,11 +990,11 @@ body {
 .footer-section h3 {
   font-weight: 600;
   margin-bottom: var(--spacing-md);
-  color: var(--text-primary);
+  color: var(--primary-white);
 }
 
 .footer-section a {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   display: block;
   margin-bottom: var(--spacing-xs);
@@ -904,22 +1004,66 @@ body {
 }
 
 .footer-section a:hover {
-  color: var(--accent-color);
+  color: var(--primary-white);
 }
 
 .footer-section a:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .footer-section a:visited {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .footer-bottom {
   padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-light);
-  color: var(--text-light);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Back to Top Button */
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: var(--accent-color);
+  color: var(--primary-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.back-to-top:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 确保body没有额外的margin/padding */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* 确保html没有额外的margin/padding */
+html {
+  margin: 0;
+  padding: 0;
 }
 
 /* Responsive Design */
@@ -999,18 +1143,24 @@ body {
   .product-layout {
     gap: var(--spacing-md);
   }
-  
+
+  .main-image-container {
+    min-height: 200px; /* 确保移动端主图也大于缩略图 */
+    min-width: 200px;
+    max-width: 90vw;
+  }
+
   #main-product-image {
     aspect-ratio: auto;
     max-height: 50vh;
   }
-  
+
   .main-image-container:hover #main-product-image { transform: none; }
-  
+
   .thumbnail-container {
     gap: var(--spacing-xs);
   }
-  
+
   .thumbnail-image { width: calc(var(--thumb-size) * 0.6); height: calc(var(--thumb-size) * 0.6); }
   
   .product-title {

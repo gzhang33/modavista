@@ -36,7 +36,7 @@ function get_media($dir) {
     }
     $used_images = [];
 
-    $stmt1 = $conn->prepare('SELECT default_image FROM product_variants WHERE default_image IS NOT NULL AND default_image <> ""');
+    $stmt1 = $conn->prepare('SELECT default_image FROM product_variant WHERE default_image IS NOT NULL AND default_image <> ""');
     if ($stmt1 && $stmt1->execute()) {
         $res1 = $stmt1->get_result();
         while ($r = $res1->fetch_assoc()) {
@@ -106,7 +106,7 @@ function cleanup_orphan_handler($dir) {
 
     // 构建引用集
     $referenced = [];
-    $stmt1 = $conn->prepare('SELECT default_image FROM product_variants WHERE default_image IS NOT NULL AND default_image <> ""');
+    $stmt1 = $conn->prepare('SELECT default_image FROM product_variant WHERE default_image IS NOT NULL AND default_image <> ""');
     if ($stmt1 && $stmt1->execute()) {
         $res1 = $stmt1->get_result();
         while ($r = $res1->fetch_assoc()) { $referenced[$r['default_image']] = true; }

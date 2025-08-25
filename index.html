@@ -12,11 +12,11 @@
   <meta property="og:title" content="Moda Italiana">
   <meta property="og:description" content="Scopri la nostra collezione esclusiva di capi di moda premium. Curata per lo stile di vita moderno.">
   <meta property="og:url" content="http://localhost/index.html">
-  <meta property="og:image" content="/images/media-689d16ccaa243-aaf7599b.jpg">
+  <meta property="og:image" content="/images/media-689df13b0f54a-04c22d50.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Moda Italiana">
   <meta name="twitter:description" content="Scopri la nostra collezione esclusiva di capi di moda premium. Curata per lo stile di vita moderno.">
-  <meta name="twitter:image" content="/images/media-689d16ccaa243-aaf7599b.jpg">
+  <meta name="twitter:image" content="/images/media-689df13b0f54a-04c22d50.jpg">
   
   <!-- Preload CSS and swap to stylesheet on load to avoid render-blocking & duplicate fetch -->
   <link rel="preload" href="assets/css/style.css?v=1.1" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -63,7 +63,7 @@
       </a>
       <div class="header-controls">
         <div id="language-switcher-container"></div>
-        <button class="mobile-nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <button class="mobile-nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-desktop-hidden>☰</button>
       </div>
       <nav class="main-nav">
         <!-- Categories will be loaded dynamically here -->
@@ -73,9 +73,24 @@
   </header>
   <main id="main-content">
     <h1 class="visually-hidden" data-translate="site_title">Fashion Collection</h1>
-  
 
-  
+    <!-- 面包屑导航 -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <div class="container">
+        <ol class="breadcrumb" id="breadcrumb-list">
+          <li class="breadcrumb-item">
+            <a href="/" class="breadcrumb-link">
+              <span class="breadcrumb-icon">🏠</span>
+              Home
+            </a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <span class="breadcrumb-text">Collezione</span>
+          </li>
+        </ol>
+      </div>
+    </nav>
+
   <section class="section" id="collection">
     <div class="container">
       <!-- I prodotti verranno caricati dinamicamente qui -->
@@ -128,28 +143,12 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>Negozio</h3>
-          <a href="#collection">Nuovi Arrivi</a>
-          <a href="#collection">I Più Venduti</a>
+          <h3 data-translate="footer_shop">Negozio</h3>
+          <a href="#collection" data-translate="footer_collection">Collezione</a>
         </div>
         <div class="footer-section">
-          <h3>Assistenza Clienti</h3>
-          <a href="#contact">Contattaci</a>
-          <a href="#size-guide">Guida alle Taglie</a>
-        </div>
-        <div class="footer-section">
-          <h3>Azienda</h3>
-          <a href="#about">Chi Siamo</a>
-          <a href="#careers">Carriere</a>
-          <a href="#sustainability">Sostenibilità</a>
-          <a href="#press">Stampa</a>
-        </div>
-        <div class="footer-section">
-          <h3>Seguici</h3>
-          <a href="#instagram">Instagram</a>
-          <a href="#facebook">Facebook</a>
-          <a href="#twitter">Twitter</a>
-          <a href="#pinterest">Pinterest</a>
+          <h3 data-translate="footer_support">Assistenza Clienti</h3>
+          <a href="#contact" data-translate="footer_contact">Contattaci</a>
         </div>
       </div>
       <div class="footer-bottom">

@@ -4,69 +4,71 @@
 require_once 'config.php';
 require_once 'utils.php';
 
-// 获取当前语言
+// 获取当前语言（返回标准 locale，如 en-GB）
 function get_current_language() {
     // 优先级：URL参数 > Session > Cookie > 浏览器语言 > 默认语言
-    $language = 'en'; // 默认语言
-    
-    // 1. 检查URL参数
-    if (isset($_GET['lang']) && !empty($_GET['lang'])) {
-        $language = $_GET['lang'];
+    $raw = null;
+
+    if (isset($_GET['lang']) && $_GET['lang'] !== '') {
+        $raw = $_GET['lang'];
+    } elseif (isset($_SESSION['user_language'])) {
+        $raw = $_SESSION['user_language'];
+    } elseif (isset($_COOKIE['user_language'])) {
+        $raw = $_COOKIE['user_language'];
+    } else {
+        $raw = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en', 0, 2);
     }
-    // 2. 检查Session
-    elseif (isset($_SESSION['user_language'])) {
-        $language = $_SESSION['user_language'];
-    }
-    // 3. 检查Cookie
-    elseif (isset($_COOKIE['user_language'])) {
-        $language = $_COOKIE['user_language'];
-    }
-    // 4. 检查浏览器语言
-    else {
-        $browser_lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en', 0, 2);
-        if (is_valid_language($browser_lang)) {
-            $language = $browser_lang;
-        }
-    }
-    
-    return $language;
+
+    return normalize_language_code($raw);
 }
 
-// 验证语言是否有效
+// 验证语言是否有效（适配新的locales表）
 function is_valid_language($language_code) {
-    $valid_languages = ['en', 'it', 'fr', 'de', 'es', 'pt', 'nl', 'pl'];
-    return in_array($language_code, $valid_languages);
+    $conn = get_db_connection();
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM locales WHERE code = ?");
+    $stmt->bind_param("s", $language_code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $count = $result->fetch_row()[0];
+    $stmt->close();
+    return $count > 0;
 }
 
 // 设置用户语言偏好
 function set_user_language($language_code) {
+    // 统一规范化传入语言码
+    $language_code = normalize_language_code($language_code);
     if (!is_valid_language($language_code)) {
         return false;
     }
-    
+
     // 设置Session
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
     $_SESSION['user_language'] = $language_code;
-    
+
     // 设置Cookie (30天)
     setcookie('user_language', $language_code, time() + (30 * 24 * 60 * 60), '/');
-    
-    // 记录到数据库
+
+    // 记录到数据库（如果user_language_preferences表存在）
     $conn = get_db_connection();
     $session_id = session_id();
     $ip_address = $_SERVER['REMOTE_ADDR'] ?? '';
-    
-    $stmt = $conn->prepare("
-        INSERT INTO user_language_preferences (session_id, ip_address, language_code) 
-        VALUES (?, ?, ?) 
-        ON DUPLICATE KEY UPDATE language_code = ?, updated_at = NOW()
-    ");
-    $stmt->bind_param("ssss", $session_id, $ip_address, $language_code, $language_code);
-    $stmt->execute();
-    $stmt->close();
-    
+
+    // 检查表是否存在
+    $result = $conn->query("SHOW TABLES LIKE 'user_language_preferences'");
+    if ($result->num_rows > 0) {
+        $stmt = $conn->prepare("
+            INSERT INTO user_language_preferences (session_id, ip_address, language_code)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE language_code = ?, updated_at = NOW()
+        ");
+        $stmt->bind_param("ssss", $session_id, $ip_address, $language_code, $language_code);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     return true;
 }
 
@@ -78,9 +80,9 @@ function get_translation($content_key, $language_code = null) {
     
     $conn = get_db_connection();
     $stmt = $conn->prepare("
-        SELECT sct.translated_text 
-        FROM site_content sc 
-        JOIN site_content_translations sct ON sc.id = sct.content_id 
+        SELECT sct.translated_text
+        FROM site_content sc
+        JOIN site_content_translation sct ON sc.id = sct.content_id
         WHERE sc.content_key = ? AND sct.language_code = ?
     ");
     $stmt->bind_param("ss", $content_key, $language_code);
@@ -102,21 +104,21 @@ function get_translation($content_key, $language_code = null) {
     return $content_key; // 最后返回键名
 }
 
-// 获取所有可用语言
+// 获取所有可用语言（适配新的locales表）
 function get_available_languages() {
     $conn = get_db_connection();
     $result = $conn->query("
-        SELECT language_code, language_name, language_name_native, is_default 
-        FROM languages 
-        WHERE is_active = 1 
+        SELECT code as language_code, language_name, language_name as language_name_native,
+               (sort_order = 1) as is_default
+        FROM locales
         ORDER BY sort_order, language_name
     ");
-    
+
     $languages = [];
     while ($row = $result->fetch_assoc()) {
         $languages[] = $row;
     }
-    
+
     return $languages;
 }
 
@@ -154,6 +156,42 @@ function get_localized_field($table, $field, $id, $language_code = null) {
     return !empty($row[$localized_field]) ? $row[$localized_field] : $row[$field];
 }
 
+// 获取指定语言的所有翻译（适配新的数据库结构）
+function get_all_translations($language_code = null) {
+    if (!$language_code) {
+        $language_code = get_current_language();
+    }
+    // 规范化，确保为 locales.code 格式
+    $language_code = normalize_language_code($language_code);
+
+    $conn = get_db_connection();
+
+    // 检查site_content_translation表是否存在（注意：表名是单数）
+    $result = $conn->query("SHOW TABLES LIKE 'site_content_translation'");
+    if ($result->num_rows == 0) {
+        // 如果表不存在，返回空数组
+        return [];
+    }
+
+    $stmt = $conn->prepare("
+        SELECT sc.content_key, sct.translated_text
+        FROM site_content sc
+        JOIN site_content_translation sct ON sc.id = sct.content_id
+        WHERE sct.language_code = ?
+    ");
+    $stmt->bind_param("s", $language_code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $translations = [];
+    while ($row = $result->fetch_assoc()) {
+        $translations[$row['content_key']] = $row['translated_text'];
+    }
+
+    $stmt->close();
+    return $translations;
+}
+
 // API端点处理
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? '';
@@ -176,6 +214,15 @@ switch ($method) {
                 json_response(200, [
                     'key' => $content_key,
                     'text' => get_translation($content_key)
+                ]);
+                break;
+
+            case 'translations':
+                $language_code = $_GET['lang'] ?? get_current_language();
+                $translations = get_all_translations($language_code);
+                json_response(200, [
+                    'language' => $language_code,
+                    'translations' => $translations
                 ]);
                 break;
                 

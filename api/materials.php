@@ -36,31 +36,35 @@ switch ($method) {
 $conn->close();
 
 function get_materials($conn) {
-    // 语言参数处理：en | zh | it
-    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
-    if (!in_array($lang, ['en', 'zh', 'it'], true)) { $lang = 'en'; }
+    // 支持两位语言码或完整 locale，统一规范化
+    $raw = $_GET['lang'] ?? null;
+    $locale = normalize_language_code($raw);
 
-    $sql = 'SELECT id, material_name, material_name_zh, material_name_it FROM materials ORDER BY 
-            CASE WHEN (? = "zh") THEN COALESCE(material_name_zh, material_name)
-                 WHEN (? = "it") THEN COALESCE(material_name_it, material_name)
-                 ELSE material_name END ASC';
+    // 使用新的 i18n 结构查询材质
+    $sql = 'SELECT
+                m.id,
+                COALESCE(mi.name, m.material_name) AS name,
+                m.material_name AS name_en
+            FROM material m
+            LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?
+            ORDER BY COALESCE(mi.name, m.material_name) ASC';
+
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
-    $stmt->bind_param('ss', $lang, $lang);
+    $stmt->bind_param('s', $locale);
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
     $result = $stmt->get_result();
     $materials = [];
     while ($row = $result->fetch_assoc()) {
-        $name_en = $row['material_name'];
-        $name_zh = $row['material_name_zh'] ?? null;
-        $name_it = $row['material_name_it'] ?? null;
-        $name = $lang === 'zh' ? ($name_zh ?: $name_en) : ($lang === 'it' ? ($name_it ?: $name_en) : $name_en);
-        // 返回包含英文名和本地化名称的对象
-        $materials[] = ['id' => $row['id'], 'name' => $name, 'name_en' => $name_en];
+        $materials[] = [
+            'id' => (int)$row['id'],
+            'name' => $row['name'],
+            'name_en' => $row['name_en']
+        ];
     }
     $stmt->close();
     json_response(200, $materials);
@@ -68,16 +72,15 @@ function get_materials($conn) {
 
 function add_material($conn) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $name = $data['name'] ?? null; // 英文
-    $name_zh = $data['name_zh'] ?? null;
-    $name_it = $data['name_it'] ?? null;
+    $name = $data['name'] ?? null; // 英文名称
+    $translations = $data['translations'] ?? []; // 多语言翻译
 
     if (empty($name)) {
         json_response(400, ['message' => '材质名称不能为空']);
     }
-    
-    // 检查是否已存在
-    $check = $conn->prepare('SELECT id FROM materials WHERE material_name = ?');
+
+    // 检查材质是否已存在
+    $check = $conn->prepare('SELECT id FROM material WHERE material_name = ?');
     $check->bind_param('s', $name);
     $check->execute();
     $res = $check->get_result();
@@ -87,15 +90,58 @@ function add_material($conn) {
     }
     $check->close();
 
-    $ins = $conn->prepare('INSERT INTO materials (material_name, material_name_zh, material_name_it) VALUES (?, ?, ?)');
+    // 开始事务
+    $conn->begin_transaction();
+
+    // 创建主材质记录
+    $ins = $conn->prepare('INSERT INTO material (material_name) VALUES (?)');
     if ($ins === false) {
+        $conn->rollback();
         json_response(500, ['message' => '创建材质失败: ' . $conn->error]);
     }
-    $ins->bind_param('sss', $name, $name_zh, $name_it);
-    $ins->execute();
-    $id = $ins->insert_id;
+    $ins->bind_param('s', $name);
+    if (!$ins->execute()) {
+        $ins->close();
+        $conn->rollback();
+        json_response(500, ['message' => '创建材质失败: ' . $conn->error]);
+    }
+    $material_id = $ins->insert_id;
     $ins->close();
-    json_response(201, ['message' => "材质 '{$name}' 添加成功", 'id' => (int)$id]);
+
+    // 添加英文翻译
+    $i18n_stmt = $conn->prepare('INSERT INTO material_i18n (material_id, locale, name) VALUES (?, ?, ?)');
+    if (!$i18n_stmt) {
+        $conn->rollback();
+        json_response(500, ['message' => '创建材质翻译失败: ' . $conn->error]);
+    }
+
+    $locale = 'en-GB';
+    $i18n_stmt->bind_param('iss', $material_id, $locale, $name);
+    if (!$i18n_stmt->execute()) {
+        $i18n_stmt->close();
+        $conn->rollback();
+        json_response(500, ['message' => '创建英文翻译失败: ' . $conn->error]);
+    }
+
+    // 添加其他语言翻译
+    foreach ($translations as $lang => $translation) {
+        if (empty($translation)) continue;
+
+        $locale_map = ['zh' => 'zh-CN', 'it' => 'it-IT'];
+        $locale = $locale_map[$lang] ?? null;
+        if (!$locale) continue;
+
+        $i18n_stmt->bind_param('iss', $material_id, $locale, $translation);
+        if (!$i18n_stmt->execute()) {
+            $i18n_stmt->close();
+            $conn->rollback();
+            json_response(500, ['message' => "创建 {$lang} 翻译失败: " . $conn->error]);
+        }
+    }
+    $i18n_stmt->close();
+
+    $conn->commit();
+    json_response(201, ['message' => "材质 '{$name}' 添加成功", 'id' => (int)$material_id]);
 }
 
 function delete_material($conn) {
@@ -105,8 +151,9 @@ function delete_material($conn) {
     if (empty($name)) {
         json_response(400, ['message' => '要删除的材质名称不能为空']);
     }
-    
-    $del = $conn->prepare('DELETE FROM materials WHERE material_name = ?');
+
+    // 删除材质（外键约束会自动删除相关的 i18n 记录）
+    $del = $conn->prepare('DELETE FROM material WHERE material_name = ?');
     if ($del === false) {
         json_response(500, ['message' => '删除失败: ' . $conn->error]);
     }

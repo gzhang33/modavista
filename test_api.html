@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { margin: 5px; padding: 10px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>API Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Categories API Test</h2>
+        <button onclick="testGetCategories()">Get Categories (EN)</button>
+        <button onclick="testGetCategoriesZh()">Get Categories (ZH)</button>
+        <button onclick="testCreateCategory()">Create Test Category</button>
+        <div id="categories-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Colors API Test</h2>
+        <button onclick="testGetColors()">Get Colors</button>
+        <button onclick="testCreateColor()">Create Test Color</button>
+        <div id="colors-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Materials API Test</h2>
+        <button onclick="testGetMaterials()">Get Materials</button>
+        <button onclick="testCreateMaterial()">Create Test Material</button>
+        <div id="materials-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Products API Test</h2>
+        <button onclick="testGetProducts()">Get Products</button>
+        <button onclick="testGetProductsZh()">Get Products (ZH)</button>
+        <div id="products-result" class="result"></div>
+    </div>
+
+    <script>
+        async function apiCall(url, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.json();
+                return { success: response.ok, data: result, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayResult(elementId, result) {
+            const element = document.getElementById(elementId);
+            if (result.success) {
+                element.className = 'result success';
+                element.innerHTML = `<strong>Success:</strong><br><pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+            } else {
+                element.className = 'result error';
+                element.innerHTML = `<strong>Error:</strong><br>${result.error || JSON.stringify(result.data, null, 2)}`;
+            }
+        }
+
+        async function testGetCategories() {
+            const result = await apiCall('/api/categories.php');
+            displayResult('categories-result', result);
+        }
+
+        async function testGetCategoriesZh() {
+            const result = await apiCall('/api/categories.php?lang=zh');
+            displayResult('categories-result', result);
+        }
+
+        async function testCreateCategory() {
+            const data = {
+                name: 'Test Category ' + Date.now(),
+                translations: {
+                    zh: '测试分类 ' + Date.now(),
+                    it: 'Categoria Test ' + Date.now()
+                }
+            };
+            const result = await apiCall('/api/categories.php', 'POST', data);
+            displayResult('categories-result', result);
+        }
+
+        async function testGetColors() {
+            const result = await apiCall('/api/colors.php');
+            displayResult('colors-result', result);
+        }
+
+        async function testCreateColor() {
+            const data = {
+                name: 'Test Color ' + Date.now(),
+                code: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase(),
+                translations: {
+                    zh: '测试颜色 ' + Date.now(),
+                    it: 'Colore Test ' + Date.now()
+                }
+            };
+            const result = await apiCall('/api/colors.php', 'POST', data);
+            displayResult('colors-result', result);
+        }
+
+        async function testGetMaterials() {
+            const result = await apiCall('/api/materials.php');
+            displayResult('materials-result', result);
+        }
+
+        async function testCreateMaterial() {
+            const data = {
+                name: 'Test Material ' + Date.now(),
+                translations: {
+                    zh: '测试材质 ' + Date.now(),
+                    it: 'Materiale Test ' + Date.now()
+                }
+            };
+            const result = await apiCall('/api/materials.php', 'POST', data);
+            displayResult('materials-result', result);
+        }
+
+        async function testGetProducts() {
+            const result = await apiCall('/api/products.php');
+            displayResult('products-result', result);
+        }
+
+        async function testGetProductsZh() {
+            const result = await apiCall('/api/products.php?lang=zh');
+            displayResult('products-result', result);
+        }
+    </script>
+</body>
+</html>

@@ -41,17 +41,26 @@ export class RelatedProducts {
 
     try {
       this.showLoadingState();
-      
-      // 获取同分类的所有产品
-      const allCategoryProducts = await apiClient.getProductsByCategory(category);
 
-      // 过滤掉当前产品，只保留同分类的其他产品
-      const filteredProducts = allCategoryProducts.filter(product => 
-        product.category === category && product.id !== currentProductId
-      );
+      let allProducts;
+
+      // 如果有分类，获取同分类产品；否则获取所有产品
+      if (category && category !== 'null' && category !== null) {
+        allProducts = await apiClient.getProductsByCategory(category);
+        // 过滤掉当前产品，只保留同分类的其他产品
+        this.relatedProducts = allProducts.filter(product =>
+          product.category === category && product.id != currentProductId
+        );
+      } else {
+        // 如果没有分类，获取所有产品并排除当前产品
+        allProducts = await apiClient.getProducts();
+        this.relatedProducts = allProducts.filter(product =>
+          product.id != currentProductId
+        );
+      }
 
       // 随机排序并限制数量
-      this.relatedProducts = this.shuffleArray(filteredProducts).slice(0, limit);
+      this.relatedProducts = this.shuffleArray(this.relatedProducts).slice(0, limit);
 
       if (this.relatedProducts.length > 0) {
         this.renderProducts();

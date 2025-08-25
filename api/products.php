@@ -1,6 +1,6 @@
 <?php
 session_start();
-// api/products.php（新版：三表结构）
+// api/products.php（新版：i18n 多语言结构）
 require_once 'config.php';
 require_once 'utils.php';
 
@@ -47,60 +47,42 @@ function respond_error($http_status, $error_code, $message, $field = null) {
 
 // === GET ===
 function handle_get($conn) {
-    // language param for localized display fields - 支持所有欧洲语言
-    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
-    $valid_languages = ['en', 'it', 'fr', 'de', 'es', 'pt', 'nl', 'pl'];
-    if (!in_array($lang, $valid_languages, true)) { $lang = 'en'; }
-
-    // Helper to detect if a column exists; prevents SQL errors if migrations not applied
-    $column_exists = function($table, $column) use ($conn) {
-        $sql = 'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1';
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) return false;
-        $db = DB_NAME;
-        $stmt->bind_param('sss', $db, $table, $column);
-        if (!$stmt->execute()) { $stmt->close(); return false; }
-        $res = $stmt->get_result();
-        $exists = (bool)$res->fetch_row();
-        $stmt->close();
-        return $exists;
-    };
-    
-    // 检查所有语言字段是否存在
-    $has_cat_lang = $column_exists('categories', "category_name_$lang");
-    $has_col_lang = $column_exists('colors', "color_name_$lang");
-    $has_mat_lang = $column_exists('materials', "material_name_$lang");
-    $has_desc_lang = $column_exists('products', "description_$lang");
-    
-    // 根据实际数据库结构调整字段名
-    $cat_field = $has_cat_lang ? "category_name_$lang" : "category_name_en";
-    $col_field = $has_col_lang ? "color_name_$lang" : "color_name";
-    $mat_field = $has_mat_lang ? "material_name_$lang" : "material_name";
+    // language param for localized display fields - 支持多语言
+    $raw = $_GET['lang'] ?? null;
+    $locale = normalize_language_code($raw);
     // 单个变体详情（保持前端兼容字段名；不再依赖已删除的 v.variant_name 字段）
     if (isset($_GET['id'])) {
         $variant_id = (int)$_GET['id'];
-        $sql = 'SELECT 
+        $sql = 'SELECT
                     v.id              AS variant_id,
                     v.default_image   AS default_image,
                     v.created_at      AS variant_created_at,
+                    v.sku             AS sku,
                     p.id              AS product_id,
                     p.base_name       AS base_name,
                     p.description     AS description,
                     p.category_id     AS category_id,
-                    c.' . $cat_field . ' AS category_name,
-                    clr.' . $col_field . ' AS color_name,
-                    m.' . $mat_field . ' AS material_name
-                FROM product_variants v
-                JOIN products p ON v.product_id = p.id
-                LEFT JOIN categories c ON p.category_id = c.id
-                LEFT JOIN colors clr ON v.color_id = clr.id
-                LEFT JOIN materials m ON v.material_id = m.id
+                    p.status          AS product_status,
+                    COALESCE(pi.name, p.base_name) AS product_name,
+                    COALESCE(pi.description, p.description) AS product_description,
+                    COALESCE(ci.name, c.category_name_en) AS category_name,
+                    COALESCE(cli.name, clr.color_name) AS color_name,
+                    COALESCE(mi.name, m.material_name) AS material_name
+                FROM product_variant v
+                JOIN product p ON v.product_id = p.id
+                LEFT JOIN category c ON p.category_id = c.id
+                LEFT JOIN color clr ON v.color_id = clr.id
+                LEFT JOIN material m ON v.material_id = m.id
+                LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
+                LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
+                LEFT JOIN color_i18n cli ON clr.id = cli.color_id AND cli.locale = ?
+                LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?
                 WHERE v.id = ?';
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             json_response(500, ['message' => '查询准备失败: ' . $conn->error]);
         }
-        $stmt->bind_param('i', $variant_id);
+        $stmt->bind_param('ssssi', $locale, $locale, $locale, $locale, $variant_id);
         if (!$stmt->execute()) {
             json_response(500, ['message' => '查询执行失败: ' . $stmt->error]);
         }
@@ -123,19 +105,21 @@ function handle_get($conn) {
         }
         $media_stmt->close();
 
-        // 同组变体（siblings）- 使用 base_name 与 color_name 组合展示名
-        $sib_sql = 'SELECT 
+        // 同组变体（siblings）- 使用 i18n 名称
+        $sib_sql = 'SELECT
                         v.id AS id,
-                        CONCAT(p.base_name, " - ", IFNULL(clr.color_name, "")) AS name,
+                        CONCAT(COALESCE(pi.name, p.base_name), " - ", IFNULL(COALESCE(cli.name, clr.color_name), "")) AS name,
                         v.default_image AS default_image,
                         v.created_at AS created_at
-                    FROM product_variants v
-                    JOIN products p ON v.product_id = p.id
-                    LEFT JOIN colors clr ON v.color_id = clr.id
+                    FROM product_variant v
+                    JOIN product p ON v.product_id = p.id
+                    LEFT JOIN color clr ON v.color_id = clr.id
+                    LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
+                    LEFT JOIN color_i18n cli ON clr.id = cli.color_id AND cli.locale = ?
                     WHERE v.product_id = ?
                     ORDER BY v.created_at ASC, v.id ASC';
         $sib_stmt = $conn->prepare($sib_sql);
-        $sib_stmt->bind_param('i', $row['product_id']);
+        $sib_stmt->bind_param('ssi', $locale, $locale, $row['product_id']);
         $sib_stmt->execute();
         $sib_res = $sib_stmt->get_result();
         $siblings = [];
@@ -149,18 +133,20 @@ function handle_get($conn) {
         }
         $sib_stmt->close();
 
-        $display_name = $row['base_name'] . ' - ' . ($row['color_name'] ?? '');
+        $display_name = $row['product_name'] . ' - ' . ($row['color_name'] ?? '');
         $response = [
             'id' => (int)$row['variant_id'],
             'product_id' => (int)$row['product_id'],
             // 兼容旧前端字段：提供组合名称
             'name' => trim($display_name),
             'base_name' => $row['base_name'],
-            'description' => $row['description'],
+            'description' => $row['product_description'],
             'category' => $row['category_name'],
             'category_id' => $row['category_id'] ? (int)$row['category_id'] : null,
             'color' => $row['color_name'],
             'material' => $row['material_name'],
+            'sku' => $row['sku'],
+            'status' => $row['product_status'],
             'defaultImage' => $row['default_image'],
             'media' => $media,
             'createdAt' => $row['variant_created_at'],
@@ -173,21 +159,23 @@ function handle_get($conn) {
     // 根据产品 ID 获取该产品的所有变体（用于后台编辑同组展示）
     if (isset($_GET['product_id'])) {
         $product_id = (int)$_GET['product_id'];
-        $sql = 'SELECT 
+        $sql = 'SELECT
                     v.id AS id,
-                    CONCAT(p.base_name, " - ", IFNULL(clr.color_name, "")) AS name,
+                    CONCAT(COALESCE(pi.name, p.base_name), " - ", IFNULL(COALESCE(cli.name, clr.color_name), "")) AS name,
                     v.default_image AS defaultImage,
                     v.created_at AS created_at
-                FROM product_variants v
-                JOIN products p ON v.product_id = p.id
-                LEFT JOIN colors clr ON v.color_id = clr.id
+                FROM product_variant v
+                JOIN product p ON v.product_id = p.id
+                LEFT JOIN color clr ON v.color_id = clr.id
+                LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
+                LEFT JOIN color_i18n cli ON clr.id = cli.color_id AND cli.locale = ?
                 WHERE v.product_id = ?
                 ORDER BY v.created_at ASC, v.id ASC';
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             json_response(500, ['message' => '查询准备失败: ' . $conn->error]);
         }
-        $stmt->bind_param('i', $product_id);
+        $stmt->bind_param('ssi', $locale, $locale, $product_id);
         $stmt->execute();
         $res = $stmt->get_result();
         $rows = [];
@@ -204,16 +192,14 @@ function handle_get($conn) {
         return;
     }
 
-    // 列表（按变体返回，保持与旧前端兼容）
-    $where = [];
-    $params = [];
-    $types = '';
+    // 列表（按变体返回，使用新的 i18n 结构和发布状态）
+    $where = ['p.status = "published"']; // 只显示已发布的产品
+    $params = [$locale, $locale, $locale, $locale]; // i18n 参数
+    $types = 'ssss';
 
-    // 归档功能已移除：忽略 archived 参数，避免引用已删除的列
-
-    // 模糊搜索（基名或颜色名）
+    // 模糊搜索（产品名或颜色名）
     if (!empty($_GET['search'])) {
-        $where[] = '(p.base_name LIKE ? OR clr.color_name LIKE ?)';
+        $where[] = '(COALESCE(pi.name, p.base_name) LIKE ? OR COALESCE(cli.name, clr.color_name) LIKE ?)';
         $params[] = '%' . $_GET['search'] . '%';
         $params[] = '%' . $_GET['search'] . '%';
         $types .= 'ss';
@@ -221,27 +207,33 @@ function handle_get($conn) {
 
     // 分类（按名称，以保持前端兼容）
     if (!empty($_GET['category'])) {
-        $where[] = "c.$cat_field = ?";
+        $where[] = 'COALESCE(ci.name, c.category_name_en) = ?';
         $params[] = $_GET['category'];
         $types .= 's';
     }
 
-    $sql = 'SELECT 
+    $sql = 'SELECT
                 v.id            AS id,
-                CONCAT_WS(" - ", p.base_name, clr.' . $col_field . ') AS name,
+                CONCAT_WS(" - ", COALESCE(pi.name, p.base_name), COALESCE(cli.name, clr.color_name)) AS name,
                 v.default_image AS default_image,
                 v.created_at    AS created_at,
+                v.sku           AS sku,
                 p.base_name     AS base_name,
-                p.description   AS description,
+                COALESCE(pi.description, p.description) AS description,
                 p.id            AS product_id,
-                c.' . $cat_field . ' AS category,
-                clr.' . $col_field . ' AS color,
-                m.' . $mat_field . ' AS material
-            FROM product_variants v
-            JOIN products p ON v.product_id = p.id
-            LEFT JOIN categories c ON p.category_id = c.id
-            LEFT JOIN colors clr ON v.color_id = clr.id
-            LEFT JOIN materials m ON v.material_id = m.id';
+                p.status        AS product_status,
+                COALESCE(ci.name, c.category_name_en) AS category,
+                COALESCE(cli.name, clr.color_name) AS color,
+                COALESCE(mi.name, m.material_name) AS material
+            FROM product_variant v
+            JOIN product p ON v.product_id = p.id
+            LEFT JOIN category c ON p.category_id = c.id
+            LEFT JOIN color clr ON v.color_id = clr.id
+            LEFT JOIN material m ON v.material_id = m.id
+            LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
+            LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
+            LEFT JOIN color_i18n cli ON clr.id = cli.color_id AND cli.locale = ?
+            LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?';
     if ($where) {
         $sql .= ' WHERE ' . implode(' AND ', $where);
     }
@@ -267,6 +259,8 @@ function handle_get($conn) {
             'product_id' => (int)$r['product_id'],
             'color' => $r['color'],
             'material' => $r['material'],
+            'sku' => $r['sku'],
+            'status' => $r['product_status'],
             'defaultImage' => $r['default_image'],
             'media' => [],
             'createdAt' => $r['created_at'],
@@ -307,8 +301,8 @@ function handle_post($conn) {
 
         // 更新 products（可选字段）
         if ($base_name !== null || $description !== null || $category_id !== null) {
-            $sql = 'UPDATE products p
-                    JOIN product_variants v ON v.product_id = p.id
+            $sql = 'UPDATE product p
+                    JOIN product_variant v ON v.product_id = p.id
                     SET p.base_name = COALESCE(?, p.base_name),
                         p.description = COALESCE(?, p.description),
                         p.category_id = COALESCE(?, p.category_id)
@@ -330,7 +324,7 @@ function handle_post($conn) {
 
         // 更新变体默认图（可选）
         if ($default_image !== null) {
-            $sql = 'UPDATE product_variants SET 
+            $sql = 'UPDATE product_variant SET
                         default_image = COALESCE(?, default_image)
                     WHERE id = ?';
             $stmt = $conn->prepare($sql);
@@ -395,16 +389,15 @@ function handle_post($conn) {
             $upd->close();
         }
 
-        // 新增媒体明细（按顺序）
+        // 新增媒体明细（让触发器自动处理排序）
         if (!empty($uploaded)) {
-            $insert = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
+            $insert = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, NULL)');
             if (!$insert) {
                 $conn->rollback();
                 json_response(500, ['message' => '媒体插入准备失败: ' . $conn->error]);
             }
-            foreach ($uploaded as $index => $path) {
-                $sort = (int)$index;
-                $insert->bind_param('isi', $variant_id, $path, $sort);
+            foreach ($uploaded as $path) {
+                $insert->bind_param('is', $variant_id, $path);
                 if (!$insert->execute()) {
                     $insert->close();
                     $conn->rollback();
@@ -532,8 +525,8 @@ function handle_post($conn) {
     // 开启事务
     $conn->begin_transaction();
 
-    // 新建产品
-    $p_stmt = $conn->prepare('INSERT INTO products (base_name, description, category_id) VALUES (?, ?, ?)');
+    // 新建产品（使用新的表名和状态字段）
+    $p_stmt = $conn->prepare('INSERT INTO product (base_name, description, category_id, status) VALUES (?, ?, ?, "published")');
     if (!$p_stmt) {
         $conn->rollback();
         json_response(500, ['message' => '创建产品失败: ' . $conn->error]);
@@ -566,18 +559,17 @@ function handle_post($conn) {
         json_response(400, ['message' => '颜色名称不能为空']);
     }
     $color_id_main = resolve_color_id($conn, $color_main);
-    $v_main = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+    $v_main = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
     if (!$v_main) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
     $v_main->bind_param('iiis', $product_id, $color_id_main, $material_id, $default_image_main);
     if (!$v_main->execute()) { $v_main->close(); $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
     $main_variant_id = $v_main->insert_id;
     $v_main->close();
     if (!empty($upload_main['media'])) {
-        $m_main = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
+        $m_main = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, NULL)');
         if (!$m_main) { $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
-        foreach ($upload_main['media'] as $index => $path) {
-            $sort = (int)$index;
-            $m_main->bind_param('isi', $main_variant_id, $path, $sort);
+        foreach ($upload_main['media'] as $path) {
+            $m_main->bind_param('is', $main_variant_id, $path);
             if (!$m_main->execute()) { $m_main->close(); $conn->rollback(); json_response(500, ['message' => '创建媒体失败: ' . $conn->error]); }
         }
         $m_main->close();
@@ -650,18 +642,17 @@ function handle_post($conn) {
                 if ($provided_default_name && isset($upload['media_map'][$provided_default_name])) {
                     $default_image = $upload['media_map'][$provided_default_name];
                     // 更新变体默认图
-                    $upd_def = $conn->prepare('UPDATE product_variants SET default_image = ? WHERE id = ?');
+                    $upd_def = $conn->prepare('UPDATE product_variant SET default_image = ? WHERE id = ?');
                     if (!$upd_def) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '更新默认图失败: ' . $conn->error, $default_field); }
                     $upd_def->bind_param('si', $default_image, $variant_id);
                     if (!$upd_def->execute()) { $upd_def->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '更新默认图失败: ' . $conn->error, $default_field); }
                     $upd_def->close();
                 }
 
-                $m_stmt = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, ?)');
+                $m_stmt = $conn->prepare('INSERT INTO product_media (variant_id, image_path, sort_order) VALUES (?, ?, NULL)');
                 if (!$m_stmt) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建媒体失败: ' . $conn->error); }
-                foreach ($ordered_paths as $index => $path) {
-                    $sort = (int)$index;
-                    $m_stmt->bind_param('isi', $variant_id, $path, $sort);
+                foreach ($ordered_paths as $path) {
+                    $m_stmt->bind_param('is', $variant_id, $path);
                     if (!$m_stmt->execute()) { $m_stmt->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建媒体失败: ' . $conn->error, $field); }
                 }
                 $m_stmt->close();
@@ -671,7 +662,7 @@ function handle_post($conn) {
         }
     } elseif (!empty($variants_array)) {
         // 简单变体数组（仅颜色，无独立媒体上传）
-        $v_stmt = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, NULL)');
+        $v_stmt = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, NULL)');
         if (!$v_stmt) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
         foreach ($variants_array as $color_name) {
             $color = trim((string)$color_name);
@@ -724,7 +715,7 @@ function handle_delete($conn) {
     $m_del->close();
 
     // 找到相关产品 id 用于后续清理
-    $get_p = $conn->prepare("SELECT DISTINCT product_id FROM product_variants WHERE id IN ($placeholders)");
+    $get_p = $conn->prepare("SELECT DISTINCT product_id FROM product_variant WHERE id IN ($placeholders)");
     $get_p->bind_param($types, ...$ids);
     $get_p->execute();
     $res = $get_p->get_result();
@@ -735,7 +726,7 @@ function handle_delete($conn) {
     $get_p->close();
 
     // 删除变体
-    $v_del = $conn->prepare("DELETE FROM product_variants WHERE id IN ($placeholders)");
+    $v_del = $conn->prepare("DELETE FROM product_variant WHERE id IN ($placeholders)");
     $v_del->bind_param($types, ...$ids);
     $v_del->execute();
     $affected = $v_del->affected_rows;
@@ -745,7 +736,7 @@ function handle_delete($conn) {
     if (!empty($product_ids)) {
         $p_ph = implode(',', array_fill(0, count($product_ids), '?'));
         $p_types = str_repeat('i', count($product_ids));
-        $cleanup = $conn->prepare("DELETE p FROM products p LEFT JOIN product_variants v ON v.product_id = p.id WHERE v.id IS NULL AND p.id IN ($p_ph)");
+        $cleanup = $conn->prepare("DELETE p FROM product p LEFT JOIN product_variant v ON v.product_id = p.id WHERE v.id IS NULL AND p.id IN ($p_ph)");
         $cleanup->bind_param($p_types, ...$product_ids);
         $cleanup->execute();
         $cleanup->close();
@@ -763,7 +754,7 @@ function handle_delete($conn) {
 function resolve_category_id($conn, $category_name) {
     $category_name = trim((string)$category_name);
     if ($category_name === '') { return null; }
-    $sel = $conn->prepare('SELECT id FROM categories WHERE category_name = ?');
+    $sel = $conn->prepare('SELECT id FROM category WHERE category_name_en = ?');
     $sel->bind_param('s', $category_name);
     $sel->execute();
     $res = $sel->get_result();
@@ -772,7 +763,7 @@ function resolve_category_id($conn, $category_name) {
     if ($row) { return (int)$row['id']; }
 
     // 若不存在则创建
-    $ins = $conn->prepare('INSERT INTO categories (category_name) VALUES (?)');
+    $ins = $conn->prepare('INSERT INTO category (category_name_en) VALUES (?)');
     $ins->bind_param('s', $category_name);
     $ins->execute();
     $id = $ins->insert_id;
@@ -783,7 +774,7 @@ function resolve_category_id($conn, $category_name) {
 function resolve_material_id($conn, $material_name) {
     $material_name = trim((string)$material_name);
     if ($material_name === '') { return null; }
-    $sel = $conn->prepare('SELECT id FROM materials WHERE material_name = ?');
+    $sel = $conn->prepare('SELECT id FROM material WHERE material_name = ?');
     $sel->bind_param('s', $material_name);
     $sel->execute();
     $res = $sel->get_result();
@@ -792,7 +783,7 @@ function resolve_material_id($conn, $material_name) {
     if ($row) { return (int)$row['id']; }
 
     // 若不存在则创建
-    $ins = $conn->prepare('INSERT INTO materials (material_name) VALUES (?)');
+    $ins = $conn->prepare('INSERT INTO material (material_name) VALUES (?)');
     $ins->bind_param('s', $material_name);
     $ins->execute();
     $id = $ins->insert_id;
@@ -803,7 +794,7 @@ function resolve_material_id($conn, $material_name) {
 function resolve_color_id($conn, $color_name) {
     $color_name = trim((string)$color_name);
     if ($color_name === '') { return null; }
-    $sel = $conn->prepare('SELECT id FROM colors WHERE color_name = ?');
+    $sel = $conn->prepare('SELECT id FROM color WHERE color_name = ?');
     $sel->bind_param('s', $color_name);
     $sel->execute();
     $res = $sel->get_result();
@@ -812,7 +803,7 @@ function resolve_color_id($conn, $color_name) {
     if ($row) { return (int)$row['id']; }
 
     // 若不存在则创建
-    $ins = $conn->prepare('INSERT INTO colors (color_name) VALUES (?)');
+    $ins = $conn->prepare('INSERT INTO color (color_name) VALUES (?)');
     $ins->bind_param('s', $color_name);
     $ins->execute();
     $id = $ins->insert_id;
@@ -873,7 +864,7 @@ function cleanup_orphan_images($conn, $dir = UPLOAD_DIR) {
 
     // 构建数据库引用集合
     $referenced = [];
-    $stmt1 = $conn->prepare('SELECT default_image FROM product_variants WHERE default_image IS NOT NULL AND default_image <> ""');
+    $stmt1 = $conn->prepare('SELECT default_image FROM product_variant WHERE default_image IS NOT NULL AND default_image <> ""');
     if ($stmt1 && $stmt1->execute()) {
         $res1 = $stmt1->get_result();
         while ($r = $res1->fetch_assoc()) {

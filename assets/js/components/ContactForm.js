@@ -2,18 +2,24 @@
  * 联系表单管理器
  * 处理联系表单的提交和验证
  */
-export class ContactForm {
+class ContactForm {
     constructor() {
         this.contactButton = null;
         this.contactForm = null;
         this.isExpanded = false;
+        this.translations = {};
+        this.currentLanguage = 'it-IT';
         this.init();
     }
 
-    init() {
+    async init() {
+        // 加载翻译
+        await this.loadTranslations();
         // 创建可展开的联系表单
         this.createExpandableContactForm();
         this.bindEvents();
+        // 监听语言切换事件
+        this.setupLanguageListener();
     }
 
     createExpandableContactForm() {
@@ -25,18 +31,15 @@ export class ContactForm {
         const formHTML = `
             <div class="expandable-contact-form" style="margin-top: 2rem;">
                 <!-- 触发按钮 -->
-                <div class="contact-form-trigger" id="contact-form-trigger">
+                <div class="contact-form-trigger" id="contact-form-trigger" role="button" tabindex="0" aria-expanded="false" aria-controls="contact-form-container">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
-                    <span>Invia un Messaggio</span>
+                    <span>${this.translations['contact_form_send'] || 'Invia un Messaggio'}</span>
                     <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 9l6 6 6-6"/>
                     </svg>
-                <!-- 按钮容器，确保可点击区域和布局 -->
-                <div role="group" aria-label="Contact actions" style="margin-top:8px"></div>
-
                 </div>
 
                 <!-- 表单容器 -->
@@ -44,33 +47,33 @@ export class ContactForm {
                     <form id="contact-form" class="contact-form">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="contact-name">Nome *</label>
+                                <label for="contact-name">${this.translations['contact_form_name'] || 'Nome'} *</label>
                                 <input type="text" id="contact-name" name="name" required>
                             </div>
                             <div class="form-group">
-                                <label for="contact-email">Email *</label>
+                                <label for="contact-email">${this.translations['contact_form_email'] || 'Email'} *</label>
                                 <input type="email" id="contact-email" name="email" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="contact-phone">Telefono</label>
+                                <label for="contact-phone">${this.translations['contact_form_phone'] || 'Telefono'}</label>
                                 <input type="tel" id="contact-phone" name="phone">
                             </div>
                             <div class="form-group">
-                                <label for="contact-company">Azienda</label>
+                                <label for="contact-company">${this.translations['contact_form_company'] || 'Azienda'}</label>
                                 <input type="text" id="contact-company" name="company">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="contact-message">Messaggio *</label>
+                            <label for="contact-message">${this.translations['contact_form_message'] || 'Messaggio'} *</label>
                             <textarea id="contact-message" name="message" rows="4" required
                                       placeholder="Descrivi la tua richiesta o interesse per i nostri prodotti..."></textarea>
                         </div>
                         <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" id="contact-cancel">Annulla</button>
+                            <button type="button" class="btn btn-secondary" id="contact-cancel">${this.translations['contact_form_cancel'] || 'Annulla'}</button>
                             <button type="submit" class="btn btn-primary" id="contact-submit">
-                                <span class="btn-text">Invia Messaggio</span>
+                                <span class="btn-text">${this.translations['contact_form_send'] || 'Invia Messaggio'}</span>
                                 <span class="btn-loading" style="display: none;">Invio in corso...</span>
                             </button>
                         </div>
@@ -99,6 +102,14 @@ export class ContactForm {
             this.contactButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.toggleForm();
+            });
+
+            // 键盘支持
+            this.contactButton.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.toggleForm();
+                }
             });
         }
 
@@ -142,6 +153,11 @@ export class ContactForm {
             icon.style.transform = 'rotate(180deg)';
         }
 
+        // 更新 ARIA 状态
+        if (this.contactButton) {
+            this.contactButton.setAttribute('aria-expanded', 'true');
+        }
+
         // 聚焦到第一个输入框
         setTimeout(() => {
             const firstInput = document.getElementById('contact-name');
@@ -154,6 +170,11 @@ export class ContactForm {
 
         this.isExpanded = false;
         this.contactForm.classList.remove('expanded');
+
+        // 更新 ARIA 状态
+        if (this.contactButton) {
+            this.contactButton.setAttribute('aria-expanded', 'false');
+        }
 
         // 重置图标
         const icon = this.contactButton.querySelector('.expand-icon');
@@ -428,4 +449,110 @@ export class ContactForm {
 
         document.head.appendChild(styles);
     }
+
+    /**
+     * 加载翻译数据
+     */
+    async loadTranslations() {
+        try {
+            // 获取当前语言
+            this.currentLanguage = this.getCurrentLanguage();
+
+            // 从 API 加载翻译
+            const response = await fetch(`/api/language.php?action=translations&lang=${this.currentLanguage}`);
+            const data = await response.json();
+
+            if (data.translations) {
+                this.translations = data.translations;
+            }
+        } catch (error) {
+            console.warn('Failed to load translations:', error);
+            // 使用默认翻译
+            this.translations = this.getDefaultTranslations();
+        }
+    }
+
+    /**
+     * 获取当前语言
+     */
+    getCurrentLanguage() {
+        // 从全局变量、localStorage 或默认值获取
+        return window.__currentLanguage || localStorage.getItem('user_language') || 'it-IT';
+    }
+
+    /**
+     * 获取默认翻译（意大利语）
+     */
+    getDefaultTranslations() {
+        return {
+            'contact_form_send': 'Invia Messaggio',
+            'contact_form_name': 'Nome',
+            'contact_form_email': 'Email',
+            'contact_form_phone': 'Telefono',
+            'contact_form_company': 'Azienda',
+            'contact_form_message': 'Messaggio',
+            'contact_form_cancel': 'Annulla',
+            'contact_form_success': 'Messaggio inviato con successo! Ti risponderemo presto.',
+            'contact_form_error': 'Errore durante l\'invio del messaggio. Riprova più tardi.'
+        };
+    }
+
+    /**
+     * 监听语言切换事件
+     */
+    setupLanguageListener() {
+        if (window.EventBus) {
+            window.EventBus.on('language_changed', (data) => {
+                this.currentLanguage = data.language_code;
+                if (data.translations) {
+                    this.translations = data.translations;
+                }
+                this.updateFormTexts();
+            });
+        }
+    }
+
+    /**
+     * 更新表单文本
+     */
+    updateFormTexts() {
+        // 更新触发按钮文本
+        const triggerSpan = document.querySelector('#contact-form-trigger span');
+        if (triggerSpan && this.translations['contact_form_send']) {
+            triggerSpan.textContent = this.translations['contact_form_send'];
+        }
+
+        // 更新表单标签
+        const labelMappings = {
+            'contact-name': 'contact_form_name',
+            'contact-email': 'contact_form_email',
+            'contact-phone': 'contact_form_phone',
+            'contact-company': 'contact_form_company',
+            'contact-message': 'contact_form_message'
+        };
+
+        Object.entries(labelMappings).forEach(([inputId, translationKey]) => {
+            const input = document.getElementById(inputId);
+            if (input && this.translations[translationKey]) {
+                const label = document.querySelector(`label[for="${inputId}"]`);
+                if (label) {
+                    label.textContent = this.translations[translationKey] + (input.required ? ' *' : '');
+                }
+            }
+        });
+
+        // 更新按钮文本
+        const submitBtnText = document.querySelector('#contact-submit .btn-text');
+        if (submitBtnText && this.translations['contact_form_send']) {
+            submitBtnText.textContent = this.translations['contact_form_send'];
+        }
+
+        const cancelBtn = document.getElementById('contact-cancel');
+        if (cancelBtn && this.translations['contact_form_cancel']) {
+            cancelBtn.textContent = this.translations['contact_form_cancel'];
+        }
+    }
 }
+
+// 将 ContactForm 暴露到全局
+window.ContactForm = ContactForm;

@@ -328,15 +328,32 @@ export class ProductGrid {
   }
 
   /**
-   * 显示加载状态
+   * 显示加载状态（带骨架屏）
    */
   showLoading() {
     const grid = document.getElementById('product-list');
     if (!grid) return;
+
+    // 创建骨架屏卡片
+    const skeletonCards = Array.from({ length: 6 }, () => `
+      <div class="product-card skeleton">
+        <div class="product-image-container skeleton-image"></div>
+        <div class="product-info">
+          <div class="skeleton-text skeleton-title"></div>
+          <div class="skeleton-text skeleton-subtitle"></div>
+        </div>
+      </div>
+    `).join('');
+
     grid.innerHTML = `
       <div class="loading-state">
-        <div class="loading-spinner" aria-hidden="true"></div>
-        <div class="loading-text">Caricamento in corso…</div>
+        <div class="loading-header">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <div class="loading-text">Caricamento in corso…</div>
+        </div>
+        <div class="skeleton-grid">
+          ${skeletonCards}
+        </div>
       </div>
     `;
   }

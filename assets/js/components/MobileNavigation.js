@@ -24,6 +24,7 @@ export class MobileNavigation {
     this.setupNavClickHandler();
     this.setupOutsideClickHandler();
     this.setupResizeHandler();
+    this.setupLanguageDropdownListener();
   }
 
   /**
@@ -72,19 +73,8 @@ export class MobileNavigation {
    */
   setupOutsideClickHandler() {
     document.addEventListener('click', (e) => {
-      // 检查是否点击了语言切换器区域
-      const languageSwitcher = document.getElementById('language-switcher-container');
-      const isLanguageSwitcherClick = languageSwitcher && languageSwitcher.contains(e.target);
-
-      // 如果点击的不是导航相关元素且不是语言切换器，则关闭导航
-      if (!this.mainNav.contains(e.target) &&
-          !this.mobileToggle.contains(e.target) &&
-          !isLanguageSwitcherClick) {
-        this.closeNavigation();
-      }
-
-      // 如果点击了语言切换器，关闭移动导航（互斥逻辑）
-      if (isLanguageSwitcherClick && this.isNavigationOpen()) {
+      // 如果点击的不是导航相关元素，则关闭导航
+      if (!this.mainNav.contains(e.target) && !this.mobileToggle.contains(e.target)) {
         this.closeNavigation();
       }
     });
@@ -127,6 +117,21 @@ export class MobileNavigation {
    */
   isNavigationOpen() {
     return this.mainNav.classList.contains('active');
+  }
+
+  /**
+   * 设置语言下拉菜单监听器（互斥逻辑）
+   */
+  setupLanguageDropdownListener() {
+    if (window.EventBus) {
+      // 当语言下拉菜单打开时，关闭移动导航
+      window.EventBus.on('language_dropdown_opened', () => {
+        this.closeNavigation();
+      });
+
+      // 当移动导航打开时，可以通知语言切换器关闭
+      // （如果需要的话，这里可以添加相应逻辑）
+    }
   }
 
   /**

@@ -272,8 +272,15 @@ export default class LanguageSwitcher extends BaseComponent {
         });
 
         // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-            this.closeDropdown();
+        document.addEventListener('click', (e) => {
+            // 检查是否点击在语言切换器外部
+            if (!this.container.contains(e.target)) {
+                this.closeDropdown();
+                // 通知移动导航关闭（如果存在）
+                if (window.EventBus) {
+                    window.EventBus.emit('language_dropdown_closed');
+                }
+            }
         });
 
         // Close dropdown on escape key
@@ -298,6 +305,11 @@ export default class LanguageSwitcher extends BaseComponent {
     openDropdown() {
         const trigger = this.container.querySelector('.language-switcher__trigger');
         trigger.setAttribute('aria-expanded', 'true');
+
+        // 通知移动导航关闭（避免重叠）
+        if (window.EventBus) {
+            window.EventBus.emit('language_dropdown_opened');
+        }
     }
 
     closeDropdown() {

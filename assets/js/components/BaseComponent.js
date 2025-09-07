@@ -5,8 +5,7 @@ export default class BaseComponent {
         this.eventBus = window.EventBus;
 
         if (!this.container) {
-            console.error('Container element not provided to BaseComponent.');
-            return;
+            throw new Error('Container element not provided to BaseComponent.');
         }
     }
 

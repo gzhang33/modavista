@@ -6,7 +6,7 @@
 // 导入所需的组件和工具
 import ProductGrid from './components/ProductGrid.js';
 import MobileNavigation from './components/MobileNavigation.js';
-import { ContactForm } from './components/ContactForm.js';
+// ContactForm will be loaded as a global from ContactForm.js
 import LanguageSwitcher from './components/LanguageSwitcher.js';
 import EventBus from './EventBus.js';
 import { build_map_link, sanitize_phone_href } from './utils/map_utils.js';
@@ -51,10 +51,9 @@ class MainApp {
    */
   initializeComponents() {
     // 初始化语言切换组件
-    if (document.getElementById('language-switcher-container')) {
-      this.languageSwitcher = new LanguageSwitcher(
-        document.getElementById('language-switcher-container')
-      );
+    const languageContainer = document.getElementById('language-switcher-container');
+    if (languageContainer) {
+      this.languageSwitcher = new LanguageSwitcher(languageContainer);
     }
 
     // 初始化产品网格组件
@@ -86,6 +85,9 @@ class MainApp {
 
     // 联系方式链接（电话、地址）增强
     this.setupContactLinks();
+
+    // 初始化联系表单
+    this.initContactForm();
   }
 
   /**
@@ -222,6 +224,22 @@ class MainApp {
     
     if (this.mobileNavigation) {
       this.mobileNavigation.destroy?.();
+    }
+  }
+
+  /**
+   * 初始化联系表单
+   */
+  initContactForm() {
+    try {
+      if (typeof ContactForm !== 'undefined') {
+        this.contactForm = new ContactForm();
+        console.log('ContactForm initialized successfully');
+      } else {
+        console.warn('ContactForm class not available');
+      }
+    } catch (error) {
+      console.error('Failed to initialize ContactForm:', error);
     }
   }
 }

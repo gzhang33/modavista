@@ -9,34 +9,24 @@ interface CategoryCarouselProps {
 
 const categories = [
   {
-    id: 'shirts',
-    name: 'SHIRTS',
-    image: 'https://images.unsplash.com/photo-1564859228273-274232fdb516?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400'
+    id: 'Tops',
+    name: 'TOPS',
+    image: '/images/categories/tops.jpg'
   },
   {
-    id: 'dresses',
-    name: 'DRESSES',
-    image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400'
-  },
-  {
-    id: 'jackets',
+    id: 'Outerwear',
     name: 'OUTERWEAR',
-    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400'
+    image: '/images/categories/outerwear.jpg'
   },
   {
-    id: 'pants',
-    name: 'PANTS',
-    image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400'
+    id: 'Bottoms',
+    name: 'BOTTOMS',
+    image: '/images/categories/bottoms.jpg'
   },
   {
-    id: 'accessories',
-    name: 'KNITWEAR',
-    image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400'
-  },
-  {
-    id: 'accessories',
-    name: 'BLOUSES',
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400'
+    id: 'Dresses',
+    name: 'DRESSES',
+    image: '/images/categories/dresses.jpg'
   }
 ];
 
@@ -160,17 +150,18 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
                 onClick={() => handleCategoryClick(category.id)}
                 data-testid={`category-card-${category.id}`}
               >
-                <div className="relative overflow-hidden rounded-lg shadow-lg">
+                <div className="relative overflow-hidden rounded-lg shadow-lg h-64 group-hover:scale-110 transition-transform duration-500 bg-gray-200">
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-charcoal bg-opacity-20 group-hover:bg-opacity-40 transition-all duration-300" />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
                   
                   {/* Category Name Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-charcoal/80 to-transparent p-6">
-                    <h4 className="text-white text-xl font-playfair font-semibold text-center tracking-wider">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-charcoal/90 to-transparent p-6">
+                    <h4 className="text-white text-xl font-playfair font-semibold text-center tracking-wider mb-2">
                       {category.name}
                     </h4>
                   </div>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简化图片测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.4em;
+        }
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            margin: 15px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-family: monospace;
+            font-size: 0.9em;
+            border-left: 4px solid #007bff;
+        }
+        .debug-info h3 {
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+        .refresh-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 20px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .refresh-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ 分类图片显示测试</h1>
+        
+        <button class="refresh-btn" onclick="location.reload()">🔄 刷新测试</button>
+        
+        <div class="image-grid" id="imageGrid"></div>
+        
+        <div class="debug-info">
+            <h3>🔧 调试信息</h3>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        console.clear();
+        console.log('🚀 开始图片测试...');
+        
+        const categories = [
+            { id: 'Tops', name: 'TOPS', image: '/images/categories/tops.jpg' },
+            { id: 'Outerwear', name: 'OUTERWEAR', image: '/images/categories/outerwear.jpg' },
+            { id: 'Bottoms', name: 'BOTTOMS', image: '/images/categories/bottoms.jpg' },
+            { id: 'Dresses', name: 'DRESSES', image: '/images/categories/dresses.jpg' }
+        ];
+
+        const results = [];
+        const imageGrid = document.getElementById('imageGrid');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        // 显示基本信息
+        debugInfo.innerHTML = `
+            <div><strong>当前URL:</strong> ${window.location.href}</div>
+            <div><strong>测试时间:</strong> ${new Date().toLocaleString()}</div>
+            <div><strong>浏览器:</strong> ${navigator.userAgent}</div>
+            <div><strong>协议:</strong> ${window.location.protocol}</div>
+            <div><strong>主机:</strong> ${window.location.host}</div>
+            <hr style="margin: 15px 0;">
+            <div id="testResults"></div>
+        `;
+
+        categories.forEach((category, index) => {
+            // 创建卡片
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${index}`;
+            
+            const timestamp = Date.now();
+            const randomParam = Math.random().toString(36).substring(7);
+            const imageUrl = `${category.image}?t=${timestamp}&r=${randomParam}`;
+            
+            card.innerHTML = `
+                <h3>${category.name}</h3>
+                <div class="image-container">
+                    <img 
+                        id="img-${index}" 
+                        src="${imageUrl}" 
+                        alt="${category.name}"
+                        style="display: block !important; visibility: visible !important; opacity: 1 !important;"
+                    />
+                </div>
+                <div class="status loading" id="status-${index}">⏳ 加载中...</div>
+                <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
+                    <div>路径: ${category.image}</div>
+                    <div>完整URL: ${imageUrl}</div>
+                </div>
+            `;
+            
+            imageGrid.appendChild(card);
+            
+            const img = document.getElementById(`img-${index}`);
+            const status = document.getElementById(`status-${index}`);
+            
+            img.onload = function() {
+                console.log(`✅ ${category.name} 加载成功:`, {
+                    src: this.src,
+                    naturalWidth: this.naturalWidth,
+                    naturalHeight: this.naturalHeight,
+                    complete: this.complete
+                });
+                
+                status.className = 'status success';
+                status.innerHTML = `✅ 加载成功 (${this.naturalWidth}×${this.naturalHeight})`;
+                
+                results.push({
+                    category: category.name,
+                    status: 'success',
+                    width: this.naturalWidth,
+                    height: this.naturalHeight,
+                    url: imageUrl
+                });
+                
+                updateResults();
+            };
+            
+            img.onerror = function(e) {
+                console.error(`❌ ${category.name} 加载失败:`, {
+                    src: this.src,
+                    error: e
+                });
+                
+                status.className = 'status error';
+                status.innerHTML = `❌ 加载失败`;
+                
+                results.push({
+                    category: category.name,
+                    status: 'error',
+                    url: imageUrl
+                });
+                
+                updateResults();
+            };
+            
+            // 设置超时检查
+            setTimeout(() => {
+                if (!img.complete || img.naturalWidth === 0) {
+                    console.warn(`⚠️ ${category.name} 可能加载超时`);
+                }
+            }, 5000);
+        });
+
+        function updateResults() {
+            if (results.length === categories.length) {
+                const successCount = results.filter(r => r.status === 'success').length;
+                const errorCount = results.filter(r => r.status === 'error').length;
+                
+                const resultDiv = document.getElementById('testResults');
+                let resultHtml = `
+                    <div><strong>测试结果:</strong></div>
+                    <div>✅ 成功: ${successCount}/${categories.length}</div>
+                    <div>❌ 失败: ${errorCount}/${categories.length}</div>
+                `;
+                
+                if (successCount === categories.length) {
+                    resultHtml += `<div style="color: #28a745; font-weight: bold; margin-top: 10px;">🎉 所有图片加载成功！</div>`;
+                } else if (errorCount === categories.length) {
+                    resultHtml += `<div style="color: #dc3545; font-weight: bold; margin-top: 10px;">❌ 所有图片加载失败，请检查服务器配置</div>`;
+                } else {
+                    resultHtml += `<div style="color: #ffc107; font-weight: bold; margin-top: 10px;">⚠️ 部分图片加载失败</div>`;
+                }
+                
+                resultDiv.innerHTML = resultHtml;
+                
+                // 详细结果
+                results.forEach(result => {
+                    console.log(`📋 ${result.category}:`, result);
+                });
+            }
+        }
+        
+        // 检查图片文件是否存在
+        categories.forEach(category => {
+            fetch(category.image, { method: 'HEAD' })
+                .then(response => {
+                    console.log(`🔍 ${category.name} 文件检查:`, {
+                        url: category.image,
+                        status: response.status,
+                        ok: response.ok,
+                        size: response.headers.get('content-length')
+                    });
+                })
+                .catch(error => {
+                    console.error(`🔍 ${category.name} 文件检查失败:`, error);
+                });
+        });
+    </script>
+</body>
+</html>

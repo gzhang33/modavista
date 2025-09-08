@@ -1,0 +1,525 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATELIER TEXTILE - Premium Wholesale Garments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'charcoal': '#2C2C2C',
+                    'soft-white': '#F8F8F8',
+                    'accent-gold': '#D4AF37',
+                    'text-grey': '#4A4A4A'
+                },
+                fontFamily: {
+                    'playfair': ['Playfair Display', 'serif'],
+                    'lato': ['Lato', 'sans-serif']
+                }
+            }
+        }
+    };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-white font-lato text-text-grey">
+
+    <!-- @COMPONENT: Header [navigation and branding] -->
+    <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-playfair font-semibold text-charcoal tracking-wide">ATELIER TEXTILE</h1>
+                    <span class="ml-3 text-sm text-accent-gold font-medium">WHOLESALE</span>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#collections" class="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">Collections</a>
+                    <a href="#categories" class="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">Categories</a>
+                    <a href="#about" class="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">About</a>
+                    <a href="#contact" class="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">Contact</a>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <button class="text-charcoal hover:text-accent-gold transition-colors" data-event="click:toggleSearch">
+                        <i class="fas fa-search text-lg"></i>
+                    </button>
+                    <button class="md:hidden text-charcoal hover:text-accent-gold transition-colors" data-event="click:toggleMobileMenu">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: SearchOverlay [expandable search functionality] -->
+    <!-- @STATE: searchOpen:boolean = false -->
+    <div class="bg-soft-white border-b border-gray-200 py-4 hidden" data-mock="true" data-implementation="Show/hide based on searchOpen state">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative">
+                <input type="text" placeholder="Search garments, styles, fabrics..." 
+                       class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
+                       data-bind="searchQuery" data-mock="true">
+                <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-grey hover:text-accent-gold">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: SearchOverlay -->
+
+    <!-- @COMPONENT: HeroSection [main showcase area] -->
+    <section class="relative h-screen flex items-center justify-center overflow-hidden">
+        <!-- Professional textile factory workspace with organized garment samples -->
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+             style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080');">
+        </div>
+        <div class="absolute inset-0 bg-charcoal bg-opacity-40"></div>
+        
+        <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+            <h2 class="text-5xl md:text-7xl font-playfair font-bold mb-6 leading-tight">
+                Premium Wholesale<br>
+                <span class="text-accent-gold">Garment Collection</span>
+            </h2>
+            <p class="text-xl md:text-2xl mb-8 font-light max-w-2xl mx-auto leading-relaxed">
+                Discover our curated selection of high-quality garments crafted for discerning wholesale partners
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-accent-gold text-charcoal px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300"
+                        data-event="click:scrollToCollections">
+                    Explore Collections
+                </button>
+                <button class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-charcoal transition-all duration-300"
+                        data-event="click:scrollToContact">
+                    Request Samples
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: HeroSection -->
+
+    <!-- @COMPONENT: CategoryFilter [product filtering system] -->
+    <section class="bg-soft-white py-8" id="categories">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div>
+                    <h3 class="text-2xl font-playfair font-semibold text-charcoal mb-2">Browse by Category</h3>
+                    <p class="text-text-grey">Filter our extensive collection by garment type and style</p>
+                </div>
+                
+                <!-- @STATE: activeCategory:string = 'all' -->
+                <div class="flex flex-wrap gap-3">
+                    <!-- @MAP: categories.map(category => ( -->
+                    <button class="px-6 py-3 rounded-full border-2 border-charcoal text-charcoal hover:bg-charcoal hover:text-white transition-all duration-300 font-medium"
+                            data-bind="category.name" data-event="click:setActiveCategory" data-mock="true">All</button>
+                    <button class="px-6 py-3 rounded-full border-2 border-gray-300 text-text-grey hover:border-charcoal hover:text-charcoal transition-all duration-300 font-medium"
+                            data-bind="category.name" data-event="click:setActiveCategory" data-mock="true">Shirts</button>
+                    <button class="px-6 py-3 rounded-full border-2 border-gray-300 text-text-grey hover:border-charcoal hover:text-charcoal transition-all duration-300 font-medium"
+                            data-bind="category.name" data-event="click:setActiveCategory" data-mock="true">Dresses</button>
+                    <button class="px-6 py-3 rounded-full border-2 border-gray-300 text-text-grey hover:border-charcoal hover:text-charcoal transition-all duration-300 font-medium"
+                            data-bind="category.name" data-event="click:setActiveCategory" data-mock="true">Pants</button>
+                    <button class="px-6 py-3 rounded-full border-2 border-gray-300 text-text-grey hover:border-charcoal hover:text-charcoal transition-all duration-300 font-medium"
+                            data-bind="category.name" data-event="click:setActiveCategory" data-mock="true">Outerwear</button>
+                    <button class="px-6 py-3 rounded-full border-2 border-gray-300 text-text-grey hover:border-charcoal hover:text-charcoal transition-all duration-300 font-medium"
+                            data-bind="category.name" data-event="click:setActiveCategory" data-mock="true">Knitwear</button>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <select class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                    <option>All Fabrics</option>
+                    <option>Cotton</option>
+                    <option>Linen</option>
+                    <option>Silk</option>
+                    <option>Wool</option>
+                </select>
+                <select class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                    <option>All Seasons</option>
+                    <option>Spring/Summer</option>
+                    <option>Fall/Winter</option>
+                    <option>All Season</option>
+                </select>
+                <select class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                    <option>All Styles</option>
+                    <option>Casual</option>
+                    <option>Formal</option>
+                    <option>Business</option>
+                    <option>Evening</option>
+                </select>
+                <button class="bg-charcoal text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors duration-300 font-medium"
+                        data-event="click:applyFilters">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: CategoryFilter -->
+
+    <!-- @COMPONENT: FeaturedCollection [main product showcase] -->
+    <section class="py-16" id="collections">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-playfair font-semibold text-charcoal mb-4">Featured Collection</h3>
+                <p class="text-xl text-text-grey max-w-2xl mx-auto">Handpicked selections from our latest seasonal collection, showcasing exceptional craftsmanship and contemporary design</p>
+            </div>
+
+            <!-- @MAP: featuredProducts.map(product => ( -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Product 1 -->
+                <div class="group cursor-pointer" data-event="click:openProductDetail" data-bind="product.id" data-mock="true">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Professional minimalist white shirt on mannequin in clean studio setting -->
+                        <img src="https://images.unsplash.com/photo-1564859228273-274232fdb516?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" 
+                             alt="Premium cotton dress shirt" 
+                             class="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500" data-mock-image="true">
+                        <div class="absolute top-4 right-4 bg-accent-gold text-charcoal px-3 py-1 rounded-full text-sm font-semibold">
+                            New
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-playfair font-semibold text-charcoal mb-2" data-bind="product.name" data-mock="true">Premium Cotton Dress Shirt</h4>
+                    <p class="text-text-grey mb-2" data-bind="product.description" data-mock="true">Classic tailored fit with mother-of-pearl buttons</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-grey" data-bind="product.fabric" data-mock="true">100% Egyptian Cotton</span>
+                        <span class="text-sm text-accent-gold font-semibold">SKU: #AT001</span>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="group cursor-pointer" data-event="click:openProductDetail" data-bind="product.id" data-mock="true">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Elegant black dress on mannequin with professional lighting and minimal background -->
+                        <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" 
+                             alt="Elegant midi dress" 
+                             class="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500" data-mock-image="true">
+                    </div>
+                    <h4 class="text-xl font-playfair font-semibold text-charcoal mb-2" data-bind="product.name" data-mock="true">Elegant Midi Dress</h4>
+                    <p class="text-text-grey mb-2" data-bind="product.description" data-mock="true">Sophisticated A-line silhouette with subtle pleating</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-grey" data-bind="product.fabric" data-mock="true">Ponte Knit Blend</span>
+                        <span class="text-sm text-accent-gold font-semibold">SKU: #AT002</span>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="group cursor-pointer" data-event="click:openProductDetail" data-bind="product.id" data-mock="true">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Tailored navy blazer on professional mannequin in studio setting -->
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" 
+                             alt="Tailored wool blazer" 
+                             class="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500" data-mock-image="true">
+                    </div>
+                    <h4 class="text-xl font-playfair font-semibold text-charcoal mb-2" data-bind="product.name" data-mock="true">Tailored Wool Blazer</h4>
+                    <p class="text-text-grey mb-2" data-bind="product.description" data-mock="true">Contemporary cut with notched lapels</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-grey" data-bind="product.fabric" data-mock="true">Pure Wool</span>
+                        <span class="text-sm text-accent-gold font-semibold">SKU: #AT003</span>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="group cursor-pointer" data-event="click:openProductDetail" data-bind="product.id" data-mock="true">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Casual linen pants displayed on mannequin with natural lighting -->
+                        <img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" 
+                             alt="Linen casual pants" 
+                             class="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500" data-mock-image="true">
+                    </div>
+                    <h4 class="text-xl font-playfair font-semibold text-charcoal mb-2" data-bind="product.name" data-mock="true">Linen Casual Pants</h4>
+                    <p class="text-text-grey mb-2" data-bind="product.description" data-mock="true">Relaxed fit with adjustable waistband</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-grey" data-bind="product.fabric" data-mock="true">100% Linen</span>
+                        <span class="text-sm text-accent-gold font-semibold">SKU: #AT004</span>
+                    </div>
+                </div>
+
+                <!-- Product 5 -->
+                <div class="group cursor-pointer" data-event="click:openProductDetail" data-bind="product.id" data-mock="true">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Cozy knitted sweater on display with soft studio lighting -->
+                        <img src="https://images.unsplash.com/photo-1578587018452-892bacefd3f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" 
+                             alt="Cashmere sweater" 
+                             class="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500" data-mock-image="true">
+                    </div>
+                    <h4 class="text-xl font-playfair font-semibold text-charcoal mb-2" data-bind="product.name" data-mock="true">Cashmere Crew Sweater</h4>
+                    <p class="text-text-grey mb-2" data-bind="product.description" data-mock="true">Luxurious soft knit with ribbed trim</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-grey" data-bind="product.fabric" data-mock="true">100% Cashmere</span>
+                        <span class="text-sm text-accent-gold font-semibold">SKU: #AT005</span>
+                    </div>
+                </div>
+
+                <!-- Product 6 -->
+                <div class="group cursor-pointer" data-event="click:openProductDetail" data-bind="product.id" data-mock="true">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Professional silk blouse on mannequin in elegant studio setup -->
+                        <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" 
+                             alt="Silk blouse" 
+                             class="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500" data-mock-image="true">
+                    </div>
+                    <h4 class="text-xl font-playfair font-semibold text-charcoal mb-2" data-bind="product.name" data-mock="true">Silk Button-Down Blouse</h4>
+                    <p class="text-text-grey mb-2" data-bind="product.description" data-mock="true">Fluid drape with hidden button placket</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-grey" data-bind="product.fabric" data-mock="true">100% Mulberry Silk</span>
+                        <span class="text-sm text-accent-gold font-semibold">SKU: #AT006</span>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+
+            <div class="text-center">
+                <button class="bg-charcoal text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-300"
+                        data-event="click:loadMoreProducts">
+                    View Complete Collection
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: FeaturedCollection -->
+
+    <!-- @COMPONENT: ProductModal [detailed product view] -->
+    <!-- @STATE: selectedProduct:object = null, modalOpen:boolean = false -->
+    <div class="fixed inset-0 z-50 hidden" data-mock="true" data-implementation="Show when modalOpen is true">
+        <div class="absolute inset-0 bg-black bg-opacity-50" data-event="click:closeModal"></div>
+        <div class="relative bg-white max-w-6xl mx-auto mt-8 rounded-lg overflow-hidden max-h-screen overflow-y-auto">
+            <button class="absolute top-4 right-4 z-10 text-gray-500 hover:text-charcoal" data-event="click:closeModal">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <div class="relative">
+                    <!-- Product image gallery would go here -->
+                    <div class="h-96 lg:h-full bg-soft-white flex items-center justify-center">
+                        <span class="text-text-grey" data-mock="true">Product Image Gallery</span>
+                    </div>
+                </div>
+                
+                <div class="p-8">
+                    <h3 class="text-3xl font-playfair font-semibold text-charcoal mb-4" data-bind="selectedProduct.name" data-mock="true">Product Name</h3>
+                    <p class="text-text-grey mb-6" data-bind="selectedProduct.description" data-mock="true">Detailed product description...</p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Fabric:</span>
+                            <span data-bind="selectedProduct.fabric" data-mock="true">100% Cotton</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Care:</span>
+                            <span data-bind="selectedProduct.care" data-mock="true">Machine wash cold</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Origin:</span>
+                            <span data-bind="selectedProduct.origin" data-mock="true">Made in Italy</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">SKU:</span>
+                            <span class="text-accent-gold" data-bind="selectedProduct.sku" data-mock="true">#AT001</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-accent-gold text-charcoal py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300"
+                            data-event="click:requestSample">
+                        Request Sample
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ProductModal -->
+
+    <!-- @COMPONENT: CompanyInfo [about section] -->
+    <section class="bg-soft-white py-16" id="about">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-4xl font-playfair font-semibold text-charcoal mb-6">Crafting Excellence Since 1985</h3>
+                    <p class="text-lg text-text-grey mb-6 leading-relaxed">
+                        ATELIER TEXTILE represents three decades of unwavering commitment to exceptional garment manufacturing. 
+                        Our state-of-the-art facility combines traditional craftsmanship with modern technology to deliver 
+                        premium quality clothing for discerning wholesale partners worldwide.
+                    </p>
+                    <p class="text-lg text-text-grey mb-8 leading-relaxed">
+                        We specialize in small to medium production runs, ensuring attention to detail and quality control 
+                        that larger manufacturers often cannot provide. Our experienced team works closely with each client 
+                        to bring their vision to life with precision and expertise.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-playfair font-bold text-accent-gold mb-2">500+</div>
+                            <div class="text-text-grey">Garment Styles</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-playfair font-bold text-accent-gold mb-2">50+</div>
+                            <div class="text-text-grey">Global Partners</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <!-- Modern textile factory floor with organized production lines and quality control stations -->
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
+                         alt="Modern textile manufacturing facility" 
+                         class="rounded-lg shadow-lg w-full h-auto">
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: CompanyInfo -->
+
+    <!-- @COMPONENT: ContactSection [wholesale inquiry form] -->
+    <section class="py-16" id="contact">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-playfair font-semibold text-charcoal mb-4">Start Your Wholesale Partnership</h3>
+                <p class="text-xl text-text-grey max-w-2xl mx-auto">Ready to explore our collection? Contact our wholesale team for detailed catalogs, pricing, and sample requests.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact Form -->
+                <div class="bg-soft-white p-8 rounded-lg">
+                    <h4 class="text-2xl font-playfair font-semibold text-charcoal mb-6">Request Information</h4>
+                    <form class="space-y-6" data-event="submit:handleContactForm" data-mock="true">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" placeholder="First Name" required
+                                   class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                            <input type="text" placeholder="Last Name" required
+                                   class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                        </div>
+                        <input type="email" placeholder="Business Email" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                        <input type="text" placeholder="Company Name" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-mock="true">
+                        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" required data-mock="true">
+                            <option value="">Business Type</option>
+                            <option value="retailer">Retailer</option>
+                            <option value="distributor">Distributor</option>
+                            <option value="brand">Fashion Brand</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <textarea placeholder="Tell us about your requirements..." rows="4" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent resize-none" data-mock="true"></textarea>
+                        <button type="submit" 
+                                class="w-full bg-accent-gold text-charcoal py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300">
+                            Send Inquiry
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-8">
+                    <div>
+                        <h4 class="text-2xl font-playfair font-semibold text-charcoal mb-6">Get In Touch</h4>
+                        <div class="space-y-6">
+                            <div class="flex items-start space-x-4">
+                                <i class="fas fa-map-marker-alt text-accent-gold text-xl mt-1"></i>
+                                <div>
+                                    <h5 class="font-semibold text-charcoal mb-1">Manufacturing Facility</h5>
+                                    <p class="text-text-grey">1285 Industrial Boulevard<br>Milan, Italy 20154</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4">
+                                <i class="fas fa-phone text-accent-gold text-xl mt-1"></i>
+                                <div>
+                                    <h5 class="font-semibold text-charcoal mb-1">Wholesale Sales</h5>
+                                    <p class="text-text-grey">+39 02 1234 5678<br>Mon - Fri, 9:00 AM - 6:00 PM CET</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4">
+                                <i class="fas fa-envelope text-accent-gold text-xl mt-1"></i>
+                                <div>
+                                    <h5 class="font-semibold text-charcoal mb-1">Email</h5>
+                                    <p class="text-text-grey">wholesale@ateliertextile.com<br>samples@ateliertextile.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-charcoal text-white p-6 rounded-lg">
+                        <h5 class="text-xl font-playfair font-semibold mb-4">Minimum Order Requirements</h5>
+                        <ul class="space-y-2 text-sm">
+                            <li>• Minimum order: 100 pieces per style</li>
+                            <li>• Sample orders: 5-10 pieces available</li>
+                            <li>• Lead time: 4-6 weeks for production</li>
+                            <li>• Custom designs welcome</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: ContactSection -->
+
+    <!-- @COMPONENT: Footer [company information and links] -->
+    <footer class="bg-charcoal text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <h5 class="text-2xl font-playfair font-semibold mb-4">ATELIER TEXTILE</h5>
+                    <p class="text-gray-300 mb-4 max-w-md">
+                        Premium wholesale garment manufacturer serving fashion brands and retailers worldwide 
+                        with exceptional quality and craftsmanship since 1985.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-accent-gold transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-accent-gold transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-accent-gold transition-colors">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h6 class="font-semibold mb-4">Quick Links</h6>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#collections" class="hover:text-accent-gold transition-colors">Collections</a></li>
+                        <li><a href="#categories" class="hover:text-accent-gold transition-colors">Categories</a></li>
+                        <li><a href="#about" class="hover:text-accent-gold transition-colors">About Us</a></li>
+                        <li><a href="#contact" class="hover:text-accent-gold transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h6 class="font-semibold mb-4">Services</h6>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>Wholesale Manufacturing</li>
+                        <li>Custom Design Services</li>
+                        <li>Sample Development</li>
+                        <li>Quality Assurance</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+                <p>&copy; 2024 ATELIER TEXTILE. All rights reserved. | Wholesale inquiries only - No retail sales.</p>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+    (function() {
+        // TODO: Implement search functionality, product filtering, modal controls, and form handling
+        // TODO: Add smooth scrolling, mobile menu toggle, and dynamic content loading
+        // TODO: Integrate with product management system and inquiry processing
+        
+        // Mock interaction handlers for demonstration
+        console.log('ATELIER TEXTILE - Wholesale Showcase Website Loaded');
+        console.log('Features: Product browsing, filtering, detailed views, wholesale inquiries');
+        console.log('Note: This is a design mockup - implement actual functionality as needed');
+    })();
+    </script>
+
+</body>
+</html>

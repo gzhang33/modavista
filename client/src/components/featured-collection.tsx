@@ -20,10 +20,27 @@ export default function FeaturedCollection({
   onOpenProductModal 
 }: FeaturedCollectionProps) {
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['/api/products'],
+    queryKey: ['products'],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/products?limit=10&featured=yes');
-      return (data as any).products || data;
+      const res = await fetch('/api/products.php?limit=10&featured=yes');
+      const data = await res.json();
+      
+      // 将PHP API响应转换为前端期望的格式
+      return data.map((item: any) => ({
+        id: item.id,
+        name: item.name || item.base_name,
+        description: item.description,
+        category: item.category || 'General',
+        fabric: item.material || 'Unknown',
+        style: 'modern',
+        season: 'all-season',
+        care: 'machine-wash',
+        origin: 'italy',
+        sku: item.sku || '',
+        images: item.defaultImage ? [`/product-images/${item.defaultImage.replace('images/', '')}`] : ['/placeholder-image.svg'],
+        specifications: {},
+        featured: 'yes'
+      }));
     }
   });
 
@@ -125,7 +142,7 @@ export default function FeaturedCollection({
                 >
                   <div className="relative overflow-hidden rounded-lg mb-4">
                     <img
-                      src={product.images[0] || '/placeholder-image.jpg'}
+                      src={product.images[0] || '/placeholder-image.svg'}
                       alt={product.name}
                       className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
                     />

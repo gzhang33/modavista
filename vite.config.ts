@@ -26,9 +26,16 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost',
         changeOrigin: true,
         secure: false
+      },
+      // 产品图片代理到根目录的images文件夹
+      '/product-images': {
+        target: 'http://localhost/images',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/product-images/, '')
       }
     },
     fs: {
@@ -36,4 +43,5 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
+  publicDir: path.resolve(__dirname, "client", "public"),
 });

@@ -10,9 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Grid3X3, List, ChevronLeft } from "lucide-react";
 import { Product } from "@shared/schema";
-import { FilterState, FilterOption, SearchState } from "@/types";
+import { FilterState, FilterOption, LanguageState } from "@/types";
 import { Link, useLocation } from "wouter";
-import Header from "@/components/header";
+import Header from "@/components/header-simple";
 import Footer from "@/components/footer";
 import { fetchAllFilterOptions } from "@/lib/filter-options";
 import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
@@ -35,9 +35,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('most-popular');
   
-  const [searchState, setSearchState] = useState<SearchState>({
-    isOpen: false,
-    query: ""
+  const [languageState, setLanguageState] = useState<LanguageState>({
+    currentLanguage: 'en',
+    availableLanguages: []
   });
 
   // Dynamic filter options state
@@ -55,13 +55,6 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
     styles: []
   });
 
-  const toggleSearch = () => {
-    setSearchState(prev => ({ ...prev, isOpen: !prev.isOpen }));
-  };
-
-  const updateSearchQuery = (query: string) => {
-    setSearchState(prev => ({ ...prev, query }));
-  };
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -206,11 +199,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
-        <Header
-          searchState={searchState}
-          onToggleSearch={toggleSearch}
-          onUpdateSearchQuery={updateSearchQuery}
-        />
+        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex">
             {/* Sidebar Skeleton */}
@@ -247,11 +236,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   if (error) {
     return (
       <div className="min-h-screen bg-white">
-        <Header
-          searchState={searchState}
-          onToggleSearch={toggleSearch}
-          onUpdateSearchQuery={updateSearchQuery}
-        />
+        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-16">
             <p className="text-xl text-red-500">Error loading products: {(error as Error).message}</p>
@@ -265,11 +250,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
   return (
     <div className="min-h-screen bg-white">
-      <Header
-        searchState={searchState}
-        onToggleSearch={toggleSearch}
-        onUpdateSearchQuery={updateSearchQuery}
-      />
+      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center mb-8">

@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import Header from "@/components/header-simple";
 import HeroSection from "@/components/hero-section";
 import CategoryCarousel from "@/components/category-carousel";
 import FeaturedCollection from "@/components/featured-collection";
@@ -6,18 +6,16 @@ import CompanyInfo from "@/components/company-info";
 import ContactSection from "@/components/contact-section";
 import Footer from "@/components/footer";
 import { useState, useEffect } from "react";
-import { SearchState, FilterState } from "@/types";
+import { FilterState } from "@/types";
 import { useLocation } from "wouter";
 import { handleHashOnLoad } from "@/utils/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HomeProps {}
 
 export default function Home({}: HomeProps) {
   const [, setLocation] = useLocation();
-  const [searchState, setSearchState] = useState<SearchState>({
-    isOpen: false,
-    query: ""
-  });
+  const { t } = useLanguage();
 
   const [filters, setFilters] = useState<FilterState>({
     category: 'all',
@@ -36,25 +34,13 @@ export default function Home({}: HomeProps) {
     handleHashOnLoad();
   }, []);
 
-  const toggleSearch = () => {
-    setSearchState(prev => ({ ...prev, isOpen: !prev.isOpen }));
-  };
-
-  const updateSearchQuery = (query: string) => {
-    setSearchState(prev => ({ ...prev, query }));
-  };
-
   const handleNavigateToCategory = (category: string) => {
     setLocation(`/products?category=${category}`);
   };
 
   return (
     <div className="min-h-screen bg-white">
-      <Header
-        searchState={searchState}
-        onToggleSearch={toggleSearch}
-        onUpdateSearchQuery={updateSearchQuery}
-      />
+      <Header />
       
       <HeroSection />
       
@@ -62,7 +48,6 @@ export default function Home({}: HomeProps) {
       
       <FeaturedCollection 
         filters={filters}
-        searchQuery={searchState.query}
       />
       
       <CompanyInfo />

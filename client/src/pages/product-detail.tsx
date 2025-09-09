@@ -7,9 +7,9 @@ import { Product } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useParams, useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import Header from "@/components/header";
+import Header from "@/components/header-simple";
 import Footer from "@/components/footer";
-import { SearchState } from "@/types";
+import { LanguageState } from "@/types";
 import { navigateToSection } from "@/utils/navigation";
 import { processImageArray, createImageErrorHandler } from "@/lib/image-utils";
 
@@ -24,9 +24,9 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [location] = useLocation();
   
-  const [searchState, setSearchState] = useState<SearchState>({
-    isOpen: false,
-    query: ""
+  const [languageState, setLanguageState] = useState<LanguageState>({
+    currentLanguage: 'en',
+    availableLanguages: []
   });
   
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -36,13 +36,6 @@ export default function ProductDetailPage() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const toggleSearch = () => {
-    setSearchState(prev => ({ ...prev, isOpen: !prev.isOpen }));
-  };
-
-  const updateSearchQuery = (query: string) => {
-    setSearchState(prev => ({ ...prev, query }));
-  };
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -160,11 +153,7 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-        <Header
-          searchState={searchState}
-          onToggleSearch={toggleSearch}
-          onUpdateSearchQuery={updateSearchQuery}
-        />
+        <Header />
         <main className="pt-8 pb-16">
           <div className="container mx-auto px-4">
             <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
@@ -195,11 +184,7 @@ export default function ProductDetailPage() {
   if (error || !product) {
     return (
       <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-        <Header
-          searchState={searchState}
-          onToggleSearch={toggleSearch}
-          onUpdateSearchQuery={updateSearchQuery}
-        />
+        <Header />
         <main className="pt-8 pb-16">
           <div className="container mx-auto px-4">
             <div className="text-center py-16">
@@ -253,11 +238,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      <Header
-        searchState={searchState}
-        onToggleSearch={toggleSearch}
-        onUpdateSearchQuery={updateSearchQuery}
-      />
+      <Header />
       
       <main className="pt-8 pb-16">
         <div className="container mx-auto px-4">

@@ -8,9 +8,16 @@ export interface FilterState {
   style: string;
 }
 
-export interface SearchState {
-  isOpen: boolean;
-  query: string;
+export interface LanguageState {
+  currentLanguage: string;
+  availableLanguages: Language[];
+}
+
+export interface Language {
+  language_code: string;
+  language_name: string;
+  language_name_native: string;
+  is_default: boolean;
 }
 
 export interface ProductModalState {

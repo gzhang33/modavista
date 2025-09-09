@@ -11,12 +11,10 @@ import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
 
 interface FeaturedCollectionProps {
   filters: FilterState;
-  searchQuery: string;
 }
 
 export default function FeaturedCollection({ 
-  filters, 
-  searchQuery
+  filters
 }: FeaturedCollectionProps) {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
@@ -45,7 +43,7 @@ export default function FeaturedCollection({
     }
   });
 
-  // Filter products based on current filters and search query
+  // Filter products based on current filters
   const filteredProducts = products.filter(product => {
     // Category filter
     if (filters.category !== 'all' && product.category !== filters.category) {
@@ -65,17 +63,6 @@ export default function FeaturedCollection({
     // Style filter
     if (filters.style !== 'all' && product.style !== filters.style) {
       return false;
-    }
-
-    // Search query filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query) ||
-        product.fabric.toLowerCase().includes(query) ||
-        product.category.toLowerCase().includes(query)
-      );
     }
 
     return true;

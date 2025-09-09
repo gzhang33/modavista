@@ -70,11 +70,22 @@ export default class ProductTableComponent extends BaseComponent {
 
             if (Array.isArray(colors)) {
                 colors.forEach(c => {
-                    const en = (c.name_en || c.color_name || '').trim();
-                    const zh = (c.name || c.color_name_zh || c.color_name || '').trim();
-                    console.log('Processing color:', en, '->', zh);
-                    if (en) {
-                        this.color_en_to_zh.set(en.toLowerCase(), zh);
+                    // 如果是字符串，直接使用作为中文名称
+                    if (typeof c === 'string') {
+                        const zh = c.trim();
+                        console.log('Processing color string:', zh);
+                        // 对于字符串格式，我们假设英文名就是中文名的小写版本
+                        if (zh) {
+                            this.color_en_to_zh.set(zh.toLowerCase(), zh);
+                        }
+                    } else {
+                        // 如果是对象格式，使用原有逻辑
+                        const en = (c.name_en || c.color_name || '').trim();
+                        const zh = (c.name || c.color_name_zh || c.color_name || '').trim();
+                        console.log('Processing color object:', en, '->', zh);
+                        if (en) {
+                            this.color_en_to_zh.set(en.toLowerCase(), zh);
+                        }
                     }
                 });
                 console.log('Color map created:', this.color_en_to_zh);
@@ -160,8 +171,12 @@ export default class ProductTableComponent extends BaseComponent {
                 <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td>
                 <td class="product-created-at-cell">${this.format_created_at(p.createdAt)}</td>
                 <td class="product-actions-cell sticky-right">
-                    <a class="button button-small edit-btn" data-id="${p.id}" href="/admin/edit_product.php?id=${p.id}">编辑</a>
-                    <button class="button button-small delete-btn" data-id="${p.id}">删除</button>
+                    <a class="button button-small edit-btn" data-id="${p.id}" href="/admin/edit_product.php?id=${p.id}">
+                        <i class="fas fa-edit"></i>编辑
+                    </a>
+                    <button class="button button-small delete-btn" data-id="${p.id}">
+                        <i class="fas fa-trash"></i>删除
+                    </button>
                 </td>`;
             this.tableBody.appendChild(row);
         });

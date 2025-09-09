@@ -9,7 +9,7 @@ class ApiClient {
         
         const config = {
             headers: {
-                'Content-Type': 'application/json',
+                ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
                 ...options.headers
             },
             ...options
@@ -89,7 +89,7 @@ class ApiClient {
     // 获取分类（支持语言参数）
     async getCategories(lang = 'en') {
         try {
-            const categories = await this.get('/api/categories.php', { lang });
+            const categories = await this.get('/categories.php', { lang });
             return Array.isArray(categories) ? categories : [];
         } catch (error) {
             console.error('获取分类失败:', error);
@@ -100,7 +100,7 @@ class ApiClient {
     // 获取材质（支持语言参数）
     async getMaterials(lang = 'en') {
         try {
-            const materials = await this.get('/api/materials.php', { lang });
+            const materials = await this.get('/materials.php', { lang });
             return Array.isArray(materials) ? materials : [];
         } catch (error) {
             console.error('获取材质失败:', error);
@@ -111,7 +111,7 @@ class ApiClient {
     // 获取颜色（支持语言参数）
     async getColors(lang = 'en') {
         try {
-            const colors = await this.get('/api/colors.php', { lang });
+            const colors = await this.get('/colors.php', { lang });
             return Array.isArray(colors) ? colors : [];
         } catch (error) {
             console.error('获取颜色失败:', error);

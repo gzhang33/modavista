@@ -198,8 +198,8 @@ export default class ProductFormComponent extends BaseComponent {
         this.material_select.innerHTML = '<option value="">请选择材质</option>';
         materials.forEach(material => {
             const option = document.createElement('option');
-            option.value = material.name_en; // 使用英文名作为值
-            option.textContent = material.name; // 使用本地化名称作为显示文本
+            option.value = material; // 使用材质名称作为值
+            option.textContent = material; // 使用材质名称作为显示文本
             this.material_select.appendChild(option);
         });
         this.material_select.value = current_val;
@@ -221,15 +221,14 @@ export default class ProductFormComponent extends BaseComponent {
             this.color_select.innerHTML = '<option value="">请选择颜色</option>';
             colors.forEach(color => {
                 const option = document.createElement('option');
-                const value_en = (color && color.names && color.names.en) ? color.names.en : (color.name || color);
-                option.value = value_en;
-                option.textContent = color.name || color;
+                option.value = color; // 使用颜色名称作为值
+                option.textContent = color; // 使用颜色名称作为显示文本
                 this.color_select.appendChild(option);
             });
             this.color_select.value = current_val;
         }
         // 更新所有变体行的颜色选项
-        this.update_all_variant_color_options(colors.map(c => (typeof c === 'string' ? { name: c, names: { en: c, zh: c, it: c } } : c)));
+        this.update_all_variant_color_options(colors);
     }
     
     async populate_variant_color_options(row) {
@@ -241,9 +240,8 @@ export default class ProductFormComponent extends BaseComponent {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
                 colors.forEach(color => {
                     const option = document.createElement('option');
-                    const value_en = color?.names?.en || color.name;
-                    option.value = value_en;
-                    option.textContent = color.name;
+                    option.value = color; // 使用颜色名称作为值
+                    option.textContent = color; // 使用颜色名称作为显示文本
                     color_select.appendChild(option);
                 });
             }
@@ -261,9 +259,8 @@ export default class ProductFormComponent extends BaseComponent {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
                 colors.forEach(color => {
                     const option = document.createElement('option');
-                    const value_en = color?.names?.en || color.name;
-                    option.value = value_en;
-                    option.textContent = color.name;
+                    option.value = color; // 使用颜色名称作为值
+                    option.textContent = color; // 使用颜色名称作为显示文本
                     color_select.appendChild(option);
                 });
                 color_select.value = current_val;

@@ -60,11 +60,10 @@ function get_materials($conn) {
     $result = $stmt->get_result();
     $materials = [];
     while ($row = $result->fetch_assoc()) {
-        $materials[] = [
-            'id' => (int)$row['id'],
-            'name' => $row['name'],
-            'name_en' => $row['name_en']
-        ];
+        $name = $row['name'];
+        if (!empty($name) && $name !== null) {
+            $materials[] = $name;
+        }
     }
     $stmt->close();
     json_response(200, $materials);

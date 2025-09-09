@@ -21,6 +21,9 @@
             </div>
         </header>
 
+        <!-- Toast Notification -->
+        <div id="toast-notification" class="toast"></div>
+
         <section id="product-form-section" class="form-section">
             <h3 id="form-title" style="margin-top:0">编辑产品</h3>
             <form id="product-form">

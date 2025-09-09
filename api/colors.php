@@ -61,12 +61,10 @@ function get_colors($conn) {
     $result = $stmt->get_result();
     $colors = [];
     while ($row = $result->fetch_assoc()) {
-        $colors[] = [
-            'id' => (int)$row['id'],
-            'name' => $row['name'],
-            'code' => $row['color_code'],
-            'name_en' => $row['name_en'],
-        ];
+        $name = $row['name'];
+        if (!empty($name) && $name !== null) {
+            $colors[] = $name;
+        }
     }
     $stmt->close();
     json_response(200, $colors);

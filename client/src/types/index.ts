@@ -18,8 +18,16 @@ export interface ProductModalState {
   productId: string | null;
 }
 
+// 筛选选项接口
+export interface FilterOption {
+  id: string;
+  name: string;
+  label: string;
+}
+
 // 从DreaModa API动态获取的静态数据，这里保留作为后备
-export const CATEGORIES = [
+// 注意：实际应用中应优先使用 fetchAllFilterOptions() 获取最新数据
+export const CATEGORIES: FilterOption[] = [
   { id: 'all', name: 'All', label: 'All Categories' },
   { id: 'shirts', name: 'Shirts', label: 'Shirts' },
   { id: 'dresses', name: 'Dresses', label: 'Dresses' },
@@ -28,7 +36,7 @@ export const CATEGORIES = [
   { id: 'accessories', name: 'Accessories', label: 'Accessories' },
 ];
 
-export const FABRICS = [
+export const FABRICS: FilterOption[] = [
   { id: 'all', name: 'All Fabrics', label: 'All Fabrics' },
   { id: 'cotton', name: 'Cotton', label: 'Cotton' },
   { id: 'silk', name: 'Silk', label: 'Silk' },
@@ -40,20 +48,14 @@ export const FABRICS = [
   { id: 'leather', name: 'Leather', label: 'Leather' },
 ];
 
-export const SEASONS = [
+export const SEASONS: FilterOption[] = [
   { id: 'all', name: 'All Seasons', label: 'All Seasons' },
   { id: 'spring-summer', name: 'Spring/Summer', label: 'Spring/Summer' },
   { id: 'fall-winter', name: 'Fall/Winter', label: 'Fall/Winter' },
   { id: 'all-season', name: 'All Season', label: 'All Season' },
 ];
 
-export const STYLES = [
-  { id: 'all', name: 'All Styles', label: 'All Styles' },
-  { id: 'casual', name: 'Casual', label: 'Casual' },
-  { id: 'formal', name: 'Formal', label: 'Formal' },
-  { id: 'business', name: 'Business', label: 'Business' },
-  { id: 'evening', name: 'Evening', label: 'Evening' },
-];
+
 
 export const BUSINESS_TYPES = [
   { id: 'retail', name: 'Retailer', label: 'Retailer' },
@@ -66,4 +68,5 @@ export const INQUIRY_TYPES = [
   { id: 'general', name: 'General Inquiry', label: 'General Inquiry' },
   { id: 'sample', name: 'Sample Request', label: 'Sample Request' },
   { id: 'catalog', name: 'Catalog Request', label: 'Catalog Request' },
+  { id: 'other', name: 'Other', label: 'Other' },
 ];

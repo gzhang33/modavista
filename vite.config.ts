@@ -30,12 +30,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
-      // 产品图片代理到根目录的images文件夹
+      // 产品图片代理配置 - 修复图片路径问题
       '/product-images': {
-        target: 'http://localhost/images',
+        target: 'http://localhost',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/product-images/, '')
+        rewrite: (path) => path.replace(/^\/product-images/, '/images')
       }
     },
     fs: {

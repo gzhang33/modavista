@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Menu } from "lucide-react";
 import { SearchState } from "@/types";
+import { Link, useLocation } from "wouter";
+import { navigateToSection } from "@/utils/navigation";
 
 interface HeaderProps {
   searchState: SearchState;
@@ -10,11 +12,10 @@ interface HeaderProps {
 }
 
 export default function Header({ searchState, onToggleSearch, onUpdateSearchQuery }: HeaderProps) {
+  const [location] = useLocation();
+  
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateToSection(sectionId, location);
   };
 
   return (
@@ -22,14 +23,20 @@ export default function Header({ searchState, onToggleSearch, onUpdateSearchQuer
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-playfair font-semibold text-charcoal tracking-wide">
+            <Link href="/" className="flex items-center">
+              <h1 className="text-2xl font-playfair font-semibold text-charcoal tracking-wide hover:text-accent-gold transition-colors cursor-pointer">
                 DREAMODA
               </h1>
-              <span className="ml-3 text-sm text-accent-gold font-medium">FASHION</span>
-            </div>
+              <span className="ml-3 text-sm text-accent-gold font-medium">Wholesale</span>
+            </Link>
             
             <nav className="hidden md:flex space-x-8">
+              <Link href="/products">
+                <span className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium cursor-pointer"
+                      data-testid="nav-products">
+                  All Products
+                </span>
+              </Link>
               
               <button
                 onClick={() => scrollToSection('categories')}

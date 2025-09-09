@@ -24,7 +24,6 @@ export const products = mysqlTable("product_variant", {
   description: text("computed_description"), // 计算字段：从关联表获取
   category: varchar("computed_category", { length: 100 }), // 计算字段：从关联表获取
   fabric: varchar("computed_material", { length: 100 }), // 材质信息
-  style: varchar("computed_style", { length: 50 }).default("casual"), // 风格
   season: varchar("computed_season", { length: 50 }).default("all-season"), // 季节
   care: text("computed_care").default("Machine wash cold"), // 护理说明
   origin: varchar("computed_origin", { length: 100 }).default("Made in Italy"), // 产地
@@ -34,6 +33,14 @@ export const products = mysqlTable("product_variant", {
   featured: mysqlEnum("computed_featured", ["yes", "no"]).notNull().default("no"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
+});
+
+// =============================================
+// 季节表
+// =============================================
+export const seasons = mysqlTable("seasons", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("season_name", { length: 100 }).notNull(),
 });
 
 // =============================================
@@ -90,8 +97,7 @@ SELECT
     COALESCE(pi.description, p.description) AS computed_description,
     COALESCE(ci.name, c.category_name_en) AS computed_category,
     COALESCE(mi.name, m.material_name) AS computed_material,
-    'business' AS computed_style,
-    'all-season' AS computed_season,
+    p.season AS computed_season,
     'Dry clean recommended' AS computed_care,
     'Made in Italy' AS computed_origin,
     v.sku,
@@ -114,6 +120,7 @@ SELECT
 FROM product_variant v
 JOIN product p ON v.product_id = p.id
 LEFT JOIN category c ON p.category_id = c.id
+LEFT JOIN seasons s ON p.season_id = s.id
 LEFT JOIN color clr ON v.color_id = clr.id
 LEFT JOIN material m ON v.material_id = m.id
 LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = 'en-GB'

@@ -10,15 +10,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Grid3X3, List, ChevronLeft } from "lucide-react";
 import { Product } from "@shared/schema";
-import { FilterState, CATEGORIES, FABRICS, SEASONS, STYLES } from "@/types";
+import { FilterState, FilterOption, SearchState } from "@/types";
 import { Link, useLocation } from "wouter";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import { fetchAllFilterOptions } from "@/lib/filter-options";
+import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
 
 interface ProductsPageProps {
   onOpenProductModal: (productId: string) => void;
 }
 
 export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [filters, setFilters] = useState<FilterState>({
     category: 'all',
     fabric: 'all',
@@ -30,6 +34,49 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('most-popular');
+  
+  const [searchState, setSearchState] = useState<SearchState>({
+    isOpen: false,
+    query: ""
+  });
+
+  // Dynamic filter options state
+  const [filterOptions, setFilterOptions] = useState<{
+    categories: FilterOption[];
+    materials: FilterOption[];
+    colors: FilterOption[];
+    seasons: FilterOption[];
+    styles: FilterOption[];
+  }>({
+    categories: [],
+    materials: [],
+    colors: [],
+    seasons: [],
+    styles: []
+  });
+
+  const toggleSearch = () => {
+    setSearchState(prev => ({ ...prev, isOpen: !prev.isOpen }));
+  };
+
+  const updateSearchQuery = (query: string) => {
+    setSearchState(prev => ({ ...prev, query }));
+  };
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Load dynamic filter options
+  useEffect(() => {
+    fetchAllFilterOptions().then(options => {
+      console.log('Loaded filter options:', options);
+      setFilterOptions(options);
+    }).catch(error => {
+      console.error('Failed to load filter options:', error);
+    });
+  }, []);
 
   // Parse URL parameters and set initial filters
   useEffect(() => {
@@ -41,20 +88,76 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
     }
   }, [location]);
 
-  const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['/api/products'],
+  const { data: products = [], isLoading, error } = useQuery<Product[]>({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const response = await fetch('/api/products.php?lang=en');
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      const data = await response.json();
+      
+      console.log('Fetched products data:', data);
+
+      // Adapt product variant data to frontend Product interface
+      return data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || '',
+        category: item.category || 'Uncategorized',
+        fabric: item.material || 'Cotton',
+        style: 'casual', // 默认值
+        season: 'all-season', // 默认值
+        care: 'Machine wash',
+        origin: 'Made in China',
+        sku: item.sku || '',
+        images: item.media && item.media.length > 0
+          ? item.media
+          : (item.defaultImage ? [item.defaultImage] : []),
+        specifications: {
+          'Material': item.material || '',
+          'Color': item.color || '',
+          'SKU': item.sku || ''
+        },
+        featured: 'no',
+        defaultImage: item.defaultImage,
+        createdAt: item.createdAt,
+        color: item.color,
+        material: item.material
+      }));
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
   // Filter products based on current filters and search query
   const filteredProducts = products.filter(product => {
-    // Category filter
-    if (filters.category !== 'all' && product.category !== filters.category) {
-      return false;
+    // Category filter - support Chinese category matching
+    if (filters.category !== 'all') {
+      const categoryMatch =
+        product.category === filters.category ||
+        product.category?.toLowerCase().includes(filters.category.toLowerCase()) ||
+        filterOptions.categories.find(cat =>
+          cat.id === filters.category &&
+          (cat.name === product.category || cat.label === product.category)
+        );
+
+      if (!categoryMatch) {
+        return false;
+      }
     }
 
-    // Fabric filter
-    if (filters.fabric !== 'all' && !product.fabric.toLowerCase().includes(filters.fabric.toLowerCase())) {
-      return false;
+    // Fabric/Material filter - support Chinese material matching
+    if (filters.fabric !== 'all' && product.material) {
+      const fabricMatch = 
+        product.material.toLowerCase().includes(filters.fabric.toLowerCase()) ||
+        filterOptions.materials.find(mat => 
+          mat.id === filters.fabric && 
+          (mat.name === product.material || mat.label === product.material)
+        );
+      
+      if (!fabricMatch) {
+        return false;
+      }
     }
 
     // Season filter
@@ -73,7 +176,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
       return (
         product.name.toLowerCase().includes(query) ||
         product.description.toLowerCase().includes(query) ||
-        product.fabric.toLowerCase().includes(query) ||
+        (product.fabric && product.fabric.toLowerCase().includes(query)) ||
+        (product.material && product.material.toLowerCase().includes(query)) ||
+        (product.color && product.color.toLowerCase().includes(query)) ||
         product.category.toLowerCase().includes(query)
       );
     }
@@ -84,6 +189,8 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   const updateFilters = (newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
+
+  console.log('Products loaded:', products.length, 'Filtered:', filteredProducts.length);
 
   const clearFilters = () => {
     setFilters({
@@ -99,6 +206,11 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
+        <Header
+          searchState={searchState}
+          onToggleSearch={toggleSearch}
+          onUpdateSearchQuery={updateSearchQuery}
+        />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex">
             {/* Sidebar Skeleton */}
@@ -127,12 +239,37 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
             </div>
           </div>
         </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header
+          searchState={searchState}
+          onToggleSearch={toggleSearch}
+          onUpdateSearchQuery={updateSearchQuery}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-16">
+            <p className="text-xl text-red-500">Error loading products: {(error as Error).message}</p>
+            <p className="text-text-grey mt-2">Please try refreshing the page.</p>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white">
+      <Header
+        searchState={searchState}
+        onToggleSearch={toggleSearch}
+        onUpdateSearchQuery={updateSearchQuery}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center mb-8">
@@ -151,10 +288,10 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-playfair font-semibold text-charcoal mb-4">
-            Complete Collection
+            All Products
           </h1>
           <p className="text-xl text-text-grey">
-            Browse our entire range of premium wholesale garments
+            Browse our complete collection of {filteredProducts.length} premium wholesale garments
           </p>
         </div>
 
@@ -192,7 +329,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
               <div className="mb-6">
                 <label className="text-sm font-medium text-charcoal mb-3 block">Category</label>
                 <div className="space-y-2">
-                  {CATEGORIES.map((category) => (
+                  {filterOptions.categories.map((category) => (
                     <div key={category.id} className="flex items-center space-x-3">
                       <Checkbox
                         id={category.id}
@@ -211,23 +348,23 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                 </div>
               </div>
 
-              {/* Fabric */}
+              {/* Fabric/Material */}
               <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">Fabric</label>
+                <label className="text-sm font-medium text-charcoal mb-3 block">Material</label>
                 <div className="space-y-2">
-                  {FABRICS.slice(1).map((fabric) => (
-                    <div key={fabric.id} className="flex items-center space-x-3">
+                  {filterOptions.materials.map((material) => (
+                    <div key={material.id} className="flex items-center space-x-3">
                       <Checkbox
-                        id={fabric.id}
-                        checked={filters.fabric === fabric.id}
-                        onCheckedChange={() => updateFilters({ fabric: fabric.id })}
-                        data-testid={`checkbox-fabric-${fabric.id}`}
+                        id={material.id}
+                        checked={filters.fabric === material.id}
+                        onCheckedChange={() => updateFilters({ fabric: material.id })}
+                        data-testid={`checkbox-fabric-${material.id}`}
                       />
                       <label
-                        htmlFor={fabric.id}
+                        htmlFor={material.id}
                         className="text-sm text-text-grey cursor-pointer"
                       >
-                        {fabric.name}
+                        {material.name}
                       </label>
                     </div>
                   ))}
@@ -238,7 +375,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
               <div className="mb-6">
                 <label className="text-sm font-medium text-charcoal mb-3 block">Season</label>
                 <div className="space-y-2">
-                  {SEASONS.slice(1).map((season) => (
+                  {filterOptions.seasons.slice(1).map((season) => (
                     <div key={season.id} className="flex items-center space-x-3">
                       <Checkbox
                         id={season.id}
@@ -251,29 +388,6 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                         className="text-sm text-text-grey cursor-pointer"
                       >
                         {season.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Style */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">Style</label>
-                <div className="space-y-2">
-                  {STYLES.slice(1).map((style) => (
-                    <div key={style.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={style.id}
-                        checked={filters.style === style.id}
-                        onCheckedChange={() => updateFilters({ style: style.id })}
-                        data-testid={`checkbox-style-${style.id}`}
-                      />
-                      <label
-                        htmlFor={style.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {style.name}
                       </label>
                     </div>
                   ))}
@@ -333,8 +447,16 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
             {/* Products Grid */}
             {filteredProducts.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-xl text-text-grey">No products found matching your criteria.</p>
-                <p className="text-text-grey mt-2">Try adjusting your filters or search terms.</p>
+                <p className="text-xl text-text-grey">
+                  {products.length === 0 
+                    ? 'No products available. Please add some products from the admin panel.'
+                    : 'No products found matching your criteria.'}
+                </p>
+                {products.length === 0 ? (
+                  <p className="text-text-grey mt-2">Visit the admin panel to add your first product.</p>
+                ) : (
+                  <p className="text-text-grey mt-2">Try adjusting your filters or search terms.</p>
+                )}
               </div>
             ) : (
               <div className={`grid gap-6 ${
@@ -348,18 +470,24 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                     className={`group cursor-pointer border-none shadow-none hover:shadow-lg transition-shadow duration-300 ${
                       viewMode === 'list' ? 'flex flex-row' : ''
                     }`}
-                    onClick={() => onOpenProductModal(String(product.id))}
+                    onClick={() => setLocation(`/product/${product.id}`)}
                     data-testid={`card-product-${product.id}`}
                   >
                     <div className={`relative overflow-hidden rounded-lg ${
                       viewMode === 'list' ? 'w-48 h-48 flex-shrink-0' : 'mb-4'
                     }`}>
                       <img
-                        src={product.images[0] || '/placeholder-image.jpg'}
+                        src={processImagePath(
+                          product.images && product.images[0] 
+                            ? product.images[0]
+                            : product.defaultImage,
+                          { debug: true } // Enable debug mode
+                        )}
                         alt={product.name}
                         className={`object-cover group-hover:scale-105 transition-transform duration-500 ${
                           viewMode === 'list' ? 'w-full h-full' : 'w-full h-80'
                         }`}
+                        onError={createImageErrorHandler(true)} // Enable debug mode
                       />
                       <Badge className="absolute top-4 right-4 bg-accent-gold text-charcoal">
                         New
@@ -370,15 +498,6 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                       <h4 className="text-xl font-playfair font-semibold text-charcoal mb-2">
                         {product.name}
                       </h4>
-                      <p className="text-text-grey mb-2 line-clamp-2">
-                        {product.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-text-grey">{product.fabric}</span>
-                        <span className="text-sm text-accent-gold font-semibold capitalize">
-                          {product.style}
-                        </span>
-                      </div>
                     </div>
                   </Card>
                 ))}
@@ -387,7 +506,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
+
 

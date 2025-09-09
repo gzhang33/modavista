@@ -1,6 +1,6 @@
 // htdocs/admin/assets/js/components/add_product.js
 import BaseComponent from './BaseComponent.js';
-import apiClient from '/assets/js/utils/apiClient.js';
+import apiClient from '/admin/assets/js/utils/apiClient.js';
 import { handle_session_expired } from '../utils/session.js';
 
 export default class ProductFormComponent extends BaseComponent {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
@@ -32,7 +32,10 @@ const categories = [
 
 export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarouselProps) {
   const [, setLocation] = useLocation();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // 创建3组重复数据实现无限循环
+  const extendedCategories = [...categories, ...categories, ...categories];
+  // 初始位置设在中间组，避免边界问题
+  const [currentIndex, setCurrentIndex] = useState(categories.length);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<NodeJS.Timeout>();
@@ -45,27 +48,92 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
     }
   };
 
-  const scrollTo = (index: number) => {
+  // 获取实际分类索引（用于dots显示）
+  const getActualIndex = (index: number) => index % categories.length;
+
+  // 检查并重置位置实现真正的持续向右滚动
+  const checkAndResetPosition = useCallback((index: number) => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const cardWidth = 320; // Card width + gap
+      
+      // 当滚动到第三组的第一个项目时，进行无缝重置
+      if (index >= categories.length * 2) {
+        const newIndex = categories.length + (index % categories.length);
+        
+        // 临时禁用平滑滚动以实现瞬时跳转
+        container.style.scrollBehavior = 'auto';
+        
+        // 计算并执行跳转
+        const cardElement = container.querySelector('.category-card') as HTMLElement;
+        if (cardElement) {
+          const cardWidth = cardElement.offsetWidth;
+          const gap = 24;
+          const totalCardWidth = cardWidth + gap;
+          const containerWidth = container.clientWidth;
+          const targetCardCenter = newIndex * totalCardWidth + cardWidth / 2;
+          const containerCenter = containerWidth / 2;
+          const scrollLeft = targetCardCenter - containerCenter;
+          
+          container.scrollLeft = scrollLeft;
+          setCurrentIndex(newIndex);
+        }
+        
+        // 在下一帧重新启用平滑滚动，让后续滚动是平滑的
+        setTimeout(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.style.scrollBehavior = 'smooth';
+          }
+        }, 50);
+      }
+    }
+  }, [categories.length]);
+
+  const scrollToCenter = useCallback((index: number) => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      
+      // 动态获取卡片实际宽度
+      const cardElement = container.querySelector('.category-card') as HTMLElement;
+      if (!cardElement) return;
+      
+      const cardWidth = cardElement.offsetWidth;
+      const gap = 24; // gap-6 in Tailwind = 24px
+      const totalCardWidth = cardWidth + gap;
+      const containerWidth = container.clientWidth;
+      
+      // 计算目标卡片的中心位置
+      const targetCardCenter = index * totalCardWidth + cardWidth / 2;
+      
+      // 计算容器中心位置
+      const containerCenter = containerWidth / 2;
+      
+      // 计算需要滚动的距离（让目标卡片居中）
+      const scrollLeft = targetCardCenter - containerCenter;
+      
       container.scrollTo({
-        left: index * cardWidth,
+        left: scrollLeft,
         behavior: 'smooth'
       });
       setCurrentIndex(index);
+      
+      // 滚动完成后检查是否需要无缝跳转
+      setTimeout(() => {
+        checkAndResetPosition(index);
+      }, 600); // 等待滚动动画完成
     }
-  };
+  }, [checkAndResetPosition]);
 
   const scrollLeft = () => {
-    const newIndex = currentIndex > 0 ? currentIndex - 1 : categories.length - 1;
-    scrollTo(newIndex);
+    const newIndex = currentIndex - 1;
+    // 允许手动向左滚动到第一组，不进行边界限制
+    scrollToCenter(newIndex);
     setIsAutoScrolling(false);
   };
 
   const scrollRight = () => {
-    const newIndex = currentIndex < categories.length - 1 ? currentIndex + 1 : 0;
-    scrollTo(newIndex);
+    const newIndex = currentIndex + 1;
+    // 向右滚动无限制，通过checkAndResetPosition处理无缝循环
+    scrollToCenter(newIndex);
     setIsAutoScrolling(false);
   };
 
@@ -74,8 +142,8 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
     if (isAutoScrolling) {
       autoScrollRef.current = setInterval(() => {
         setCurrentIndex(prev => {
-          const nextIndex = prev < categories.length - 1 ? prev + 1 : 0;
-          scrollTo(nextIndex);
+          const nextIndex = prev + 1;
+          scrollToCenter(nextIndex);
           return nextIndex;
         });
       }, 4000);
@@ -86,7 +154,28 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
         clearInterval(autoScrollRef.current);
       }
     };
-  }, [isAutoScrolling, currentIndex]);
+  }, [isAutoScrolling, scrollToCenter]); // 移除currentIndex依赖
+
+  // Handle window resize to recenter current item
+  useEffect(() => {
+    const handleResize = () => {
+      // 延迟执行，确保DOM已更新
+      setTimeout(() => {
+        scrollToCenter(currentIndex);
+      }, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    // 初始居中（从中间组第一个开始）
+    setTimeout(() => {
+      scrollToCenter(currentIndex);
+    }, 100);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [currentIndex, scrollToCenter]);
 
   const handleMouseEnter = () => {
     setIsAutoScrolling(false);
@@ -143,10 +232,10 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
             className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth px-8"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {categories.map((category, index) => (
+            {extendedCategories.map((category, index) => (
               <div
                 key={`${category.id}-${index}`}
-                className="flex-shrink-0 w-80 cursor-pointer group"
+                className="flex-shrink-0 w-80 cursor-pointer group category-card"
                 onClick={() => handleCategoryClick(category.id)}
                 data-testid={`category-card-${category.id}`}
               >
@@ -176,11 +265,13 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
               <button
                 key={index}
                 onClick={() => {
-                  scrollTo(index);
+                  // 找到最近的对应位置（中间组）
+                  const targetIndex = categories.length + index;
+                  scrollToCenter(targetIndex);
                   setIsAutoScrolling(false);
                 }}
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentIndex 
+                  index === getActualIndex(currentIndex)
                     ? 'bg-accent-gold' 
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}

@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { insertInquirySchema } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiPost } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BUSINESS_TYPES } from "@/types";
 
@@ -46,11 +46,11 @@ export default function ContactSection() {
   });
 
   const submitInquiryMutation = useMutation({
-    mutationFn: (data: ContactFormData) => apiRequest('POST', '/api/inquiries', data),
+    mutationFn: (data: ContactFormData) => apiPost('inquiries.php', data),
     onSuccess: () => {
       toast({
         title: "Inquiry Sent Successfully",
-        description: "Thank you for your interest. We'll contact you within 24 hours.",
+        description: "Thank you for your interest. We'll contact you within 2 days.",
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['/api/inquiries'] });
@@ -254,7 +254,6 @@ export default function ContactSection() {
                     <h5 className="font-semibold text-charcoal mb-1">Email</h5>
                     <p className="text-text-grey">
                       Hi@DreaModa.store<br />
-                      info@dreamoda.com
                     </p>
                   </div>
                 </div>

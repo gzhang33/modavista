@@ -1,6 +1,6 @@
 // htdocs/admin/assets/js/components/dashboard_filters.js
 import BaseComponent from './BaseComponent.js';
-import apiClient from '/assets/js/utils/apiClient.js';
+import apiClient from '/admin/assets/js/utils/apiClient.js';
 
 export default class AdvancedFilterComponent extends BaseComponent {
     constructor(selector, eventBus) {

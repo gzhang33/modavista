@@ -10,8 +10,8 @@ export interface Product {
   baseName?: string;
   description: string;
   category: string;
-  color?: string;
-  material?: string;
+  color?: string; // 颜色名称
+  material?: string; // 材质名称
   fabric: string; // 对应DreaModa的material字段
   style: string;
   season: string;

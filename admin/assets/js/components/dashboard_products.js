@@ -1,7 +1,7 @@
-// htdocs/admin/assets/js/components/dashboard_products.js
+// htdocs/admin/assets/js/components/dashboard_products.js - v1.1
 import BaseComponent from './BaseComponent.js';
-import apiClient from '/assets/js/utils/apiClient.js';
-import { get_base_name, extract_color_label, color_name_to_hex } from '/assets/js/utils/product_name_utils.js';
+import apiClient from '/admin/assets/js/utils/apiClient.js';
+import { get_base_name, extract_color_label, color_name_to_hex } from '/admin/assets/js/utils/product_name_utils.js';
 import { handle_session_expired } from '../utils/session.js';
 
 // Tiny inline placeholder to avoid missing asset references
@@ -64,17 +64,23 @@ export default class ProductTableComponent extends BaseComponent {
 
     async load_colors_map() {
         try {
+            console.log('Loading color map...');
             const colors = await apiClient.get('/colors.php', { lang: 'zh' });
+            console.log('Colors loaded:', colors);
+
             if (Array.isArray(colors)) {
                 colors.forEach(c => {
-                    const en = (c.color_name || '').trim();
-                    const zh = (c.color_name_zh || c.color_name || '').trim();
+                    const en = (c.name_en || c.color_name || '').trim();
+                    const zh = (c.name || c.color_name_zh || c.color_name || '').trim();
+                    console.log('Processing color:', en, '->', zh);
                     if (en) {
                         this.color_en_to_zh.set(en.toLowerCase(), zh);
                     }
                 });
+                console.log('Color map created:', this.color_en_to_zh);
             }
         } catch (e) {
+            console.error('Error loading color map:', e);
             // ignore mapping failure; fallback to original values
         }
     }
@@ -84,19 +90,31 @@ export default class ProductTableComponent extends BaseComponent {
         // 如果已包含中文字符，直接返回
         if (/[\u4e00-\u9fa5]/.test(color_value)) return color_value;
         const mapped = this.color_en_to_zh.get(String(color_value).toLowerCase());
+        console.log('Translating color:', color_value, '->', mapped || color_value);
         return mapped || color_value;
     }
 
     async load_products(filters = { archived: 0 }) {
         try {
-            // 默认中文
-            this.all_products = await apiClient.get('/products.php', { archived: filters.archived, lang: 'zh' });
+            console.log('Loading products with filters:', filters);
+            console.log('API URL:', this.api_url);
+            console.log('apiClient baseURL:', apiClient.baseURL);
+
+            // 管理后台使用中文显示
+            const productsUrl = '/products.php';
+            console.log('Requesting:', productsUrl, { archived: filters.archived, lang: 'zh' });
+
+            this.all_products = await apiClient.get(productsUrl, { archived: filters.archived, lang: 'zh' });
+            console.log('Products loaded:', this.all_products);
+
             this.filtered_products = null;
             this.render();
             this.apply_list_animation();
             this.update_bulk_actions_panel();
             this.eventBus.emit('products:loaded', this.all_products);
         } catch (error) {
+            console.error('Error loading products:', error);
+            console.error('Error details:', error.message, error.stack);
             this.eventBus.emit('toast:show', { message: `加载产品数据失败: ${error.message}`, type: 'error' });
             this.all_products = [];
             this.filtered_products = null;
@@ -153,11 +171,6 @@ export default class ProductTableComponent extends BaseComponent {
 
 
 
-    get_base_name(name) { return get_base_name(name); }
-
-    extract_color_label(name) { return extract_color_label(name); }
-
-    color_name_to_hex(color_name) { return color_name_to_hex(color_name); }
 
     apply_list_animation() {
         const table = this.element.querySelector('#products-table');

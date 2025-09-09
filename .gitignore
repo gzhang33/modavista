@@ -1,6 +1,9 @@
 # Dependencies
-node_modules/ 
+node_modules/
 vendor/
+
+# Build outputs
+dist/
 
 
 # Temporary files
@@ -73,13 +76,7 @@ test/traces/
 phpMyAdmin/
 
 # Images and media uploads (keep repo slim). Track a placeholder if needed.
-images/**/*.jpg
-images/**/*.jpeg
-images/**/*.png
-images/**/*.gif
-images/**/*.webp
-images/**/*.svg
-!images/.gitkeep
+
 
 # Lighthouse reports
 lh-*.json

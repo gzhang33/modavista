@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { Product } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -18,7 +19,48 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
   const queryClient = useQueryClient();
 
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ['/api/products', productId],
+    queryKey: ['product', productId],
+    queryFn: async () => {
+      if (!productId) throw new Error('No product ID provided');
+      const response = await fetch(`/api/products.php?id=${productId}&lang=en`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch product');
+      }
+      const data = await response.json();
+      
+      console.log('Product API response:', data);
+      
+      if (!data) {
+        throw new Error('Product not found');
+      }
+      
+      // Adapt product variant data to frontend Product interface
+      return {
+        id: data.id,
+        name: data.name,
+        description: data.description || '',
+        category: data.category || 'Uncategorized',
+        fabric: data.material || 'Cotton',
+        style: 'casual',
+        season: 'all-season',
+        care: 'Machine wash',
+        origin: 'Made in China',
+        sku: data.sku || '',
+        images: data.media && data.media.length > 0 
+          ? data.media 
+          : (data.defaultImage ? [data.defaultImage] : []),
+        specifications: {
+          'Material': data.material || '',
+          'Color': data.color || '',
+          'SKU': data.sku || ''
+        },
+        featured: 'no',
+        defaultImage: data.defaultImage,
+        createdAt: data.createdAt,
+        color: data.color,
+        material: data.material
+      } as Product;
+    },
     enabled: !!productId && isOpen,
   });
 
@@ -92,9 +134,15 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="relative">
               <img
-                src={product.images[0] || '/placeholder-image.jpg'}
+                src={processImagePath(
+                  product.images && product.images[0] 
+                    ? product.images[0]
+                    : '/placeholder-image.svg',
+                  { debug: false }
+                )}
                 alt={product.name}
                 className="w-full h-96 lg:h-full object-cover"
+                onError={createImageErrorHandler(false)}
               />
             </div>
             

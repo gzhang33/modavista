@@ -1,51 +1,36 @@
-import { Linkedin, Instagram, Facebook } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { navigateToSection } from "@/utils/navigation";
 
 export default function Footer() {
+  const [location] = useLocation();
+  
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateToSection(sectionId, location);
   };
 
   return (
     <footer className="bg-charcoal text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <h5 className="text-2xl font-playfair font-semibold mb-4">DREAMODA</h5>
             <p className="text-gray-300 mb-4 max-w-md">
               Premium fashion manufacturer and designer, creating exceptional garments 
               for discerning customers worldwide with Italian craftsmanship and modern style.
             </p>
-            <div className="flex space-x-4">
-              <a
-                href="#"
-                className="text-gray-300 hover:text-accent-gold transition-colors"
-                data-testid="link-linkedin"
-              >
-                <Linkedin className="text-xl" />
-              </a>
-              <a
-                href="#"
-                className="text-gray-300 hover:text-accent-gold transition-colors"
-                data-testid="link-instagram"
-              >
-                <Instagram className="text-xl" />
-              </a>
-              <a
-                href="#"
-                className="text-gray-300 hover:text-accent-gold transition-colors"
-                data-testid="link-facebook"
-              >
-                <Facebook className="text-xl" />
-              </a>
-            </div>
           </div>
           
           <div>
             <h6 className="font-semibold mb-4">Quick Links</h6>
             <ul className="space-y-2 text-gray-300">
+              <li>
+                <Link href="/products">
+                  <span className="hover:text-accent-gold transition-colors cursor-pointer"
+                        data-testid="footer-products">
+                    All Products
+                  </span>
+                </Link>
+              </li>
               <li>
                 <button
                   onClick={() => scrollToSection('collections')}
@@ -82,16 +67,6 @@ export default function Footer() {
                   Contact
                 </button>
               </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h6 className="font-semibold mb-4">Services</h6>
-            <ul className="space-y-2 text-gray-300">
-              <li>Fashion Design</li>
-              <li>Custom Tailoring</li>
-              <li>Premium Collections</li>
-              <li>Style Consultation</li>
             </ul>
           </div>
         </div>

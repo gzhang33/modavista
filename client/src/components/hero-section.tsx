@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
+import { navigateToSection } from "@/utils/navigation";
 
 export default function HeroSection() {
+  const [location] = useLocation();
+  
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateToSection(sectionId, location);
   };
 
   return (
@@ -13,18 +14,20 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080')"
+          backgroundImage: "url('/index_background.png')"
         }}
       />
-      <div className="absolute inset-0 bg-charcoal bg-opacity-40" />
+      {/* Add soft dark overlay to make text more readable */}
+      <div className="absolute inset-0 bg-black bg-opacity-30" />
       
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <h2 className="text-5xl md:text-7xl font-playfair font-bold mb-6 leading-tight">
+        {/* Add text shadow to enhance readability */}
+        <h2 className="text-5xl md:text-7xl font-playfair font-bold mb-6 leading-tight drop-shadow-lg">
           Premium Wholesale
           <br />
-          <span className="text-accent-gold">Garment Collection</span>
+          <span className="text-accent-gold drop-shadow-lg">Garment Collection</span>
         </h2>
-        <p className="text-xl md:text-2xl mb-8 font-light max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xl md:text-2xl mb-8 font-light max-w-2xl mx-auto leading-relaxed drop-shadow-md">
           Discover our curated selection of high-quality garments crafted for discerning wholesale partners
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

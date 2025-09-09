@@ -63,9 +63,9 @@ function handle_get($conn) {
                     p.description     AS description,
                     p.category_id     AS category_id,
                     p.status          AS product_status,
-                    COALESCE(pi.name, p.base_name) AS product_name,
-                    COALESCE(pi.description, p.description) AS product_description,
-                    COALESCE(ci.name, c.category_name_en) AS category_name,
+                COALESCE(pi.name, p.base_name) AS product_name,
+                COALESCE(pi.description, p.description) AS product_description,
+                COALESCE(ci.name, c.category_name_en) AS category_name,
                     COALESCE(cli.name, clr.color_name) AS color_name,
                     COALESCE(mi.name, m.material_name) AS material_name
                 FROM product_variant v
@@ -209,6 +209,13 @@ function handle_get($conn) {
     if (!empty($_GET['category'])) {
         $where[] = 'COALESCE(ci.name, c.category_name_en) = ?';
         $params[] = $_GET['category'];
+        $types .= 's';
+    }
+
+    // 季节筛选
+    if (!empty($_GET['season'])) {
+        $where[] = 's.season_name = ?';
+        $params[] = $_GET['season'];
         $types .= 's';
     }
 

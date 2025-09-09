@@ -5,15 +5,14 @@ import FeaturedCollection from "@/components/featured-collection";
 import CompanyInfo from "@/components/company-info";
 import ContactSection from "@/components/contact-section";
 import Footer from "@/components/footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SearchState, FilterState } from "@/types";
 import { useLocation } from "wouter";
+import { handleHashOnLoad } from "@/utils/navigation";
 
-interface HomeProps {
-  onOpenProductModal?: (productId: string) => void;
-}
+interface HomeProps {}
 
-export default function Home({ onOpenProductModal = () => {} }: HomeProps) {
+export default function Home({}: HomeProps) {
   const [, setLocation] = useLocation();
   const [searchState, setSearchState] = useState<SearchState>({
     isOpen: false,
@@ -26,6 +25,16 @@ export default function Home({ onOpenProductModal = () => {} }: HomeProps) {
     season: 'all',
     style: 'all'
   });
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Handle hash-based navigation for anchor links
+  useEffect(() => {
+    handleHashOnLoad();
+  }, []);
 
   const toggleSearch = () => {
     setSearchState(prev => ({ ...prev, isOpen: !prev.isOpen }));
@@ -54,7 +63,6 @@ export default function Home({ onOpenProductModal = () => {} }: HomeProps) {
       <FeaturedCollection 
         filters={filters}
         searchQuery={searchState.query}
-        onOpenProductModal={onOpenProductModal}
       />
       
       <CompanyInfo />

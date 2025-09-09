@@ -7,23 +7,24 @@ import { Product } from "@shared/schema";
 import { FilterState } from "@/types";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
 
 interface FeaturedCollectionProps {
   filters: FilterState;
   searchQuery: string;
-  onOpenProductModal: (productId: string) => void;
 }
 
 export default function FeaturedCollection({ 
   filters, 
-  searchQuery, 
-  onOpenProductModal 
+  searchQuery
 }: FeaturedCollectionProps) {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const res = await fetch('/api/products.php?limit=10&featured=yes');
+      const res = await fetch('/api/products.php?limit=10&featured=yes&lang=en');
       const data = await res.json();
+      
+      console.log('Featured products data:', data);
       
       // 将PHP API响应转换为前端期望的格式
       return data.map((item: any) => ({
@@ -37,7 +38,7 @@ export default function FeaturedCollection({
         care: 'machine-wash',
         origin: 'italy',
         sku: item.sku || '',
-        images: item.defaultImage ? [`/product-images/${item.defaultImage.replace('images/', '')}`] : ['/placeholder-image.svg'],
+        images: item.defaultImage ? [item.defaultImage] : ['/placeholder-image.svg'],
         specifications: {},
         featured: 'yes'
       }));
@@ -137,14 +138,15 @@ export default function FeaturedCollection({
                 <Card
                   key={product.id}
                   className="group cursor-pointer border-none shadow-none hover:shadow-lg transition-shadow duration-300"
-                  onClick={() => onOpenProductModal(String(product.id))}
+                  onClick={() => setLocation(`/product/${product.id}`)}
                   data-testid={`card-product-${product.id}`}
                 >
                   <div className="relative overflow-hidden rounded-lg mb-4">
                     <img
-                      src={product.images[0] || '/placeholder-image.svg'}
+                      src={processImagePath(product.images[0], { debug: false })}
                       alt={product.name}
                       className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={createImageErrorHandler(false)}
                     />
                     <Badge className="absolute top-4 right-4 bg-accent-gold text-charcoal">
                       New
@@ -153,15 +155,6 @@ export default function FeaturedCollection({
                   <h4 className="text-xl font-playfair font-semibold text-charcoal mb-2">
                     {product.name}
                   </h4>
-                  <p className="text-text-grey mb-2 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-grey">{product.fabric}</span>
-                    <span className="text-sm text-accent-gold font-semibold capitalize">
-                      {product.style}
-                    </span>
-                  </div>
                 </Card>
               ))}
             </div>

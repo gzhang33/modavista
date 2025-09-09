@@ -42,11 +42,11 @@ foreach ($required_fields as $field) {
 }
 
 // 数据验证和清理
-$name = filter_var(trim($input['name']), FILTER_SANITIZE_STRING);
+$name = trim($input['name']);
 $email = filter_var(trim($input['email']), FILTER_VALIDATE_EMAIL);
-$phone = isset($input['phone']) ? filter_var(trim($input['phone']), FILTER_SANITIZE_STRING) : '';
-$company = isset($input['company']) ? filter_var(trim($input['company']), FILTER_SANITIZE_STRING) : '';
-$message = filter_var(trim($input['message']), FILTER_SANITIZE_STRING);
+$phone = isset($input['phone']) ? trim($input['phone']) : '';
+$company = isset($input['company']) ? trim($input['company']) : '';
+$message = trim($input['message']);
 
 if (!$email) {
     json_response(400, ['message' => '请提供有效的邮箱地址']);

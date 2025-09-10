@@ -14,6 +14,7 @@ import { insertInquirySchema } from "@shared/schema";
 import { apiPost } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BUSINESS_TYPES } from "@/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const contactFormSchema = insertInquirySchema.pick({
   firstName: true,
@@ -31,6 +32,7 @@ type ContactFormData = z.infer<typeof contactFormSchema>;
 export default function ContactSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -73,10 +75,10 @@ export default function ContactSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h3 className="text-4xl font-playfair font-semibold text-charcoal mb-4">
-            Connect With DreaModa
+            {t('home.contact.title')}
           </h3>
           <p className="text-xl text-text-grey max-w-2xl mx-auto">
-            Discover our exclusive fashion collections. Contact us for inquiries, appointments, or to learn more about our bespoke services.
+            {t('home.contact.subtitle')}
           </p>
         </div>
 
@@ -85,7 +87,7 @@ export default function ContactSection() {
           <Card className="bg-soft-white border-none shadow-sm">
             <CardContent className="p-8">
               <h4 className="text-2xl font-playfair font-semibold text-charcoal mb-6">
-                Request Information
+                {t('home.contact.form.title')}
               </h4>
               
               <Form {...form}>
@@ -98,7 +100,7 @@ export default function ContactSection() {
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="First Name"
+                              placeholder={t('home.contact.form.first_name')}
                               {...field}
                               className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
                               data-testid="input-first-name"
@@ -116,7 +118,7 @@ export default function ContactSection() {
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="Last Name"
+                              placeholder={t('home.contact.form.last_name')}
                               {...field}
                               className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
                               data-testid="input-last-name"
@@ -136,7 +138,7 @@ export default function ContactSection() {
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder="Business Email"
+                            placeholder={t('home.contact.form.email')}
                             {...field}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
                             data-testid="input-email"
@@ -154,7 +156,7 @@ export default function ContactSection() {
                       <FormItem>
                         <FormControl>
                           <Input
-                            placeholder="Company Name"
+                            placeholder={t('home.contact.form.company')}
                             {...field}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
                             data-testid="input-company"
@@ -173,7 +175,7 @@ export default function ContactSection() {
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-testid="select-business-type">
-                              <SelectValue placeholder="Business Type" />
+                              <SelectValue placeholder={t('home.contact.form.business_type')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -196,7 +198,7 @@ export default function ContactSection() {
                       <FormItem>
                         <FormControl>
                           <Textarea
-                            placeholder="Tell us about your requirements..."
+                            placeholder={t('home.contact.form.requirements')}
                             rows={4}
                             {...field}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent resize-none"
@@ -214,7 +216,7 @@ export default function ContactSection() {
                     className="w-full bg-accent-gold text-charcoal py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300"
                     data-testid="button-send-inquiry"
                   >
-                    {submitInquiryMutation.isPending ? 'Sending...' : 'Send Inquiry'}
+                    {submitInquiryMutation.isPending ? t('common.loading') : t('home.contact.form.submit')}
                   </Button>
                 </form>
               </Form>
@@ -224,15 +226,14 @@ export default function ContactSection() {
           {/* Contact Information */}
           <div className="space-y-8">
             <div>
-              <h4 className="text-2xl font-playfair font-semibold text-charcoal mb-6">Get In Touch</h4>
+              <h4 className="text-2xl font-playfair font-semibold text-charcoal mb-6">{t('home.contact.info.title')}</h4>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <MapPin className="text-accent-gold text-xl mt-1 flex-shrink-0" />
                   <div>
-                    <h5 className="font-semibold text-charcoal mb-1">DreaModa Headquarters</h5>
+                    <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.headquarters')}</h5>
                     <p className="text-text-grey">
-                      Via della Moda, 123<br />
-                      20121 Milano, Italia
+                      {t('home.contact.info.address')}
                     </p>
                   </div>
                 </div>
@@ -240,10 +241,9 @@ export default function ContactSection() {
                 <div className="flex items-start space-x-4">
                   <Phone className="text-accent-gold text-xl mt-1 flex-shrink-0" />
                   <div>
-                    <h5 className="font-semibold text-charcoal mb-1">Business Inquiries</h5>
+                    <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.inquiries')}</h5>
                     <p className="text-text-grey">
-                      +39 02 1234 5678<br />
-                      Mon - Fri, 9:00 AM - 6:00 PM CET
+                      {t('home.contact.info.phone')}
                     </p>
                   </div>
                 </div>
@@ -251,9 +251,9 @@ export default function ContactSection() {
                 <div className="flex items-start space-x-4">
                   <Mail className="text-accent-gold text-xl mt-1 flex-shrink-0" />
                   <div>
-                    <h5 className="font-semibold text-charcoal mb-1">Email</h5>
+                    <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.email')}</h5>
                     <p className="text-text-grey">
-                      Hi@DreaModa.store<br />
+                      {t('home.contact.info.email_address')}<br />
                     </p>
                   </div>
                 </div>
@@ -262,12 +262,12 @@ export default function ContactSection() {
 
             <Card className="bg-charcoal text-white border-none">
               <CardContent className="p-6">
-                <h5 className="text-xl font-playfair font-semibold mb-4">Visit Our Atelier</h5>
+                <h5 className="text-xl font-playfair font-semibold mb-4">{t('home.contact.visit.title')}</h5>
                 <ul className="space-y-2 text-sm">
-                  <li>• Private appointments available</li>
-                  <li>• Bespoke design consultations</li>
-                  <li>• Seasonal collection previews</li>
-                  <li>• Made-to-measure services</li>
+                  <li>• {t('home.contact.visit.appointments')}</li>
+                  <li>• {t('home.contact.visit.consultations')}</li>
+                  <li>• {t('home.contact.visit.previews')}</li>
+                  <li>• {t('home.contact.visit.services')}</li>
                 </ul>
               </CardContent>
             </Card>

@@ -146,3 +146,4 @@ function updateCanonicalLink(canonicalPath: string) {
   canonical.href = `${baseUrl}${path}`;
 }
 
+

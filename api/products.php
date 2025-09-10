@@ -194,8 +194,8 @@ function handle_get($conn) {
 
     // 列表（按变体返回，使用新的 i18n 结构和发布状态）
     $where = ['p.status = "published"']; // 只显示已发布的产品
-    $params = [$locale, $locale, $locale, $locale]; // i18n 参数
-    $types = 'ssss';
+    $params = [$locale, $locale, $locale, $locale, $locale]; // i18n 参数
+    $types = 'sssss';
 
     // 模糊搜索（产品名或颜色名）
     if (!empty($_GET['search'])) {
@@ -214,7 +214,7 @@ function handle_get($conn) {
 
     // 季节筛选
     if (!empty($_GET['season'])) {
-        $where[] = 's.season_name = ?';
+        $where[] = 'COALESCE(si.name, s.season_name) COLLATE utf8mb4_unicode_ci = ? COLLATE utf8mb4_unicode_ci';
         $params[] = $_GET['season'];
         $types .= 's';
     }
@@ -231,16 +231,19 @@ function handle_get($conn) {
                 p.status        AS product_status,
                 COALESCE(ci.name, c.category_name_en) AS category,
                 COALESCE(cli.name, clr.color_name) AS color,
-                COALESCE(mi.name, m.material_name) AS material
+                COALESCE(mi.name, m.material_name) AS material,
+                COALESCE(si.name, s.season_name) AS season
             FROM product_variant v
             JOIN product p ON v.product_id = p.id
             LEFT JOIN category c ON p.category_id = c.id
             LEFT JOIN color clr ON v.color_id = clr.id
             LEFT JOIN material m ON v.material_id = m.id
+            LEFT JOIN seasons s ON p.season_id = s.id
             LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
             LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
             LEFT JOIN color_i18n cli ON clr.id = cli.color_id AND cli.locale = ?
-            LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?';
+            LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?
+            LEFT JOIN seasons_i18n si ON s.id = si.season_id AND si.locale = ?';
     if ($where) {
         $sql .= ' WHERE ' . implode(' AND ', $where);
     }
@@ -266,6 +269,7 @@ function handle_get($conn) {
             'product_id' => (int)$r['product_id'],
             'color' => $r['color'],
             'material' => $r['material'],
+            'season' => $r['season'],
             'sku' => $r['sku'],
             'status' => $r['product_status'],
             'defaultImage' => $r['default_image'],

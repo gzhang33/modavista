@@ -23,6 +23,20 @@
             });
     </script>
     <div class="dashboard-container">
+        <!-- 管理导航栏 -->
+        <nav class="admin-nav-bar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h3><i class="fas fa-cogs"></i> DreaModa 管理后台</h3>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="dashboard.php" class="nav-link active"><i class="fas fa-box"></i> 产品管理</a></li>
+                    <li><a href="translations.php" class="nav-link"><i class="fas fa-language"></i> 多语言翻译</a></li>
+                    <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                </ul>
+            </div>
+        </nav>
+
         <main class="main-content">
             <section id="products-management-section">
                 <header class="main-header">

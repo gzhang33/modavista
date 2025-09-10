@@ -26,6 +26,13 @@ export interface ProductModalState {
 }
 
 // 筛选选项接口
+export interface Category {
+  id: string;
+  name: string;
+  image: string;
+  english_name: string;
+}
+
 export interface FilterOption {
   id: string;
   name: string;

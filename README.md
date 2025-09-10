@@ -95,7 +95,7 @@ DreaModa是专为服装批发工厂设计的现代化B2B产品展示平台，采
    ```bash
    npm run dev
    ```
-   前端将在 `http://localhost:5173` 启动
+   前端将在 `http://localhost:5173` 启动 (固定端口，支持Playwright测试)
 
 5. **构建生产版本**
    ```bash
@@ -111,7 +111,7 @@ DreaModa是专为服装批发工厂设计的现代化B2B产品展示平台，采
 ## ⚙️ 配置说明
 
 ### 环境配置
-- **前端开发**: `http://localhost:5173` (Vite开发服务器)
+- **前端开发**: `http://localhost:5173` (Vite开发服务器，固定端口用于Playwright测试)
 - **API代理**: `/api` 路径自动代理到本地PHP服务器
 - **图片代理**: `/product-images` 路径代理到PHP服务器
 - **静态资源**: 存放在 `client/public/` 目录

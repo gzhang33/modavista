@@ -14,14 +14,19 @@ import { FilterState, FilterOption, LanguageState } from "@/types";
 import { Link, useLocation } from "wouter";
 import Header from "@/components/header-simple";
 import Footer from "@/components/footer";
+import SEOHead from "@/components/seo-head";
 import { fetchAllFilterOptions } from "@/lib/filter-options";
 import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LANGUAGE_TO_LOCALE } from "@/utils/translationUtils";
 
 interface ProductsPageProps {
   onOpenProductModal: (productId: string) => void;
 }
 
 export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) {
+  const { t, currentLanguage } = useLanguage();
+  const currentLangShort = (currentLanguage || 'en').split('-')[0];
   const [location, setLocation] = useLocation();
   const [filters, setFilters] = useState<FilterState>({
     category: 'all',
@@ -63,13 +68,13 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
   // Load dynamic filter options
   useEffect(() => {
-    fetchAllFilterOptions().then(options => {
+    fetchAllFilterOptions(currentLangShort).then(options => {
       console.log('Loaded filter options:', options);
       setFilterOptions(options);
     }).catch(error => {
       console.error('Failed to load filter options:', error);
     });
-  }, []);
+  }, [currentLangShort]);
 
   // Parse URL parameters and set initial filters
   useEffect(() => {
@@ -82,9 +87,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   }, [location]);
 
   const { data: products = [], isLoading, error } = useQuery<Product[]>({
-    queryKey: ['products'],
+    queryKey: ['products', currentLangShort],
     queryFn: async () => {
-      const response = await fetch('/api/products.php?lang=en');
+      const response = await fetch(`/api/products.php?lang=${currentLangShort}`);
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }
@@ -97,22 +102,22 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
         id: item.id,
         name: item.name,
         description: item.description || '',
-        category: item.category || 'Uncategorized',
-        fabric: item.material || 'Cotton',
-        style: 'casual', // 默认值
-        season: 'all-season', // 默认值
-        care: 'Machine wash',
-        origin: 'Made in China',
+        category: item.category || t('products.uncategorized', 'Uncategorized'),
+        fabric: item.material || t('products.cotton', 'Cotton'),
+        style: t('products.casual', 'casual'), // 默认值
+        season: t('products.all_season', 'all-season'), // 默认值
+        care: item.care || t('products.machine_wash', 'Machine wash'),
+        origin: item.origin || t('products.made_in_china', 'Made in China'),
         sku: item.sku || '',
         images: item.media && item.media.length > 0
           ? item.media
           : (item.defaultImage ? [item.defaultImage] : []),
         specifications: {
-          'Material': item.material || '',
-          'Color': item.color || '',
-          'SKU': item.sku || ''
+          [t('products.material', 'Material')]: item.material || '',
+          [t('products.color', 'Color')]: item.color || '',
+          [t('products.sku', 'SKU')]: item.sku || ''
         },
-        featured: 'no',
+        featured: t('products.no', 'no'),
         defaultImage: item.defaultImage,
         createdAt: item.createdAt,
         color: item.color,
@@ -121,6 +126,16 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  // Normalize a label to a translation key suffix
+  const toKey = (label: string): string => {
+    return (label || '')
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+  };
 
   // Filter products based on current filters and search query
   const filteredProducts = products.filter(product => {
@@ -220,8 +235,6 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                 {Array.from({ length: 9 }).map((_, index) => (
                   <div key={index} className="space-y-4">
                     <Skeleton className="w-full h-80 rounded-lg" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
                   </div>
                 ))}
               </div>
@@ -250,6 +263,11 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead
+        title={t('products.seo_title', 'DreaModa Products - Premium Wholesale Garments Collection')}
+        description={t('products.seo_description', 'Explore our complete collection of premium Italian fashion garments. Wholesale clothing, dresses, tops, outerwear and accessories for discerning fashion retailers.')}
+        canonicalPath="/products"
+      />
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
@@ -261,7 +279,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
               data-testid="link-back-home"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Home
+              {t('products.back_to_home', 'Back to Home')}
             </Button>
           </Link>
         </div>
@@ -269,10 +287,12 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-playfair font-semibold text-charcoal mb-4">
-            All Products
+            {t('products.title', 'All Products')}
           </h1>
           <p className="text-xl text-text-grey">
-            Browse our complete collection of {filteredProducts.length} premium wholesale garments
+            {(
+              t('products.subtitle_plural', 'Browse our complete collection of {count} premium wholesale garments')
+            ).replace('{count}', String(filteredProducts.length))}
           </p>
         </div>
 
@@ -281,7 +301,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
           <div className="w-80 flex-shrink-0">
             <div className="bg-soft-white rounded-lg p-6 sticky top-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-charcoal">Filters</h3>
+                <h3 className="text-lg font-semibold text-charcoal">{t('products.filters_title', 'Filters')}</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -289,16 +309,16 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                   className="text-text-grey hover:text-charcoal"
                   data-testid="button-clear-filters"
                 >
-                  Clear All
+                  {t('products.clear_all', 'Clear All')}
                 </Button>
               </div>
 
               {/* Search */}
               <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-2 block">Search</label>
+                <label className="text-sm font-medium text-charcoal mb-2 block">{t('products.search_label', 'Search')}</label>
                 <Input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={t('products.search_placeholder', 'Search products...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full"
@@ -308,7 +328,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
               {/* Categories */}
               <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">Category</label>
+                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.category', 'Category')}</label>
                 <div className="space-y-2">
                   {filterOptions.categories.map((category) => (
                     <div key={category.id} className="flex items-center space-x-3">
@@ -322,7 +342,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                         htmlFor={category.id}
                         className="text-sm text-text-grey cursor-pointer"
                       >
-                        {category.name}
+                        {category.id === 'all' ? t('filters.all_categories', 'All Categories') : category.name}
                       </label>
                     </div>
                   ))}
@@ -331,7 +351,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
               {/* Fabric/Material */}
               <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">Material</label>
+                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.material', 'Material')}</label>
                 <div className="space-y-2">
                   {filterOptions.materials.map((material) => (
                     <div key={material.id} className="flex items-center space-x-3">
@@ -345,7 +365,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                         htmlFor={material.id}
                         className="text-sm text-text-grey cursor-pointer"
                       >
-                        {material.name}
+                        {material.id === 'all' ? t('products.all_materials', 'All Materials') : material.name}
                       </label>
                     </div>
                   ))}
@@ -354,7 +374,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
               {/* Season */}
               <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">Season</label>
+                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
                 <div className="space-y-2">
                   {filterOptions.seasons.slice(1).map((season) => (
                     <div key={season.id} className="flex items-center space-x-3">
@@ -383,7 +403,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-text-grey">
-                  {filteredProducts.length} products
+                  {(
+                    t('products.results_count', '{count} products')
+                  ).replace('{count}', String(filteredProducts.length))}
                 </span>
               </div>
               
@@ -391,13 +413,13 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                 {/* Sort */}
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-48" data-testid="select-sort">
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder={t('products.sort_by', 'Sort by')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="most-popular">Most Popular</SelectItem>
-                    <SelectItem value="name-asc">Name A-Z</SelectItem>
-                    <SelectItem value="name-desc">Name Z-A</SelectItem>
-                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="most-popular">{t('products.sort_most_popular', 'Most Popular')}</SelectItem>
+                    <SelectItem value="name-asc">{t('products.sort_name_asc', 'Name A-Z')}</SelectItem>
+                    <SelectItem value="name-desc">{t('products.sort_name_desc', 'Name Z-A')}</SelectItem>
+                    <SelectItem value="newest">{t('products.sort_newest', 'Newest First')}</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -430,13 +452,13 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
               <div className="text-center py-16">
                 <p className="text-xl text-text-grey">
                   {products.length === 0 
-                    ? 'No products available. Please add some products from the admin panel.'
-                    : 'No products found matching your criteria.'}
+                    ? t('products.empty.no_products', 'No products available. Please add some products from the admin panel.')
+                    : t('products.empty.no_match', 'No products found matching your criteria.')}
                 </p>
                 {products.length === 0 ? (
-                  <p className="text-text-grey mt-2">Visit the admin panel to add your first product.</p>
+                  <p className="text-text-grey mt-2">{t('products.empty.visit_admin', 'Visit the admin panel to add your first product.')}</p>
                 ) : (
-                  <p className="text-text-grey mt-2">Try adjusting your filters or search terms.</p>
+                  <p className="text-text-grey mt-2">{t('products.empty.try_adjust', 'Try adjusting your filters or search terms.')}</p>
                 )}
               </div>
             ) : (
@@ -448,7 +470,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                 {filteredProducts.map((product) => (
                   <Card
                     key={product.id}
-                    className={`group cursor-pointer border-none shadow-none hover:shadow-lg transition-shadow duration-300 ${
+                    className={`group cursor-pointer border-none shadow-none bg-transparent hover:shadow-lg transition-shadow duration-300 ${
                       viewMode === 'list' ? 'flex flex-row' : ''
                     }`}
                     onClick={() => setLocation(`/product/${product.id}`)}
@@ -459,27 +481,40 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                     }`}>
                       <img
                         src={processImagePath(
-                          product.images && product.images[0] 
+                          product.images && product.images[0]
                             ? product.images[0]
                             : product.defaultImage,
                           { debug: true } // Enable debug mode
                         )}
                         alt={product.name}
-                        className={`object-cover group-hover:scale-105 transition-transform duration-500 ${
+                        className={`object-contain group-hover:scale-105 transition-transform duration-500 ${
                           viewMode === 'list' ? 'w-full h-full' : 'w-full h-80'
                         }`}
                         onError={createImageErrorHandler(true)} // Enable debug mode
                       />
+
+                      {/* 网格视图的产品名称覆盖层 */}
+                      {viewMode !== 'list' && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                          <h4 className="text-lg font-playfair font-semibold text-white text-center">
+                            {product.name}
+                          </h4>
+                        </div>
+                      )}
+
                       <Badge className="absolute top-4 right-4 bg-accent-gold text-charcoal">
-                        New
+                        {t('common.badges.new', 'New')}
                       </Badge>
                     </div>
-                    
-                    <div className={viewMode === 'list' ? 'flex-1 p-4' : ''}>
-                      <h4 className="text-xl font-playfair font-semibold text-charcoal mb-2">
-                        {product.name}
-                      </h4>
-                    </div>
+
+                    {/* 列表视图的产品名称 */}
+                    {viewMode === 'list' && (
+                      <div className="flex-1 p-4">
+                        <h4 className="text-xl font-playfair font-semibold text-charcoal mb-2">
+                          {product.name}
+                        </h4>
+                      </div>
+                    )}
                   </Card>
                 ))}
               </div>
@@ -491,5 +526,4 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
     </div>
   );
 }
-
 

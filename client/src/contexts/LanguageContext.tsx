@@ -1,4 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  loadStaticTranslations,
+  translateSync,
+  clearTranslationCache,
+  getDynamicTranslation,
+  detectLanguagePriority,
+  shouldRedirectToLocalizedPath,
+  redirectToLocalizedPath,
+  saveLanguagePreference,
+  LANGUAGE_TO_LOCALE
+} from '@/utils/translationUtils';
 
 interface Language {
   language_code: string;
@@ -10,10 +21,12 @@ interface Language {
 interface LanguageContextType {
   currentLanguage: string;
   availableLanguages: Language[];
-  translations: Record<string, string>;
+  staticTranslations: Record<string, any>;
   isLoading: boolean;
+  isInitialized: boolean;
   changeLanguage: (languageCode: string) => Promise<void>;
   t: (key: string, fallback?: string) => string;
+  tAsync: (key: string, fallback?: string) => Promise<string>;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -25,8 +38,9 @@ interface LanguageProviderProps {
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const [currentLanguage, setCurrentLanguage] = useState<string>('en');
   const [availableLanguages, setAvailableLanguages] = useState<Language[]>([]);
-  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [staticTranslations, setStaticTranslations] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // 获取可用语言列表
   const fetchLanguages = async () => {
@@ -40,137 +54,177 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       }
     } catch (error) {
       console.error('Failed to fetch languages:', error);
-      // 设置默认语言
+      // 设置可用语言（英文、法语、德语、意大利语、西班牙语）
       setAvailableLanguages([
         { language_code: 'en', language_name: 'English', language_name_native: 'English', is_default: true },
-        { language_code: 'zh', language_name: 'Chinese', language_name_native: '中文', is_default: false }
+        { language_code: 'fr', language_name: 'French', language_name_native: 'Français', is_default: false },
+        { language_code: 'de', language_name: 'German', language_name_native: 'Deutsch', is_default: false },
+        { language_code: 'it', language_name: 'Italian', language_name_native: 'Italiano', is_default: false },
+        { language_code: 'es', language_name: 'Spanish', language_name_native: 'Español', is_default: false }
       ]);
     }
   };
 
-  // 获取翻译内容
-  const fetchTranslations = async (languageCode: string) => {
+  // 获取静态翻译内容
+  const fetchStaticTranslations = async (languageCode: string) => {
     try {
-      const response = await fetch(`/api/language.php?action=translations&lang=${languageCode}`);
-      const data = await response.json();
-      
-      if (data.translations) {
-        setTranslations(data.translations);
-      }
+      const translations = await loadStaticTranslations(languageCode);
+      setStaticTranslations(translations);
+      return translations;
     } catch (error) {
-      console.error('Failed to fetch translations:', error);
-      // 设置默认翻译
-      setTranslations({
-        'home.title': 'DreaModa - Italian Fashion Excellence',
-        'home.hero.title': 'Premium Wholesale Garment Collection',
-        'home.hero.subtitle': 'Discover our curated selection of high-quality garments crafted for discerning wholesale partners',
-        'home.hero.explore': 'Explore Collections',
-        'home.hero.samples': 'Request Samples',
-        'nav.home': 'Home',
-        'nav.collections': 'Collections',
-        'nav.about': 'About',
-        'nav.contact': 'Contact',
-        'home.categories.title': 'Shop Garments by Category',
-        'home.categories.subtitle': 'Explore our diverse collection of premium fashion garments across different categories',
-        'home.featured.title': 'Featured Collection',
-        'home.featured.subtitle': 'Handpicked selections from our latest seasonal collection, showcasing exceptional craftsmanship and contemporary design',
-        'home.featured.view_all': 'View Complete Collection',
-        'home.about.title': 'Crafting Dreams Into Fashion',
-        'home.about.description1': 'DreaModa represents the perfect fusion of Italian fashion heritage and contemporary design. Our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments that embody elegance, quality, and modern sophistication.',
-        'home.about.description2': 'Based in the heart of Milano, we specialize in creating unique pieces that reflect individual style and personality. Our commitment to excellence and attention to detail ensures that each creation meets the highest standards of Italian fashion tradition.',
-        'home.about.designs': 'Fashion Designs',
-        'home.about.experience': 'Years Experience',
-        'home.contact.title': 'Connect With DreaModa',
-        'home.contact.subtitle': 'Discover our exclusive fashion collections. Contact us for inquiries, appointments, or to learn more about our bespoke services.',
-        'home.contact.form.title': 'Request Information',
-        'home.contact.form.first_name': 'First Name',
-        'home.contact.form.last_name': 'Last Name',
-        'home.contact.form.email': 'Business Email',
-        'home.contact.form.company': 'Company Name',
-        'home.contact.form.business_type': 'Business Type',
-        'home.contact.form.requirements': 'Tell us about your requirements...',
-        'home.contact.form.submit': 'Send Inquiry',
-        'home.contact.info.title': 'Get In Touch',
-        'home.contact.info.headquarters': 'DreaModa Headquarters',
-        'home.contact.info.address': 'Via della Moda, 123\n20121 Milano, Italia',
-        'home.contact.info.inquiries': 'Business Inquiries',
-        'home.contact.info.phone': '+39 02 1234 5678\nMon - Fri, 9:00 AM - 6:00 PM CET',
-        'home.contact.info.email': 'Email',
-        'home.contact.info.email_address': 'Hi@DreaModa.store',
-        'home.contact.visit.title': 'Visit Our Atelier',
-        'home.contact.visit.appointments': 'Private appointments available',
-        'home.contact.visit.consultations': 'Bespoke design consultations',
-        'home.contact.visit.previews': 'Seasonal collection previews',
-        'home.contact.visit.services': 'Made-to-measure services',
-        'footer.description': 'Premium fashion manufacturer and designer, creating exceptional garments for discerning customers worldwide with Italian craftsmanship and modern style.',
-        'footer.quick_links': 'Quick Links',
-        'footer.all_products': 'All Products',
-        'footer.collections': 'Collections',
-        'footer.categories': 'Categories',
-        'footer.about_us': 'About Us',
-        'footer.contact': 'Contact',
-        'footer.copyright': '© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Milano, Italia.'
-      });
+      console.error('Failed to fetch static translations:', error);
+      // 设置默认的英文静态翻译
+      const defaultTranslations = {
+        nav: {
+          home: 'Home',
+          collections: 'Collections',
+          about: 'About',
+          contact: 'Contact'
+        },
+        home: {
+          title: 'DreaModa - Italian Fashion Excellence',
+          hero: {
+            title: 'Premium Wholesale Garment Collection',
+            subtitle: 'Discover our curated selection of high-quality garments crafted for discerning wholesale partners',
+            explore: 'Explore Collections',
+            samples: 'Request Samples'
+          }
+        },
+        common: {
+          loading: 'Loading...',
+          error: 'An error occurred'
+        }
+      };
+      setStaticTranslations(defaultTranslations);
+      return defaultTranslations;
     }
   };
 
-  // 切换语言
+  // 初始化语言检测（混合方案）
+  const initializeLanguage = async () => {
+    try {
+      console.log('Initializing language with hybrid approach...');
+
+      // 1. 使用混合方案检测语言优先级
+      const detectedLanguage = detectLanguagePriority();
+      console.log('Detected language:', detectedLanguage);
+
+      // 2. 获取可用语言列表
+      await fetchLanguages();
+
+      // 3. 设置检测到的语言
+      setCurrentLanguage(detectedLanguage);
+
+      // 4. 加载对应语言的静态翻译
+      await fetchStaticTranslations(detectedLanguage);
+
+      setIsInitialized(true);
+      setIsLoading(false);
+
+      console.log('Language initialization completed:', detectedLanguage);
+    } catch (error) {
+      console.error('Language initialization failed:', error);
+      // 回退到英文
+      setCurrentLanguage('en');
+      await fetchStaticTranslations('en');
+      setIsInitialized(true);
+      setIsLoading(false);
+    }
+  };
+
+  // 切换语言（混合方案）
   const changeLanguage = async (languageCode: string) => {
     try {
+      console.log('Changing language to:', languageCode);
       setIsLoading(true);
-      
-      // 设置后端语言偏好
-      const response = await fetch('/api/language.php?action=set_language', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ language_code: languageCode }),
-      });
 
-      if (response.ok) {
-        setCurrentLanguage(languageCode);
-        await fetchTranslations(languageCode);
-      } else {
-        console.error('Failed to set language');
+      // 清空翻译缓存
+      clearTranslationCache();
+
+      // 将locale格式转换为简短格式用于路由
+      const shortLangCode = languageCode.split('-')[0];
+
+      // 保存用户语言偏好（使用locale格式）
+      saveLanguagePreference(languageCode);
+
+      // 检查是否需要URL重定向
+      if (shouldRedirectToLocalizedPath(currentLanguage, shortLangCode)) {
+        console.log('URL redirect needed for language change');
+        redirectToLocalizedPath(shortLangCode);
+        return; // 重定向后函数结束，不需要继续执行
       }
+
+      // 如果不需要重定向，正常处理（Session/Cookie方式）
+      setCurrentLanguage(languageCode);
+      await fetchStaticTranslations(languageCode);
+
+      // 设置后端语言偏好
+      try {
+        const response = await fetch('/api/language.php?action=set_language', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            language_code: LANGUAGE_TO_LOCALE[languageCode] || languageCode
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to set backend language preference');
+        }
+      } catch (backendError) {
+        console.error('Error setting backend language preference:', backendError);
+        // 后端错误不影响前端语言切换
+      }
+
+      setIsLoading(false);
+      console.log('Language change completed without redirect');
     } catch (error) {
       console.error('Error changing language:', error);
-    } finally {
       setIsLoading(false);
     }
   };
 
-  // 翻译函数
+  // 同步翻译函数（用于静态翻译）
   const t = (key: string, fallback?: string): string => {
-    return translations[key] || fallback || key;
+    return translateSync(staticTranslations, key, fallback);
   };
 
-  // 初始化
-  useEffect(() => {
-    const initializeLanguage = async () => {
-      await fetchLanguages();
-      await fetchTranslations(currentLanguage);
-      setIsLoading(false);
-    };
+  // 异步翻译函数（用于动态翻译）
+  const tAsync = async (key: string, fallback?: string): Promise<string> => {
+    // 先尝试静态翻译
+    const staticValue = translateSync(staticTranslations, key);
+    if (staticValue !== key) {
+      return staticValue;
+    }
 
+    // 如果静态翻译中没有，尝试动态翻译
+    return await getDynamicTranslation(key, currentLanguage, fallback);
+  };
+
+  // 初始化（混合方案）
+  useEffect(() => {
     initializeLanguage();
   }, []);
 
-  // 当语言改变时重新获取翻译
+  // 当语言改变时重新获取静态翻译（避免初始化时的重复加载）
   useEffect(() => {
-    if (currentLanguage && !isLoading) {
-      fetchTranslations(currentLanguage);
+    if (isInitialized && currentLanguage && !isLoading) {
+      console.log('Language changed, reloading translations:', currentLanguage);
+      fetchStaticTranslations(currentLanguage);
     }
-  }, [currentLanguage]);
+  }, [currentLanguage, isInitialized]);
 
   const value: LanguageContextType = {
     currentLanguage,
     availableLanguages,
-    translations,
+    staticTranslations,
     isLoading,
+    isInitialized,
     changeLanguage,
-    t
+    t,
+    tAsync
   };
 
   return (

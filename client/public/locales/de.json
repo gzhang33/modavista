@@ -1,0 +1,187 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "collections": "Kollektionen",
+    "about": "Über Uns",
+    "contact": "Kontakt"
+  },
+  "home": {
+    "title": "DreaModa - Italienische Mode-Exzellenz",
+    "hero": {
+      "title": "Premium Großhandels-Kleidungskollektion",
+      "subtitle": "Entdecken Sie unsere sorgfältig kuratierte Auswahl an hochwertigen Kleidungsstücken, die für anspruchsvolle Großhandelspartner entwickelt wurden",
+      "explore": "Kollektionen Entdecken",
+      "samples": "Muster Anfordern"
+    },
+    "categories": {
+      "title": "Kleidung nach Kategorie Kaufen",
+      "subtitle": "Entdecken Sie unsere vielfältige Kollektion an Premium-Mode-Kleidungsstücken in verschiedenen Kategorien"
+    },
+    "featured": {
+      "title": "Vorgestellte Kollektion",
+      "subtitle": "Sorgfältig ausgewählte Stücke aus unserer neuesten saisonalen Kollektion, die außergewöhnliches Handwerk und zeitgenössisches Design präsentieren",
+      "view_all": "Gesamte Kollektion Ansehen"
+    },
+    "about": {
+      "title": "Träume in Mode Schaffen",
+      "description1": "DreaModa repräsentiert die perfekte Fusion des italienischen Mode-Erbes und des zeitgenössischen Designs. Unser Atelier kombiniert traditionelles Handwerk mit innovativen Techniken, um Kleidungsstücke zu schaffen, die Eleganz, Qualität und moderne Raffinesse verkörpern.",
+      "description2": "Im Herzen von Mailand ansässig, spezialisieren wir uns auf die Schaffung einzigartiger Stücke, die persönlichen Stil und Persönlichkeit widerspiegeln. Unser Engagement für Exzellenz und Liebe zum Detail stellen sicher, dass jede Kreation den höchsten Standards der italienischen Modetradition entspricht.",
+      "designs": "Mode-Designs",
+      "experience": "Jahre Erfahrung"
+    },
+    "contact": {
+      "title": "Mit DreaModa Verbinden",
+      "subtitle": "Entdecken Sie unsere exklusiven Modekollektionen. Kontaktieren Sie uns für Anfragen, Termine oder um mehr über unsere maßgeschneiderten Dienstleistungen zu erfahren.",
+      "form": {
+        "title": "Informationen Anfordern",
+        "first_name": "Vorname",
+        "last_name": "Nachname",
+        "email": "Geschäftliche E-Mail",
+        "company": "Firmenname",
+        "business_type": "Geschäftstyp",
+        "requirements": "Sagen Sie uns Ihre Anforderungen...",
+        "submit": "Anfrage Senden"
+      },
+      "info": {
+        "title": "Kontakt Aufnehmen",
+        "headquarters": "DreaModa Hauptsitz",
+        "address": "Via della Moda, 123\n20121 Mailand, Italien",
+        "inquiries": "Geschäftliche Anfragen",
+        "phone": "+39 02 1234 5678\nMo - Fr, 9:00 - 18:00 CET",
+        "email": "E-Mail",
+        "email_address": "Hi@DreaModa.store"
+      },
+      "visit": {
+        "title": "Besuchen Sie Unser Atelier",
+        "appointments": "Private Termine verfügbar",
+        "consultations": "Maßgeschneiderte Designberatungen",
+        "previews": "Saisonale Kollektionsvorschauen",
+        "services": "Maßgeschneiderte Services"
+      }
+    }
+  },
+  "footer": {
+    "description": "Premium-Modehersteller und -Designer, der außergewöhnliche Kleidungsstücke für anspruchsvolle Kunden weltweit mit italienischem Handwerk und modernem Stil kreiert.",
+    "quick_links": "Schnellzugriff",
+    "all_products": "Alle Produkte",
+    "collections": "Kollektionen",
+    "categories": "Kategorien",
+    "about_us": "Über Uns",
+    "contact": "Kontakt",
+    "copyright": "© 2025 DREAMODA. Alle Rechte vorbehalten. | Mit Leidenschaft für Mode in Mailand, Italien gemacht."
+  },
+  "filters": {
+    "all_categories": "Alle Kategorien",
+    "all_fabrics": "Alle Stoffe",
+    "all_seasons": "Alle Jahreszeiten",
+    "all_styles": "Alle Stile",
+    "apply": "Filter anwenden",
+    "sort": {
+      "featured": "Vorgestellt",
+      "newest": "Neueste"
+    },
+    "reset": "Zurücksetzen"
+  },
+  "products": {
+    "back_to_home": "Zur Startseite",
+    "title": "Alle Produkte",
+    "subtitle_plural": "Durchsuchen Sie unsere vollständige Kollektion von {count} Premium-Großhandelskleidungsstücken",
+    "filters_title": "Filter",
+    "clear_all": "Alle zurücksetzen",
+    "search_label": "Suche",
+    "search_placeholder": "Produkte suchen...",
+    "category": "Kategorie",
+    "material": "Material",
+    "all_materials": "Alle Materialien",
+    "season": "Saison",
+    "results_count": "{count} Produkte",
+    "sort_by": "Sortieren nach",
+    "sort_most_popular": "Am beliebtesten",
+    "sort_name_asc": "Name A-Z",
+    "sort_name_desc": "Name Z-A",
+    "sort_newest": "Neueste zuerst",
+    "empty": {
+      "no_products": "Keine Produkte verfügbar. Bitte fügen Sie welche im Admin-Bereich hinzu.",
+      "no_match": "Keine Produkte entsprechen Ihren Kriterien.",
+      "visit_admin": "Besuchen Sie den Admin-Bereich, um Ihr erstes Produkt hinzuzufügen.",
+      "try_adjust": "Passen Sie Ihre Filter oder Suchbegriffe an."
+    },
+    "uncategorized": "Unkategorisiert",
+    "cotton": "Baumwolle",
+    "casual": "Leger",
+    "all_season": "Ganzjährig",
+    "machine_wash": "Maschinenwäsche",
+    "made_in_china": "Hergestellt in China",
+    "color": "Farbe",
+    "sku": "SKU",
+    "no": "Nein",
+    "error_loading": "Fehler beim Laden der Produkte: ",
+    "refresh_page": "Bitte versuchen Sie, die Seite zu aktualisieren.",
+    "seo_title": "DreaModa Produkte - Premium Großhandels-Kleidungskollektion",
+    "seo_description": "Entdecken Sie unsere vollständige Kollektion an hochwertiger italienischer Mode. Großhandelskleidung, Kleider, Oberteile, Oberbekleidung und Accessoires für anspruchsvolle Modehändler."
+  },
+  "product_detail": {
+    "title": "Produktdetails",
+    "features": "Produkteigenschaften",
+    "specifications": "Produktspezifikationen",
+    "description_fallback": "Dieses exklusive {name} zeigt unser Engagement für Qualität und Handwerkskunst. Hergestellt aus Premium-Materialien und mit Liebe zum Detail – die perfekte Kombination aus Komfort und Stil.",
+    "description_rich": "{name} wird aus sorgfältig ausgewählten Materialien gefertigt und spiegelt unser Streben nach Qualität und Design wider. Jedes Produkt unterliegt strengen Qualitätskontrollen für die beste Kundenerfahrung.",
+    "fields": {
+      "sku": "Produktcode",
+      "fabric": "Material",
+      "category": "Kategorie",
+      "season": "Saison",
+      "care": "Pflegehinweise",
+      "origin": "Herkunft",
+      "specifications": "Spezifikationen",
+      "description": "Beschreibung"
+    },
+    "actions": {
+      "add_to_inquiry": "Muster anfordern",
+      "sending": "Wird gesendet...",
+      "favorite": "Favorit",
+      "back_to_list": "Zurück zur Liste",
+      "view_all_products": "Alle Produkte ansehen"
+    },
+    "not_found": {
+      "title": "Produkt nicht gefunden",
+      "desc": "Das gesuchte Produkt existiert nicht oder wurde entfernt."
+    },
+    "sample_request_name": "Musteranfrage",
+    "sample_request_company": "Musteranfrage Firma",
+    "sample_request_message": "Musteranfrage - Produkt: {productName} (SKU: {productSku})\n\nDer Kunde möchte ein Muster dieses Produkts anfordern, um Qualität und Eignung zu bewerten. Bitte kontaktieren Sie den Kunden, um den Musterversand zu arrangieren.\n\nProduktdetails:\n- Produktname: {productName}\n- SKU: {productSku}\n- Kategorie: {productCategory}\n- Material: {productMaterial}\n\nBitte bearbeiten Sie diese Musteranfrage so schnell wie möglich.",
+    "toast": {
+      "sample_request_sent_title": "Musteranfrage gesendet",
+      "sample_request_sent_description": "Wir werden Ihre Musteranfrage bearbeiten und Sie in Kürze kontaktieren. Weiterleitung zur Kontaktseite...",
+      "request_failed_title": "Anfrage fehlgeschlagen",
+      "request_failed_description": "Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt. Wenn das Problem weiterhin besteht, senden Sie bitte eine E-Mail an info@dreamoda.com"
+    },
+    "features": {
+      "fabric": "Hergestellt aus hochwertigem {fabric} Stoff",
+      "season": "Geeignet für die {season} Saison",
+      "style": "{style} Stil Design, geeignet für verschiedene Anlässe",
+      "care": "Strenge {care} Pflegehinweise",
+      "origin": "Herkunft: {origin}",
+      "sku": "SKU: {sku}"
+    },
+    "seo_title": "{productName} - DreaModa Premium Großhandels-Kleidung",
+    "seo_title_fallback": "Produkt - DreaModa",
+    "seo_description": "{productName} - Premium italienisches Modekleidungsstück. {productDescription} Material: {productMaterial}, Farbe: {productColor}. Großhandelspreise verfügbar.",
+    "seo_description_fallback": "Premium italienisches Modekleidungsstück für den Großhandel",
+    "thumbnail_alt": "Miniaturansicht"
+  },
+  "common": {
+    "badges": {
+      "new": "Neu",
+      "featured": "Vorgestellt"
+    },
+    "loading": "Lädt...",
+    "error": "Ein Fehler ist aufgetreten",
+    "retry": "Erneut Versuchen"
+  },
+  "seo": {
+    "title": "DreaModa - Italienische Mode-Exzellenz | Großhandels-Kleidungshersteller",
+    "description": "Premium italienischer Modehersteller, spezialisiert auf Großhandelsbekleidung. Entdecken Sie unsere kuratierte Kollektion hochwertiger Modeartikel für anspruchsvolle Großhandelspartner weltweit.",
+    "keywords": "italienische Mode, Großhandelsbekleidung, Modehersteller, Milano Mode, Premium Bekleidung, Großhandelsmode"
+  }
+}

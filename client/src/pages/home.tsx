@@ -5,6 +5,7 @@ import FeaturedCollection from "@/components/featured-collection";
 import CompanyInfo from "@/components/company-info";
 import ContactSection from "@/components/contact-section";
 import Footer from "@/components/footer";
+import SEOHead from "@/components/seo-head";
 import { useState, useEffect } from "react";
 import { FilterState } from "@/types";
 import { useLocation } from "wouter";
@@ -40,6 +41,7 @@ export default function Home({}: HomeProps) {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead />
       <Header />
       
       <HeroSection />

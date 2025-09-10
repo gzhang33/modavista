@@ -71,6 +71,7 @@ test/traces/
 .cursorrules
 .cursorignore
 .claude/
+GEMINI.md
 
 # phpMyAdmin
 phpMyAdmin/

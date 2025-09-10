@@ -103,7 +103,7 @@ function handleProducts() {
     
     // 包含现有的products.php逻辑
     ob_start();
-    $_GET['lang'] = $_GET['lang'] ?? 'zh-CN'; // 设置默认语言
+    $_GET['lang'] = $_GET['lang'] ?? 'en-GB'; // 设置默认语言
     
     // 检查是否请求单个产品
     if (isset($pathSegments[1]) && !empty($pathSegments[1])) {

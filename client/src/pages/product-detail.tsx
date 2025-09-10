@@ -9,9 +9,12 @@ import { Link, useParams, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import Header from "@/components/header-simple";
 import Footer from "@/components/footer";
+import SEOHead from "@/components/seo-head";
 import { LanguageState } from "@/types";
 import { navigateToSection } from "@/utils/navigation";
 import { processImageArray, createImageErrorHandler } from "@/lib/image-utils";
+import { createLocalizedHref } from "@/utils/translationUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Check icon component
 const CheckIcon = () => (
@@ -19,6 +22,8 @@ const CheckIcon = () => (
 );
 
 export default function ProductDetailPage() {
+  const { t, currentLanguage } = useLanguage();
+  const currentLangShort = (currentLanguage || 'en').split('-')[0];
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { id } = useParams<{ id: string }>();
@@ -41,8 +46,7 @@ export default function ProductDetailPage() {
     queryKey: ['product', id],
     queryFn: async () => {
       if (!id) throw new Error('No product ID provided');
-      // Frontend website uses English
-      const response = await fetch(`/api/products.php?id=${id}&lang=en`);
+      const response = await fetch(`/api/products.php?id=${id}&lang=${currentLangShort}`);
       if (!response.ok) {
         throw new Error('Failed to fetch product');
       }
@@ -59,22 +63,22 @@ export default function ProductDetailPage() {
         id: data.id,
         name: data.name,
         description: data.description || '',
-        category: data.category || 'Uncategorized',
-        fabric: data.material || 'Cotton',
-        style: 'casual',
-        season: 'all-season',
-        care: 'Machine wash',
-        origin: 'Made in China',
+        category: data.category || t('products.uncategorized', 'Uncategorized'),
+        fabric: data.material || t('products.cotton', 'Cotton'),
+        style: t('products.casual', 'casual'),
+        season: t('products.all_season', 'all-season'),
+        care: t('products.machine_wash', 'Machine wash'),
+        origin: t('products.made_in_china', 'Made in China'),
         sku: data.sku || '',
         images: data.media && data.media.length > 0 
           ? data.media 
           : (data.defaultImage ? [data.defaultImage] : []),
         specifications: {
-          'Material': data.material || '',
-          'Color': data.color || '',
-          'SKU': data.sku || ''
+          [t('products.material', 'Material')]: data.material || '',
+          [t('products.color', 'Color')]: data.color || '',
+          [t('products.sku', 'SKU')]: data.sku || ''
         },
-        featured: 'no',
+        featured: t('products.no', 'no'),
         defaultImage: data.defaultImage,
         createdAt: data.createdAt,
         color: data.color,
@@ -93,11 +97,11 @@ export default function ProductDetailPage() {
       // Generate random email to avoid API rate limits
       const randomSuffix = Math.random().toString(36).substring(7);
       const requestData = {
-        name: `Sample Request ${randomSuffix}`,
+        name: t('product_detail.sample_request_name', `Sample Request ${randomSuffix}`),
         email: `customer${randomSuffix}@example.com`,
         phone: '',
-        company: 'Sample Request Company',
-        message: `Sample Request - Product: ${product?.name} (SKU: ${product?.sku})\n\nCustomer wishes to request a sample of this product to evaluate quality and suitability. Please contact the customer to arrange sample shipping.\n\nProduct Details:\n- Product Name: ${product?.name}\n- SKU: ${product?.sku}\n- Category: ${product?.category}\n- Material: ${product?.fabric || product?.material}\n\nPlease process this sample request as soon as possible.`
+        company: t('product_detail.sample_request_company', 'Sample Request Company'),
+        message: t('product_detail.sample_request_message', `Sample Request - Product: ${product?.name} (SKU: ${product?.sku})\n\nCustomer wishes to request a sample of this product to evaluate quality and suitability. Please contact the customer to arrange sample shipping.\n\nProduct Details:\n- Product Name: ${product?.name}\n- SKU: ${product?.sku}\n- Category: ${product?.category}\n- Material: ${product?.fabric || product?.material}\n\nPlease process this sample request as soon as possible.`) 
       };
       
       console.log('Request data:', requestData);
@@ -188,12 +192,12 @@ export default function ProductDetailPage() {
         <main className="pt-8 pb-16">
           <div className="container mx-auto px-4">
             <div className="text-center py-16">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-4">Product Not Found</h1>
-              <p className="text-gray-600 mb-8">Sorry, the product you are looking for does not exist or has been removed.</p>
-              <Link href="/products">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-4">{t('product_detail.not_found.title', 'Product Not Found')}</h1>
+              <p className="text-gray-600 mb-8">{t('product_detail.not_found.desc', 'Sorry, the product you are looking for does not exist or has been removed.')}</p>
+              <Link href={createLocalizedHref('/products')}>
                 <Button className="bg-charcoal text-white hover:bg-gray-800">
                   <ChevronLeft className="mr-2 h-4 w-4" />
-                  Back to Products
+                  {t('product_detail.actions.view_all_products', 'View all products')}
                 </Button>
               </Link>
             </div>
@@ -238,21 +242,26 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+      <SEOHead
+        title={product ? `${product.name} - DreaModa Premium Wholesale Garments` : "Product - DreaModa"}
+        description={product ? `${product.name} - Premium Italian fashion garment. ${product.description} Material: ${product.material}, Color: ${product.color}. Wholesale pricing available.` : "Premium Italian fashion garment for wholesale"}
+        canonicalPath={`/product/${id}`}
+      />
       <Header />
       
       <main className="pt-8 pb-16">
         <div className="container mx-auto px-4">
           {/* Breadcrumb */}
           <div className="flex items-center mb-8 text-sm">
-            <Link href="/">
+            <Link href={createLocalizedHref('/') }>
               <Button variant="ghost" className="text-gray-500 hover:text-gray-700 p-0">
-                Home
+                {t('nav.home', 'Home')}
               </Button>
             </Link>
             <span className="mx-2 text-gray-400">/</span>
-            <Link href="/products">
+            <Link href={createLocalizedHref('/products')}>
               <Button variant="ghost" className="text-gray-500 hover:text-gray-700 p-0">
-                Products
+                {t('footer.all_products', 'All Products')}
               </Button>
             </Link>
             <span className="mx-2 text-gray-400">/</span>
@@ -308,7 +317,7 @@ export default function ProductDetailPage() {
                 {product.name}
               </h1>
                 <p className="text-sm text-gray-500 mt-4">
-                Product Code: {product.sku}
+                {t('product_detail.fields.sku', 'Product Code')}: {product.sku}
               </p>
 
               <div className="mt-8 border-t pt-8">
@@ -316,7 +325,7 @@ export default function ProductDetailPage() {
                   <span className="text-2xl font-bold text-accent-gold">DreaModa</span>
                 </div>
                 <p className="mt-4 text-gray-600 leading-relaxed">
-                  {product.description || `This exquisite ${product.name} showcases our commitment to quality and craftsmanship. Made with premium materials, paying attention to every detail, bringing you the perfect combination of comfort and fashion.`}
+                  {product.description || t('product_detail.description_fallback', `This exquisite ${product.name} showcases our commitment to quality and craftsmanship. Made with premium materials, paying attention to every detail, bringing you the perfect combination of comfort and fashion.`)}
                 </p>
               </div>
 
@@ -328,7 +337,7 @@ export default function ProductDetailPage() {
                   className="w-full bg-accent-gold text-charcoal py-3 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300"
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  {requestSampleMutation.isPending ? 'Sending Request...' : 'Request Sample'}
+                  {requestSampleMutation.isPending ? t('product_detail.actions.sending', 'Sending Request...') : t('product_detail.actions.add_to_inquiry', 'Request Sample')}
                 </Button>
                 
                 <div className="flex gap-4">
@@ -337,15 +346,15 @@ export default function ProductDetailPage() {
                     className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     <Heart className="mr-2 h-4 w-4" />
-                    Favorite
+                    {t('product_detail.actions.favorite', 'Favorite')}
                   </Button>
-                  <Link href="/products" className="flex-1">
+                  <Link href={createLocalizedHref('/products')} className="flex-1">
                     <Button 
                       variant="outline" 
                       className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
                     >
                       <ChevronLeft className="mr-2 h-4 w-4" />
-                      Back to List
+                      {t('product_detail.actions.back_to_list', 'Back to List')}
                     </Button>
                   </Link>
                 </div>
@@ -356,12 +365,12 @@ export default function ProductDetailPage() {
           {/* Product Details Section */}
           <div className="mt-16">
             <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Details</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('product_detail.title', 'Product Details')}</h2>
               <p className="text-gray-600 mb-8 leading-relaxed">
-                {product.description || `${product.name} is made with carefully selected materials, embodying our unwavering pursuit of quality and design. Each product undergoes strict quality control to ensure the best customer experience.`}
+                {product.description || t('product_detail.description_rich', `${product.name} is made with carefully selected materials, embodying our unwavering pursuit of quality and design. Each product undergoes strict quality control to ensure the best customer experience.`)}
               </p>
 
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Product Features</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('product_detail.features', 'Product Features')}</h3>
               <ul className="space-y-3">
                 {productFeatures.map((feature, index) => (
                   <li key={index} className="flex items-start">
@@ -376,7 +385,7 @@ export default function ProductDetailPage() {
           {/* Specifications Table */}
           <div className="mt-8">
             <div className="bg-white p-8 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Specifications</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('product_detail.specifications', 'Product Specifications')}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <tbody>

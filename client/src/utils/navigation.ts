@@ -16,7 +16,19 @@ export function navigateToSection(sectionId: string, currentLocation: string) {
   }
 
   // 如果不在首页，跳转到首页并在页面加载完成后滚动到目标区域
-  const targetUrl = `/#${sectionId}`;
+  // 识别当前URL中的语言前缀（/fr, /de, /it, /es）
+  let langPrefix = '';
+  try {
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    if (segments.length > 0) {
+      const first = segments[0].toLowerCase();
+      if (["fr","de","it","es"].includes(first)) {
+        langPrefix = `/${first}`;
+      }
+    }
+  } catch {}
+
+  const targetUrl = `${langPrefix}/#${sectionId}`;
   
   // 监听页面加载完成事件
   const handleLoad = () => {

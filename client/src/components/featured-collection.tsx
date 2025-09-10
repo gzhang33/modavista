@@ -7,6 +7,7 @@ import { Product } from "@shared/schema";
 import { FilterState } from "@/types";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
 
 interface FeaturedCollectionProps {
@@ -16,10 +17,12 @@ interface FeaturedCollectionProps {
 export default function FeaturedCollection({ 
   filters
 }: FeaturedCollectionProps) {
+  const { t, currentLanguage } = useLanguage();
+  const currentLangShort = (currentLanguage || 'en').split('-')[0];
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['products'],
+    queryKey: ['products', 'featured', currentLangShort],
     queryFn: async () => {
-      const res = await fetch('/api/products.php?limit=10&featured=yes&lang=en');
+      const res = await fetch(`/api/products.php?limit=10&featured=yes&lang=${currentLangShort}`);
       const data = await res.json();
       
       console.log('Featured products data:', data);
@@ -79,9 +82,9 @@ export default function FeaturedCollection({
       <section className="py-16" id="collections">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h3 className="text-4xl font-playfair font-semibold text-charcoal mb-4">Featured Collection</h3>
+            <h3 className="text-4xl font-playfair font-semibold text-charcoal mb-4">{t('home.featured.title', 'Featured Collection')}</h3>
             <p className="text-xl text-text-grey max-w-2xl mx-auto">
-              Handpicked selections from our latest seasonal collection
+              {t('home.featured.subtitle', 'Handpicked selections from our latest seasonal collection')}
             </p>
           </div>
 
@@ -89,12 +92,6 @@ export default function FeaturedCollection({
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="space-y-4">
                 <Skeleton className="w-full h-96 rounded-lg" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-full" />
-                <div className="flex justify-between">
-                  <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-4 w-1/4" />
-                </div>
               </div>
             ))}
           </div>
@@ -107,9 +104,9 @@ export default function FeaturedCollection({
     <section className="py-16" id="collections">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h3 className="text-4xl font-playfair font-semibold text-charcoal mb-4">Featured Collection</h3>
+          <h3 className="text-4xl font-playfair font-semibold text-charcoal mb-4">{t('home.featured.title', 'Featured Collection')}</h3>
           <p className="text-xl text-text-grey max-w-2xl mx-auto">
-            Handpicked selections from our latest seasonal collection, showcasing exceptional craftsmanship and contemporary design
+            {t('home.featured.subtitle', 'Handpicked selections from our latest seasonal collection, showcasing exceptional craftsmanship and contemporary design')}
           </p>
         </div>
 
@@ -120,11 +117,11 @@ export default function FeaturedCollection({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
               {filteredProducts.map((product) => (
                 <Card
                   key={product.id}
-                  className="group cursor-pointer border-none shadow-none hover:shadow-lg transition-shadow duration-300"
+                  className="group cursor-pointer border-none shadow-none bg-transparent hover:shadow-lg transition-shadow duration-300"
                   onClick={() => setLocation(`/product/${product.id}`)}
                   data-testid={`card-product-${product.id}`}
                 >
@@ -132,16 +129,19 @@ export default function FeaturedCollection({
                     <img
                       src={processImagePath(product.images[0], { debug: false })}
                       alt={product.name}
-                      className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-96 object-contain group-hover:scale-105 transition-transform duration-500"
                       onError={createImageErrorHandler(false)}
                     />
+                    {/* 产品名称 - 图片下方，无覆盖层 */}
+                    <div className="mt-4">
+                      <h4 className="text-xl font-playfair font-semibold text-charcoal text-center">
+                        {product.name}
+                      </h4>
+                    </div>
                     <Badge className="absolute top-4 right-4 bg-accent-gold text-charcoal">
-                      New
+                      {t('common.badges.new', 'New')}
                     </Badge>
                   </div>
-                  <h4 className="text-xl font-playfair font-semibold text-charcoal mb-2">
-                    {product.name}
-                  </h4>
                 </Card>
               ))}
             </div>
@@ -152,7 +152,7 @@ export default function FeaturedCollection({
                 className="bg-charcoal text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-300"
                 data-testid="button-view-complete-collection"
               >
-                View Complete Collection
+                {t('home.featured.view_all', 'View Complete Collection')}
               </Button>
             </div>
           </>

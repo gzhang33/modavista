@@ -128,7 +128,7 @@ function add_color($conn) {
     foreach ($translations as $lang => $translation) {
         if (empty($translation)) continue;
 
-        $locale_map = ['zh' => 'zh-CN', 'it' => 'it-IT'];
+        $locale_map = ['en' => 'en-GB', 'it' => 'it-IT'];
         $locale = $locale_map[$lang] ?? null;
         if (!$locale) continue;
 

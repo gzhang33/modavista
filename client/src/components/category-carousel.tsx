@@ -2,43 +2,68 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Category } from "@/types";
 
 interface CategoryCarouselProps {
   onNavigateToCategory?: (category: string) => void;
 }
 
-const categories = [
-  {
-    id: 'Tops',
-    name: 'TOPS',
-    image: '/images/categories/tops.jpg'
-  },
-  {
-    id: 'Outerwear',
-    name: 'OUTERWEAR',
-    image: '/images/categories/outerwear.jpg'
-  },
-  {
-    id: 'Bottoms',
-    name: 'BOTTOMS',
-    image: '/images/categories/bottoms.jpg'
-  },
-  {
-    id: 'Dresses',
-    name: 'DRESSES',
-    image: '/images/categories/dresses.jpg'
-  }
-];
-
 export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarouselProps) {
   const [, setLocation] = useLocation();
-  // 创建3组重复数据实现无限循环
-  const extendedCategories = [...categories, ...categories, ...categories];
-  // 初始位置设在中间组，避免边界问题
-  const [currentIndex, setCurrentIndex] = useState(categories.length);
+  const { currentLanguage } = useLanguage();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0); // Initial index will be set after categories load
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/categories.php?lang=${currentLanguage}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: { id: string; name: string; english_name: string }[] = await response.json();
+        const mappedCategories: Category[] = data.map(item => ({
+          id: item.id,
+          name: item.name.toUpperCase(),
+          image: `/images/categories/${item.english_name.toLowerCase()}.jpg`,
+          english_name: item.english_name
+        }));
+        setCategories(mappedCategories);
+        setCurrentIndex(mappedCategories.length); // Set initial index for infinite scroll
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        // Fallback to a default set of categories if API fails
+        setCategories([
+          { id: 'Tops', name: 'TOPS', image: '/client/public/images/categories/tops.jpg' },
+          { id: 'Outerwear', name: 'OUTERWEAR', image: '/client/public/images/categories/outerwear.jpg' },
+          { id: 'Bottoms', name: 'BOTTOMS', image: '/client/public/images/categories/bottoms.jpg' },
+          { id: 'Dresses', name: 'DRESSES', image: '/client/public/images/categories/dresses.jpg' }
+        ]);
+        setCurrentIndex(4); // Reset index for fallback
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [currentLanguage]);
+
+  // Create 3 sets of repeated data for infinite loop, only after categories are loaded
+  const extendedCategories = categories.length > 0 ? [...categories, ...categories, ...categories] : [];
+
+  // Ensure currentIndex is valid when categories change
+  useEffect(() => {
+    if (categories.length > 0 && currentIndex === 0) {
+      setCurrentIndex(categories.length);
+    }
+  }, [categories, currentIndex]);
+
 
   const handleCategoryClick = (categoryId: string) => {
     if (onNavigateToCategory) {

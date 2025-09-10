@@ -24,6 +24,8 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5173, // 固定的开发端口，用于支持Playwright测试
+    host: true, // 允许外部访问
     proxy: {
       '/api': {
         target: 'http://localhost',

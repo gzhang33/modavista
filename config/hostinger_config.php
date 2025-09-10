@@ -46,7 +46,7 @@ define('SITE_URL', 'https://yourdomain.com');
 define('SITE_NAME', 'DreaModa Fashion Collection');
 
 // 支持的语言
-define('SUPPORTED_LOCALES', ['en-GB', 'it-IT', 'zh-CN']);
+define('SUPPORTED_LOCALES', ['en-GB', 'it-IT']);
 define('DEFAULT_LOCALE', 'it-IT');
 
 // ===========================================

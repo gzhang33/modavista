@@ -16,10 +16,10 @@ export interface FilterOptionsData {
 }
 
 // 从分类API获取分类列表
-export async function fetchCategories(): Promise<FilterOption[]> {
+export async function fetchCategories(languageCode: string = 'en'): Promise<FilterOption[]> {
   try {
     // 前端网站使用英文
-    const response = await fetch('/api/categories.php?lang=en');
+    const response = await fetch(`/api/categories.php?lang=${languageCode}`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -59,10 +59,10 @@ export async function fetchCategories(): Promise<FilterOption[]> {
 }
 
 // 从材质API获取材质列表
-export async function fetchMaterials(): Promise<FilterOption[]> {
+export async function fetchMaterials(languageCode: string = 'en'): Promise<FilterOption[]> {
   try {
     // 前端网站使用英文
-    const response = await fetch('/api/materials.php?lang=en');
+    const response = await fetch(`/api/materials.php?lang=${languageCode}`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -102,10 +102,10 @@ export async function fetchMaterials(): Promise<FilterOption[]> {
 }
 
 // 从颜色API获取颜色列表
-export async function fetchColors(): Promise<FilterOption[]> {
+export async function fetchColors(languageCode: string = 'en'): Promise<FilterOption[]> {
   try {
     // 前端网站使用英文
-    const response = await fetch('/api/colors.php?lang=en');
+    const response = await fetch(`/api/colors.php?lang=${languageCode}`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -144,9 +144,9 @@ export async function fetchColors(): Promise<FilterOption[]> {
   }
 }
 
-export async function fetchSeasons(): Promise<FilterOption[]> {
+export async function fetchSeasons(languageCode: string = 'en'): Promise<FilterOption[]> {
   try {
-    const response = await fetch('/api/seasons.php');
+    const response = await fetch(`/api/seasons.php?lang=${languageCode}`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -182,12 +182,12 @@ export async function fetchSeasons(): Promise<FilterOption[]> {
 }
 
 // 获取所有筛选选项
-export async function fetchAllFilterOptions(): Promise<FilterOptionsData> {
+export async function fetchAllFilterOptions(languageCode: string = 'en'): Promise<FilterOptionsData> {
   const [categories, materials, colors, seasons] = await Promise.all([
-    fetchCategories(),
-    fetchMaterials(),
-    fetchColors(),
-    fetchSeasons()
+    fetchCategories(languageCode),
+    fetchMaterials(languageCode),
+    fetchColors(languageCode),
+    fetchSeasons(languageCode)
   ]);
   
   return {

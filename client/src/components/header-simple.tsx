@@ -3,10 +3,18 @@ import LanguageSwitcher from "@/components/language-switcher";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLocation } from "wouter";
+import { navigateToSection } from "@/utils/navigation";
+import { createLocalizedHref } from "@/utils/translationUtils";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useLanguage();
+  const [location] = useLocation();
+
+  const goTo = (sectionId: string) => {
+    navigateToSection(sectionId, location);
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -25,16 +33,32 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#hero" className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">
+            <a
+              href={createLocalizedHref('/#hero')}
+              onClick={(e) => { e.preventDefault(); goTo('hero'); }}
+              className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
+            >
               {t('nav.home', 'Home')}
             </a>
-            <a href="#collections" className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">
+            <a
+              href={createLocalizedHref('/#collections')}
+              onClick={(e) => { e.preventDefault(); goTo('collections'); }}
+              className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
+            >
               {t('nav.collections', 'Collections')}
             </a>
-            <a href="#about" className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">
+            <a
+              href={createLocalizedHref('/#about')}
+              onClick={(e) => { e.preventDefault(); goTo('about'); }}
+              className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
+            >
               {t('nav.about', 'About')}
             </a>
-            <a href="#contact" className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium">
+            <a
+              href={createLocalizedHref('/#contact')}
+              onClick={(e) => { e.preventDefault(); goTo('contact'); }}
+              className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
+            >
               {t('nav.contact', 'Contact')}
             </a>
           </nav>
@@ -63,30 +87,30 @@ export default function Header() {
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
               <a
-                href="#hero"
+                href={createLocalizedHref('/#hero')}
                 className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); goTo('hero'); }}
               >
                 {t('nav.home', 'Home')}
               </a>
               <a
-                href="#collections"
+                href={createLocalizedHref('/#collections')}
                 className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); goTo('collections'); }}
               >
                 {t('nav.collections', 'Collections')}
               </a>
               <a
-                href="#about"
+                href={createLocalizedHref('/#about')}
                 className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); goTo('about'); }}
               >
                 {t('nav.about', 'About')}
               </a>
               <a
-                href="#contact"
+                href={createLocalizedHref('/#contact')}
                 className="text-charcoal hover:text-accent-gold transition-colors duration-300 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); goTo('contact'); }}
               >
                 {t('nav.contact', 'Contact')}
               </a>

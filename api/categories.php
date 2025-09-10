@@ -36,13 +36,12 @@ switch ($method) {
 $conn->close();
 
 function get_categories($conn) {
-    // 支持两位语言码或完整 locale，统一规范化到 locales.code
     $raw = $_GET['lang'] ?? null;
     $locale = normalize_language_code($raw);
 
-    // 使用新的 i18n 结构查询分类
     $sql = 'SELECT
                 c.id,
+                c.category_name_en,
                 COALESCE(ci.name, c.category_name_en) AS name
             FROM category c
             LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
@@ -61,7 +60,11 @@ function get_categories($conn) {
     $result = $stmt->get_result();
     $categories = [];
     while ($row = $result->fetch_assoc()) {
-        $categories[] = $row['name'];
+        $categories[] = [
+            'id' => $row['id'],
+            'name' => $row['name'], // Translated name
+            'english_name' => $row['category_name_en'] // English name for image key
+        ];
     }
     $stmt->close();
     json_response(200, $categories);
@@ -125,7 +128,7 @@ function add_category($conn) {
     foreach ($translations as $lang => $translation) {
         if (empty($translation)) continue;
 
-        $locale_map = ['zh' => 'zh-CN', 'it' => 'it-IT'];
+        $locale_map = ['en' => 'en-GB', 'it' => 'it-IT'];
         $locale = $locale_map[$lang] ?? null;
         if (!$locale) continue;
 

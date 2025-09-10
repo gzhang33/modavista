@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -9,8 +10,8 @@ import Home from "@/pages/home";
 import ProductsPage from "@/pages/products";
 import ProductDetailPage from "@/pages/product-detail";
 import ProductModal from "@/components/product-modal";
-import { useState, useEffect } from "react";
 import { ProductModalState } from "@/types";
+import { SUPPORTED_LANGUAGES, getLanguageFromURL } from "@/utils/translationUtils";
 
 // Global scroll to top component
 function ScrollToTop() {
@@ -28,7 +29,8 @@ function ScrollToTop() {
   return null;
 }
 
-function Router() {
+// 多语言路由组件
+function MultilingualRoutes() {
   const [productModal, setProductModal] = useState<ProductModalState>({
     isOpen: false,
     productId: null
@@ -45,26 +47,89 @@ function Router() {
   return (
     <>
       <ScrollToTop />
-      <Switch>
-        <Route path="/">
-          <Home />
-        </Route>
-        <Route path="/products">
-          <ProductsPage onOpenProductModal={openProductModal} />
-        </Route>
-        <Route path="/product/:id">
-          <ProductDetailPage />
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
 
+      {/* 产品模态框 */}
       <ProductModal
         isOpen={productModal.isOpen}
         productId={productModal.productId}
         onClose={closeProductModal}
       />
+
+      <Switch>
+        {/* 多语言路由 - 放在前面，因为它们更具体 */}
+        {SUPPORTED_LANGUAGES.map(lang => (
+          lang !== 'en' && (
+            <React.Fragment key={lang}>
+              {/* 多语言产品详情路由 - 放在最前面，因为最具体 */}
+              <Route path={`/${lang}/product/:id`}>
+                <ProductDetailPage />
+              </Route>
+
+              {/* 多语言产品页面路由 */}
+              <Route path={`/${lang}/products`}>
+                <ProductsPage onOpenProductModal={openProductModal} />
+              </Route>
+
+              {/* 多语言主页路由 */}
+              <Route path={`/${lang}/`}>
+                <Home />
+              </Route>
+              <Route path={`/${lang}`}>
+                <Home />
+              </Route>
+            </React.Fragment>
+          )
+        ))}
+
+        {/* 默认路由（英文） */}
+        <Route path="/product/:id">
+          <ProductDetailPage />
+        </Route>
+        <Route path="/products">
+          <ProductsPage onOpenProductModal={openProductModal} />
+        </Route>
+        <Route path="/">
+          <Home />
+        </Route>
+
+        {/* 调试路由 - 临时添加，稍后移除 */}
+        <Route path="/debug">
+          <div style={{padding: '20px', fontFamily: 'monospace'}}>
+            <h2>路由调试信息</h2>
+            <p>当前路径: {typeof window !== 'undefined' ? window.location.pathname : 'SSR'}</p>
+            <p>检测到的语言: {typeof window !== 'undefined' ? getLanguageFromURL() || '无' : 'SSR'}</p>
+            <p>支持的语言: {SUPPORTED_LANGUAGES.join(', ')}</p>
+            <button onClick={() => console.log('当前路由状态:', {
+              pathname: window.location.pathname,
+              language: getLanguageFromURL(),
+              segments: window.location.pathname.split('/').filter(Boolean)
+            })}>
+              记录调试信息
+            </button>
+            <br /><br />
+            <button onClick={() => {
+              // 测试语言切换
+              console.log('测试语言切换到法语...');
+              if (typeof window !== 'undefined') {
+                window.location.href = '/fr';
+              }
+            }}>
+              测试跳转到 /fr
+            </button>
+          </div>
+        </Route>
+
+        {/* 404页面 */}
+        <Route path="*">
+          <NotFound />
+        </Route>
+      </Switch>
     </>
   );
+}
+
+function Router() {
+  return <MultilingualRoutes />;
 }
 
 function App() {

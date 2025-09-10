@@ -1,12 +1,18 @@
 import { Link, useLocation } from "wouter";
 import { navigateToSection } from "@/utils/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { createLocalizedHref } from "@/utils/translationUtils";
 
 export default function Footer() {
   const [location] = useLocation();
-  
+  const { t } = useLanguage();
+
   const scrollToSection = (sectionId: string) => {
     navigateToSection(sectionId, location);
   };
+
+  // 生成多语言产品页面链接
+  const productsHref = createLocalizedHref('/products');
 
   return (
     <footer className="bg-charcoal text-white py-12">
@@ -15,19 +21,18 @@ export default function Footer() {
           <div className="md:col-span-2">
             <h5 className="text-2xl font-playfair font-semibold mb-4">DREAMODA</h5>
             <p className="text-gray-300 mb-4 max-w-md">
-              Premium fashion manufacturer and designer, creating exceptional garments 
-              for discerning customers worldwide with Italian craftsmanship and modern style.
+              {t('footer.description', 'Premium fashion manufacturer and designer, creating exceptional garments for discerning customers worldwide with Italian craftsmanship and modern style.')}
             </p>
           </div>
           
           <div>
-            <h6 className="font-semibold mb-4">Quick Links</h6>
+            <h6 className="font-semibold mb-4">{t('footer.quick_links', 'Quick Links')}</h6>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <Link href="/products">
+                <Link href={productsHref}>
                   <span className="hover:text-accent-gold transition-colors cursor-pointer"
                         data-testid="footer-products">
-                    All Products
+                    {t('footer.all_products', 'All Products')}
                   </span>
                 </Link>
               </li>
@@ -37,7 +42,7 @@ export default function Footer() {
                   className="hover:text-accent-gold transition-colors text-left"
                   data-testid="footer-collections"
                 >
-                  Collections
+                  {t('footer.collections', 'Collections')}
                 </button>
               </li>
               <li>
@@ -46,7 +51,7 @@ export default function Footer() {
                   className="hover:text-accent-gold transition-colors text-left"
                   data-testid="footer-categories"
                 >
-                  Categories
+                  {t('footer.categories', 'Categories')}
                 </button>
               </li>
               <li>
@@ -55,7 +60,7 @@ export default function Footer() {
                   className="hover:text-accent-gold transition-colors text-left"
                   data-testid="footer-about"
                 >
-                  About Us
+                  {t('footer.about_us', 'About Us')}
                 </button>
               </li>
               <li>
@@ -64,7 +69,7 @@ export default function Footer() {
                   className="hover:text-accent-gold transition-colors text-left"
                   data-testid="footer-contact"
                 >
-                  Contact
+                  {t('footer.contact', 'Contact')}
                 </button>
               </li>
             </ul>
@@ -72,7 +77,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-          <p>&copy; 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Milano, Italia.</p>
+          <p>{t('footer.copyright', '© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Milano, Italia.')}</p>
         </div>
       </div>
     </footer>

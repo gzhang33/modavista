@@ -65,26 +65,26 @@ export default class ProductTableComponent extends BaseComponent {
     async load_colors_map() {
         try {
             console.log('Loading color map...');
-            const colors = await apiClient.get('/colors.php', { lang: 'zh' });
+            const colors = await apiClient.get('/colors.php', { lang: 'it' });
             console.log('Colors loaded:', colors);
 
             if (Array.isArray(colors)) {
                 colors.forEach(c => {
-                    // 如果是字符串，直接使用作为中文名称
+                    // 如果是字符串，直接使用作为意大利语名称
                     if (typeof c === 'string') {
-                        const zh = c.trim();
-                        console.log('Processing color string:', zh);
-                        // 对于字符串格式，我们假设英文名就是中文名的小写版本
-                        if (zh) {
-                            this.color_en_to_zh.set(zh.toLowerCase(), zh);
+                        const it = c.trim();
+                        console.log('Processing color string:', it);
+                        // 对于字符串格式，我们假设英文名就是意大利语名的小写版本
+                        if (it) {
+                            this.color_en_to_zh.set(it.toLowerCase(), it);
                         }
                     } else {
                         // 如果是对象格式，使用原有逻辑
                         const en = (c.name_en || c.color_name || '').trim();
-                        const zh = (c.name || c.color_name_zh || c.color_name || '').trim();
-                        console.log('Processing color object:', en, '->', zh);
+                        const it = (c.name || c.color_name_it || c.color_name || '').trim();
+                        console.log('Processing color object:', en, '->', it);
                         if (en) {
-                            this.color_en_to_zh.set(en.toLowerCase(), zh);
+                            this.color_en_to_zh.set(en.toLowerCase(), it);
                         }
                     }
                 });
@@ -96,10 +96,10 @@ export default class ProductTableComponent extends BaseComponent {
         }
     }
 
-    translate_color_to_zh(color_value) {
+    translate_color_to_it(color_value) {
         if (!color_value) return '—';
-        // 如果已包含中文字符，直接返回
-        if (/[\u4e00-\u9fa5]/.test(color_value)) return color_value;
+        // 如果已包含意大利语字符，直接返回
+        if (/[àèéìíîòóùú]/.test(color_value)) return color_value;
         const mapped = this.color_en_to_zh.get(String(color_value).toLowerCase());
         console.log('Translating color:', color_value, '->', mapped || color_value);
         return mapped || color_value;
@@ -111,11 +111,11 @@ export default class ProductTableComponent extends BaseComponent {
             console.log('API URL:', this.api_url);
             console.log('apiClient baseURL:', apiClient.baseURL);
 
-            // 管理后台使用中文显示
+            // 管理后台使用意大利语显示
             const productsUrl = '/products.php';
-            console.log('Requesting:', productsUrl, { archived: filters.archived, lang: 'zh' });
+            console.log('Requesting:', productsUrl, { archived: filters.archived, lang: 'it' });
 
-            this.all_products = await apiClient.get(productsUrl, { archived: filters.archived, lang: 'zh' });
+            this.all_products = await apiClient.get(productsUrl, { archived: filters.archived, lang: 'it' });
             console.log('Products loaded:', this.all_products);
 
             this.filtered_products = null;
@@ -157,7 +157,7 @@ export default class ProductTableComponent extends BaseComponent {
 
             // 获取颜色名称（优先 API 返回，再回退解析；最后映射到中文）
             const color_raw = p.color || this.extract_color_label(p.name) || '—';
-            const color_name = this.translate_color_to_zh(color_raw);
+            const color_name = this.translate_color_to_it(color_raw);
             const material_name = p.material || '—';
             const name = p.base_name; // Use only base_name
             

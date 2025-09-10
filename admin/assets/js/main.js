@@ -1,6 +1,8 @@
 // htdocs/admin/assets/js/main.js
 import EventBus from './EventBus.js';
 import ComponentManager from './ComponentManager.js';
+import SessionManager from './utils/sessionManager.js';
+import apiClient from './utils/apiClient.js';
 
 // Import all components
 import ProductTableComponent from './components/dashboard_products.js';
@@ -10,6 +12,12 @@ import ToastComponent from './components/ToastComponent.js';
 document.addEventListener('DOMContentLoaded', () => {
     const eventBus = new EventBus();
     const componentManager = new ComponentManager(eventBus);
+    
+    // 初始化会话管理器
+    const sessionManager = new SessionManager(eventBus);
+    
+    // 设置API客户端的会话管理器
+    apiClient.setSessionManager(sessionManager);
 
     // Register core components
     componentManager.register(ProductTableComponent, '#products-management-section');
@@ -19,6 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     componentManager.initAll();
     
     setup_navigation(eventBus);
+    
+    // 页面卸载时清理会话管理器
+    window.addEventListener('beforeunload', () => {
+        sessionManager.destroy();
+    });
 });
 
 function setup_navigation(eventBus) {

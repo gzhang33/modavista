@@ -307,86 +307,89 @@ function get_all_translations($language_code = null) {
 }
 
 // API端点处理
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$action = $_GET['action'] ?? '';
+// 仅当直接访问该文件时，才作为 API 端点输出响应
+if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'] ?? '')) {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $action = $_GET['action'] ?? '';
 
-switch ($method) {
-    case 'GET':
-        switch ($action) {
-            case 'languages':
-                json_response(200, [
-                    'languages' => get_available_languages(),
-                    'current' => get_current_language()
-                ]);
-                break;
+    switch ($method) {
+        case 'GET':
+            switch ($action) {
+                case 'languages':
+                    json_response(200, [
+                        'languages' => get_available_languages(),
+                        'current' => get_current_language()
+                    ]);
+                    break;
 
-            case 'translation':
-                $content_key = $_GET['key'] ?? '';
-                if (empty($content_key)) {
-                    json_response(400, ['error' => 'Missing content key']);
-                }
-                json_response(200, [
-                    'key' => $content_key,
-                    'text' => get_translation($content_key)
-                ]);
-                break;
+                case 'translation':
+                    $content_key = $_GET['key'] ?? '';
+                    if (empty($content_key)) {
+                        json_response(400, ['error' => 'Missing content key']);
+                    }
+                    json_response(200, [
+                        'key' => $content_key,
+                        'text' => get_translation($content_key)
+                    ]);
+                    break;
 
-            case 'translations':
-                $language_code = $_GET['lang'] ?? get_current_language();
-                $translations = get_all_translations($language_code);
-                json_response(200, [
-                    'language' => $language_code,
-                    'translations' => $translations
-                ]);
-                break;
+                case 'translations':
+                    $language_code = $_GET['lang'] ?? get_current_language();
+                    $translations = get_all_translations($language_code);
+                    json_response(200, [
+                        'language' => $language_code,
+                        'translations' => $translations
+                    ]);
+                    break;
 
-            case 'clear_cache':
-                // 清空缓存（需要管理员权限）
-                require_auth();
-                $pattern = $_GET['pattern'] ?? '*';
-                clear_cache($pattern);
-                json_response(200, ['message' => 'Cache cleared successfully']);
-                break;
+                case 'clear_cache':
+                    // 清空缓存（需要管理员权限）
+                    require_auth();
+                    $pattern = $_GET['pattern'] ?? '*';
+                    clear_cache($pattern);
+                    json_response(200, ['message' => 'Cache cleared successfully']);
+                    break;
 
-            default:
-                json_response(200, [
-                    'current_language' => get_current_language(),
-                    'available_languages' => get_available_languages()
-                ]);
-        }
-        break;
+                default:
+                    json_response(200, [
+                        'current_language' => get_current_language(),
+                        'available_languages' => get_available_languages()
+                    ]);
+            }
+            break;
 
-    case 'POST':
-        switch ($action) {
-            case 'set_language':
-                $data = json_decode(file_get_contents('php://input'), true);
-                $language_code = $data['language_code'] ?? '';
+        case 'POST':
+            switch ($action) {
+                case 'set_language':
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $language_code = $data['language_code'] ?? '';
 
-                if (set_user_language($language_code)) {
-                    // 语言切换时清空相关缓存
-                    clear_cache('translation_' . $language_code . '*');
-                    json_response(200, ['message' => 'Language updated successfully']);
-                } else {
-                    json_response(400, ['error' => 'Invalid language code']);
-                }
-                break;
+                    if (set_user_language($language_code)) {
+                        // 语言切换时清空相关缓存
+                        clear_cache('translation_' . $language_code . '*');
+                        json_response(200, ['message' => 'Language updated successfully']);
+                    } else {
+                        json_response(400, ['error' => 'Invalid language code']);
+                    }
+                    break;
 
-            case 'clear_cache':
-                // 清空缓存（需要管理员权限）
-                require_auth();
-                $data = json_decode(file_get_contents('php://input'), true);
-                $pattern = $data['pattern'] ?? '*';
-                clear_cache($pattern);
-                json_response(200, ['message' => 'Cache cleared successfully']);
-                break;
+                case 'clear_cache':
+                    // 清空缓存（需要管理员权限）
+                    require_auth();
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $pattern = $data['pattern'] ?? '*';
+                    clear_cache($pattern);
+                    json_response(200, ['message' => 'Cache cleared successfully']);
+                    break;
 
-            default:
-                json_response(404, ['error' => 'Action not found']);
-        }
-        break;
+                default:
+                    json_response(404, ['error' => 'Action not found']);
+            }
+            break;
 
-    default:
-        json_response(405, ['error' => 'Method not allowed']);
+        default:
+            json_response(405, ['error' => 'Method not allowed']);
+    }
 }
 ?>
 

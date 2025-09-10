@@ -162,8 +162,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_categories(products) {
         let categories = [];
         try {
-            // add_product 页面下拉统一显示中文
-            categories = await apiClient.getCategories('zh');
+            // add_product 页面下拉统一显示意大利语
+            categories = await apiClient.getCategories('it');
         } catch (error) {
             console.error('Failed to load categories:', error);
             categories = Array.isArray(products)
@@ -175,8 +175,16 @@ export default class ProductFormComponent extends BaseComponent {
         this.category_select.innerHTML = '';
         categories.forEach(category => {
             const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
+            // 修复：使用正确的字段映射
+            // 如果category是对象（来自API），使用name作为显示文本和值
+            // 如果category是字符串（来自产品数据），直接使用
+            if (typeof category === 'object' && category.name) {
+                option.value = category.name;
+                option.textContent = category.name;
+            } else {
+                option.value = category;
+                option.textContent = category;
+            }
             this.category_select.appendChild(option);
         });
         this.category_select.value = current_val;
@@ -185,8 +193,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_materials(products) {
         let materials = [];
         try {
-            // add_product 页面下拉统一显示中文
-            materials = await apiClient.getMaterials('zh');
+            // add_product 页面下拉统一显示意大利语
+            materials = await apiClient.getMaterials('it');
         } catch (error) {
             console.error('Failed to load materials:', error);
             materials = Array.isArray(products)
@@ -208,7 +216,7 @@ export default class ProductFormComponent extends BaseComponent {
     async update_colors(products) {
         let colors = [];
         try {
-            const lang = 'zh';
+            const lang = 'it';
             colors = await apiClient.getColors(lang);
         } catch (error) {
             console.error('Failed to load colors:', error);
@@ -233,7 +241,7 @@ export default class ProductFormComponent extends BaseComponent {
     
     async populate_variant_color_options(row) {
         try {
-            const lang = 'zh';
+            const lang = 'it';
             const colors = await apiClient.getColors(lang);
             const color_select = row.querySelector('.variant-color-select');
             if (color_select) {

@@ -152,18 +152,26 @@ export default class AdvancedFilterComponent extends BaseComponent {
     
     async update_categories(products) {
         try {
-            const categories = await apiClient.getCategories();
+            const categories = await apiClient.getCategories('it'); // 使用意大利语
             this.available_categories = categories;
         } catch (error) {
             console.error('Failed to load categories:', error);
             this.available_categories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
         }
         const current_val = this.category_filter.value;
-        this.category_filter.innerHTML = '<option value="">所有分类</option>';
+        this.category_filter.innerHTML = '<option value="">Tutte le Categorie</option>';
         this.available_categories.forEach(category => {
             const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
+            // 修复：使用正确的字段映射
+            // 如果category是对象（来自API），使用name作为显示文本和值
+            // 如果category是字符串（来自产品数据），直接使用
+            if (typeof category === 'object' && category.name) {
+                option.value = category.name;
+                option.textContent = category.name;
+            } else {
+                option.value = category;
+                option.textContent = category;
+            }
             this.category_filter.appendChild(option);
         });
         this.category_filter.value = current_val;

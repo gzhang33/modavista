@@ -10,17 +10,8 @@
 </head>
 <body>
     <script>
-        // 进入后台前做一次服务端会话校验
-        fetch('../api/check_session.php')
-            .then(r => r.json())
-            .then(data => {
-                if (!data.loggedIn) {
-                    window.location.href = 'login.html';
-                }
-            })
-            .catch(() => {
-                window.location.href = 'login.html';
-            });
+        // 会话检查现在由SessionManager处理
+        // 移除了硬编码的会话检查，改为动态管理
     </script>
     <div class="dashboard-container">
         <!-- 管理导航栏 -->
@@ -103,14 +94,14 @@
                             <thead>
                                 <tr>
                                     <th><input type="checkbox" id="select-all-checkbox"></th>
-                                    <th>图片</th>
-                                    <th>产品名称</th>
-                                    <th>颜色</th>
-                                    <th>材质</th>
-                                    <th>分类</th>
-                                    <th>描述</th>
-                                    <th>创建日期</th>
-                                    <th class="sticky-right">操作</th>
+                                    <th>Immagine</th>
+                                    <th>Nome Prodotto</th>
+                                    <th>Colore</th>
+                                    <th>Materiale</th>
+                                    <th>Categoria</th>
+                                    <th>Descrizione</th>
+                                    <th>Data Creazione</th>
+                                    <th class="sticky-right">Operazioni</th>
                                 </tr>
                             </thead>
                             <tbody id="products-table-body">
@@ -128,6 +119,6 @@
 <!-- Toast Notification -->
 <div id="toast-notification" class="toast"></div>
 
-    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/main.js?v=2"></script>
 </body>
 </html>

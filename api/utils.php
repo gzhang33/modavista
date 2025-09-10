@@ -19,6 +19,14 @@ function json_response($status_code, $data) {
  * 基于 PHP 会话的认证系统
  */
 function require_auth() {
+    // 尝试加载增强的会话配置
+    if (file_exists(__DIR__ . '/session_config.php')) {
+        require_once __DIR__ . '/session_config.php';
+        require_auth_enhanced();
+        return;
+    }
+    
+    // 回退到原有逻辑
     // 检查会话是否已启动
     if (session_status() == PHP_SESSION_NONE) {
         session_start();

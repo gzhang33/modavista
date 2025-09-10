@@ -1,7 +1,14 @@
 // htdocs/admin/assets/js/utils/apiClient.js
+import SessionManager from './sessionManager.js';
+
 class ApiClient {
     constructor(baseURL = '') {
         this.baseURL = baseURL;
+        this.sessionManager = null;
+    }
+    
+    setSessionManager(sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     async request(endpoint, options = {}) {
@@ -39,12 +46,25 @@ class ApiClient {
             const response = await fetch(config.url, {
                 method: config.method || 'GET',
                 headers: config.headers,
-                body: config.body ? (config.body instanceof FormData ? config.body : JSON.stringify(config.body)) : undefined
+                body: config.body ? (config.body instanceof FormData ? config.body : JSON.stringify(config.body)) : undefined,
+                credentials: 'include' // 确保发送cookies
             });
 
             if (!response.ok) {
                 if (response.status === 401) {
-                    // Session expired
+                    // 检查是否是会话过期
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.session_expired) {
+                            // 通知会话管理器处理会话过期
+                            if (this.sessionManager) {
+                                this.sessionManager.handleSessionExpired(errorData);
+                            }
+                            throw new Error('SESSION_EXPIRED');
+                        }
+                    } catch (e) {
+                        // JSON解析失败，使用默认处理
+                    }
                     throw new Error('SESSION_EXPIRED');
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);

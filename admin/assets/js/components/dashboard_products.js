@@ -1,6 +1,6 @@
 // htdocs/admin/assets/js/components/dashboard_products.js - v1.1
 import BaseComponent from './BaseComponent.js';
-import apiClient from '/admin/assets/js/utils/apiClient.js';
+import apiClient from '../utils/apiClient.js';
 import { get_base_name, extract_color_label, color_name_to_hex } from '/admin/assets/js/utils/product_name_utils.js';
 import { handle_session_expired } from '../utils/session.js';
 
@@ -46,6 +46,7 @@ export default class ProductTableComponent extends BaseComponent {
         });
 
         this.eventBus.on('products:filter-changed', (filters) => {
+            console.log('ProductTableComponent received products:filter-changed event:', filters);
             this.apply_filters(filters);
         });
 
@@ -373,7 +374,9 @@ export default class ProductTableComponent extends BaseComponent {
 
 // Filtering utilities
 ProductTableComponent.prototype.apply_filters = function(filters) {
+    console.log('ProductTableComponent.apply_filters called with:', filters);
     if (!filters || !Array.isArray(filters.conditions) || filters.conditions.length === 0) {
+        console.log('No filters to apply, showing all products');
         this.filtered_products = null;
         this.selected_product_ids.clear();
         this.render();
@@ -400,13 +403,21 @@ ProductTableComponent.prototype.apply_filters = function(filters) {
             case 'name': actual = p.name; break;
             case 'description': actual = p.description; break;
             case 'category': actual = p.category; break;
+            case 'color': actual = p.color; break;
+            case 'material': actual = p.material; break;
             case 'createdAt': actual = p.createdAt; break;
             default: actual = null;
         }
+        
 
         // Text/select comparisons
-        if (field === 'name' || field === 'description' || field === 'category') {
+        if (field === 'name' || field === 'description' || field === 'category' || field === 'color' || field === 'material') {
             const a = normalize_text(actual);
+            if (operator === 'in') {
+                // Handle array of values for 'in' operator
+                const values = Array.isArray(value) ? value : [value];
+                return values.some(v => a === normalize_text(v));
+            }
             const b = normalize_text(value);
             if (operator === 'contains') return a.includes(b);
             if (operator === 'equals') return a === b;
@@ -455,6 +466,8 @@ ProductTableComponent.prototype.apply_filters = function(filters) {
     };
 
     this.filtered_products = list.filter(passes);
+    console.log(`Filtered ${list.length} products down to ${this.filtered_products.length} products`);
+    console.log('Filtered products:', this.filtered_products);
     this.selected_product_ids.clear();
     this.render();
     this.apply_list_animation();

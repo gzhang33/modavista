@@ -77,7 +77,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-          <p>{t('footer.copyright', '© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Milano, Italia.')}</p>
+          <p>{t('footer.copyright', '© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Prato, Tuscany, Italy.')}</p>
         </div>
       </div>
     </footer>

@@ -58,10 +58,10 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
         console.error("Failed to fetch categories:", error);
         // Fallback to a default set of categories if API fails
         setCategories([
-          { id: 'Tops', name: 'TOPS', image: '/placeholder-image.svg', english_name: 'tops' },
-          { id: 'Outerwear', name: 'OUTERWEAR', image: '/placeholder-image.svg', english_name: 'outerwear' },
-          { id: 'Bottoms', name: 'BOTTOMS', image: '/placeholder-image.svg', english_name: 'bottoms' },
-          { id: 'Dresses', name: 'DRESSES', image: '/placeholder-image.svg', english_name: 'dresses' }
+          { id: 'Tops', name: 'TOPS', image: '/images/placeholder-image.svg', english_name: 'tops' },
+          { id: 'Outerwear', name: 'OUTERWEAR', image: '/images/placeholder-image.svg', english_name: 'outerwear' },
+          { id: 'Bottoms', name: 'BOTTOMS', image: '/images/placeholder-image.svg', english_name: 'bottoms' },
+          { id: 'Dresses', name: 'DRESSES', image: '/images/placeholder-image.svg', english_name: 'dresses' }
         ]);
         setCurrentIndex(4); // Reset index for fallback
         setTimeout(() => {

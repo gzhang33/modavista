@@ -25,7 +25,7 @@
     "about": {
       "title": "Créer des Rêves dans la Mode",
       "description1": "DreaModa représente la parfaite fusion de l'héritage de la mode italienne et du design contemporain. Notre atelier combine un artisanat traditionnel avec des techniques innovantes pour créer des vêtements qui incarnent l'élégance, la qualité et la sophistication moderne.",
-      "description2": "Basé au cœur de Milan, nous nous spécialisons dans la création de pièces uniques qui reflètent le style personnel et la personnalité. Notre engagement envers l'excellence et l'attention aux détails garantissent que chaque création répond aux normes les plus élevées de la tradition de la mode italienne.",
+      "description2": "Basé au cœur de Prato, Toscane, nous nous spécialisons dans la création de pièces uniques qui reflètent le style personnel et la personnalité. Notre engagement envers l'excellence et l'attention aux détails garantissent que chaque création répond aux normes les plus élevées de la tradition de la mode italienne.",
       "designs": "Conceptions de Mode",
       "experience": "Années d'Expérience"
     },
@@ -45,7 +45,7 @@
       "info": {
         "title": "Nous Contacter",
         "headquarters": "Siège de DreaModa",
-        "address": "Via della Moda, 123\n20121 Milan, Italie",
+        "address": "Via Gherardacci 47/C, Iolo, Prato, Toscane, Italie",
         "inquiries": "Demandes Commerciales",
         "phone": "+39 02 1234 5678\nLun - Ven, 9h00 - 18h00 CET",
         "email": "Email",
@@ -68,7 +68,7 @@
     "categories": "Catégories",
     "about_us": "À Propos de Nous",
     "contact": "Contact",
-    "copyright": "© 2025 DREAMODA. Tous droits réservés. | Fabriqué avec passion pour la mode à Milan, Italie."
+    "copyright": "© 2025 DREAMODA. Tous droits réservés. | Fabriqué avec passion pour la mode à Toscane, Italie."
   },
   "filters": {
     "all_categories": "Toutes les Catégories",
@@ -234,6 +234,6 @@
   "seo": {
     "title": "DreaModa - Excellence Italienne de la Mode | Fabricant de Vêtements en Gros",
     "description": "Fabricant italien de mode premium spécialisé dans les vêtements de gros. Découvrez notre collection exclusive de pièces de mode de haute qualité pour les partenaires grossistes exigeants du monde entier.",
-    "keywords": "mode italienne, vêtements de gros, fabricant de mode, mode Milano, vêtements premium, mode de gros"
+    "keywords": "mode italienne, vêtements de gros, fabricant de mode, mode Prato, vêtements premium, mode de gros"
   }
 }

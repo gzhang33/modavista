@@ -25,7 +25,7 @@
     "about": {
       "title": "Crear Sueños en la Moda",
       "description1": "DreaModa representa la perfecta fusión del legado de la moda italiana y el diseño contemporáneo. Nuestro taller combina el artesanado tradicional con técnicas innovadoras para crear prendas que encarnan elegancia, calidad y sofisticación moderna.",
-      "description2": "Con sede en el corazón de Milán, nos especializamos en la creación de piezas únicas que reflejan el estilo personal y la personalidad. Nuestro compromiso con la excelencia y la atención al detalle garantizan que cada creación cumpla con los estándares más altos de la tradición de la moda italiana.",
+      "description2": "Con sede en el corazón de Prato, Toscana, nos especializamos en la creación de piezas únicas que reflejan el estilo personal y la personalidad. Nuestro compromiso con la excelencia y la atención al detalle garantizan que cada creación cumpla con los estándares más altos de la tradición de la moda italiana.",
       "designs": "Diseños de Moda",
       "experience": "Años de Experiencia"
     },
@@ -45,7 +45,7 @@
       "info": {
         "title": "Ponerse en Contacto",
         "headquarters": "Sede Central de DreaModa",
-        "address": "Via della Moda, 123\n20121 Milán, Italia",
+        "address": "Via Gherardacci 47/C, Iolo, Prato, Toscana, Italia",
         "inquiries": "Consultas Empresariales",
         "phone": "+39 02 1234 5678\nLun - Vie, 9:00 - 18:00 CET",
         "email": "Correo Electrónico",
@@ -68,7 +68,7 @@
     "categories": "Categorías",
     "about_us": "Sobre Nosotros",
     "contact": "Contacto",
-    "copyright": "© 2025 DREAMODA. Todos los derechos reservados. | Hecho con pasión para la moda en Milán, Italia."
+    "copyright": "© 2025 DREAMODA. Todos los derechos reservados. | Hecho con pasión para la moda en Toscana, Italia."
   },
   "filters": {
     "all_categories": "Todas las Categorías",
@@ -234,6 +234,6 @@
   "seo": {
     "title": "DreaModa - Excelencia Italiana en Moda | Fabricante de Ropa al por Mayor",
     "description": "Fabricante italiano de moda premium especializado en ropa al por mayor. Descubre nuestra colección curada de prendas de moda de alta calidad para socios mayoristas exigentes de todo el mundo.",
-    "keywords": "moda italiana, ropa al por mayor, fabricante de moda, moda Milano, ropa premium, moda al por mayor"
+    "keywords": "moda italiana, ropa al por mayor, fabricante de moda, moda Prato, ropa premium, moda al por mayor"
   }
 }

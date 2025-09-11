@@ -141,7 +141,7 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
                 src={processImagePath(
                   product.images && product.images[0] 
                     ? product.images[0]
-                    : '/placeholder-image.svg',
+                    : '/images/placeholder-image.svg',
                   { debug: false }
                 )}
                 alt={product.name}

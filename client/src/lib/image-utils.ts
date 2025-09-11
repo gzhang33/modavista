@@ -24,7 +24,7 @@ export function processImagePath(imagePath: string | undefined | null, options: 
   // 如果没有图片路径，返回placeholder
   if (!imagePath || imagePath.trim() === '') {
     if (debug) console.log('No image path provided, using placeholder');
-    return '/placeholder-image.svg';
+    return '/images/placeholder-image.svg';
   }
   
   // 如果已经是完整的HTTP URL，直接返回
@@ -35,7 +35,7 @@ export function processImagePath(imagePath: string | undefined | null, options: 
   
   // 如果是placeholder，直接返回
   if (imagePath.includes('placeholder')) {
-    return '/placeholder-image.svg';
+    return '/images/placeholder-image.svg';
   }
   
   // 处理API返回的相对路径，API返回格式：images/media-xxx.jpg
@@ -78,18 +78,18 @@ export function processImageArray(images: (string | undefined | null)[] | undefi
   
   if (!images || !Array.isArray(images) || images.length === 0) {
     if (debug) console.log('No images provided, using placeholder array');
-    return ['/placeholder-image.svg'];
+    return ['/images/placeholder-image.svg'];
   }
   
   const processedImages = images
     .filter(img => img != null && img.trim() !== '') // 过滤掉空值
     .map(img => processImagePath(img, options))
-    .filter(img => img !== '/placeholder-image.svg'); // 先过滤掉placeholder
+    .filter(img => img !== '/images/placeholder-image.svg'); // 先过滤掉placeholder
   
   // 如果没有有效图片，返回placeholder
   if (processedImages.length === 0) {
     if (debug) console.log('No valid images after processing, using placeholder');
-    return ['/placeholder-image.svg'];
+    return ['/images/placeholder-image.svg'];
   }
   
   if (debug) {
@@ -113,7 +113,7 @@ export function createImageErrorHandler(options: ImageErrorHandlerOptions = {}) 
     
     // 如果已经是placeholder，不要再次设置以避免无限循环
     if (!target.src.includes('placeholder-image.svg')) {
-      target.src = '/placeholder-image.svg';
+      target.src = '/images/placeholder-image.svg';
       
       if (debug) {
         console.log('Fallback to placeholder for:', originalSrc);
@@ -166,7 +166,7 @@ export async function preloadImages(images: string[]): Promise<string[]> {
   const validImages = results.filter((src): src is string => src !== null);
   
   // 如果没有可用图片，返回placeholder
-  return validImages.length > 0 ? validImages : ['/placeholder-image.svg'];
+  return validImages.length > 0 ? validImages : ['/images/placeholder-image.svg'];
 }
 
 // 智能获取分类图片路径的函数
@@ -201,7 +201,7 @@ export async function getCategoryImagePath(englishName: string): Promise<string>
   }
 
   // 如果所有尝试都失败，返回placeholder
-  return '/placeholder-image.svg';
+  return '/images/placeholder-image.svg';
 }
 
 // 创建分类图片错误处理函数
@@ -225,7 +225,7 @@ export function createCategoryImageErrorHandler(
     
     // 如果已经是placeholder，不要再次设置以避免无限循环
     if (!target.src.includes('placeholder-image.svg')) {
-      target.src = '/placeholder-image.svg';
+      target.src = '/images/placeholder-image.svg';
       
       if (debug) {
         console.log('Fallback to placeholder for category:', categoryName);

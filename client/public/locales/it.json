@@ -25,7 +25,7 @@
     "about": {
       "title": "Creare Sogni nella Moda",
       "description1": "DreaModa rappresenta la perfetta fusione dell'eredità della moda italiana e del design contemporaneo. Il nostro atelier combina l'artigianato tradizionale con tecniche innovative per creare capi che incarnano eleganza, qualità e sofisticazione moderna.",
-      "description2": "Con sede nel cuore di Milano, ci specializziamo nella creazione di pezzi unici che riflettono lo stile personale e la personalità. Il nostro impegno per l'eccellenza e l'attenzione ai dettagli garantiscono che ogni creazione soddisfi i più alti standard della tradizione della moda italiana.",
+      "description2": "Con sede nel cuore di Prato, Toscana, ci specializziamo nella creazione di pezzi unici che riflettono lo stile personale e la personalità. Il nostro impegno per l'eccellenza e l'attenzione ai dettagli garantiscono che ogni creazione soddisfi i più alti standard della tradizione della moda italiana.",
       "designs": "Design di Moda",
       "experience": "Anni di Esperienza"
     },
@@ -45,7 +45,7 @@
       "info": {
         "title": "Mettiti in Contatto",
         "headquarters": "Sede Centrale DreaModa",
-        "address": "Via della Moda, 123\n20121 Milano, Italia",
+        "address": "Via Gherardacci 47/C, Iolo, Prato, Toscana, Italia",
         "inquiries": "Richieste Commerciali",
         "phone": "+39 02 1234 5678\nLun - Ven, 9:00 - 18:00 CET",
         "email": "Email",
@@ -68,7 +68,7 @@
     "categories": "Categorie",
     "about_us": "Chi Siamo",
     "contact": "Contatti",
-    "copyright": "© 2025 DREAMODA. Tutti i diritti riservati. | Realizzato con passione per la moda a Milano, Italia."
+    "copyright": "© 2025 DREAMODA. Tutti i diritti riservati. | Realizzato con passione per la moda a Toscana, Italia."
   },
   "filters": {
     "all_categories": "Tutte le Categorie",
@@ -234,6 +234,6 @@
   "seo": {
     "title": "DreaModa - Eccellenza Italiana della Moda | Produttore di Abbigliamento all'Ingrosso",
     "description": "Produttore italiano di moda premium specializzato in abbigliamento all'ingrosso. Scopri la nostra collezione curata di capi di moda di alta qualità per partner grossisti esigenti in tutto il mondo.",
-    "keywords": "moda italiana, abbigliamento all'ingrosso, produttore di moda, moda Milano, abbigliamento premium, moda all'ingrosso"
+    "keywords": "moda italiana, abbigliamento all'ingrosso, produttore di moda, moda Prato, abbigliamento premium, moda all'ingrosso"
   }
 }

@@ -25,7 +25,7 @@
     "about": {
       "title": "Crafting Dreams Into Fashion",
       "description1": "DreaModa represents the perfect fusion of Italian fashion heritage and contemporary design. Our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments that embody elegance, quality, and modern sophistication.",
-      "description2": "Based in the heart of Milano, we specialize in creating unique pieces that reflect individual style and personality. Our commitment to excellence and attention to detail ensures that each creation meets the highest standards of Italian fashion tradition.",
+      "description2": "Based in the heart of Prato, Tuscany, we specialize in creating unique pieces that reflect individual style and personality. Our commitment to excellence and attention to detail ensures that each creation meets the highest standards of Italian fashion tradition.",
       "designs": "Fashion Designs",
       "experience": "Years Experience"
     },
@@ -45,7 +45,7 @@
       "info": {
         "title": "Get In Touch",
         "headquarters": "DreaModa Headquarters",
-        "address": "Via della Moda, 123\n20121 Milano, Italia",
+        "address": "Via Gherardacci 47/C, Iolo, Prato, Tuscany, Italy",
         "inquiries": "Business Inquiries",
         "phone": "+39 02 1234 5678\nMon - Fri, 9:00 AM - 6:00 PM CET",
         "email": "Email",
@@ -68,7 +68,7 @@
     "categories": "Categories",
     "about_us": "About Us",
     "contact": "Contact",
-    "copyright": "© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Milano, Italia."
+    "copyright": "© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Tuscany, Italy."
   },
   "filters": {
     "all_categories": "All Categories",
@@ -234,6 +234,6 @@
   "seo": {
     "title": "DreaModa - Italian Fashion Excellence | Wholesale Garment Manufacturer",
     "description": "Premium Italian fashion manufacturer specializing in wholesale garments. Discover our curated collection of high-quality fashion pieces for discerning wholesale partners worldwide.",
-    "keywords": "Italian fashion, wholesale garments, fashion manufacturer, Milano fashion, premium clothing, wholesale fashion"
+    "keywords": "Italian fashion, wholesale garments, fashion manufacturer, Prato fashion, premium clothing, wholesale fashion"
   }
 }

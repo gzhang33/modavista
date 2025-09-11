@@ -33,6 +33,13 @@ export default function ContactSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useLanguage();
+  
+  // 生成谷歌地图链接的函数
+  const getGoogleMapsLink = () => {
+    const address = "Via Gherardacci 47/C, Iolo, Prato, Toscana, Italia";
+    const encodedAddress = encodeURIComponent(address);
+    return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+  };
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -232,9 +239,15 @@ export default function ContactSection() {
                   <MapPin className="text-accent-gold text-xl mt-1 flex-shrink-0" />
                   <div>
                     <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.headquarters')}</h5>
-                    <p className="text-text-grey">
+                    <a 
+                      href={getGoogleMapsLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-text-grey hover:text-accent-gold transition-colors duration-300 cursor-pointer underline decoration-dotted underline-offset-2"
+                      title="Click to view on Google Maps"
+                    >
                       {t('home.contact.info.address')}
-                    </p>
+                    </a>
                   </div>
                 </div>
                 

@@ -30,6 +30,10 @@ export default class ProductFormComponent extends BaseComponent {
         this.eventBus.on('products:loaded', (products) => this.update_categories(products));
         this.eventBus.on('products:loaded', (products) => this.update_materials(products));
         this.eventBus.on('products:loaded', (products) => this.update_colors(products));
+        
+        // 监听翻译事件
+        this.eventBus.on('translation:apply', (translations) => this.handle_translation_apply(translations));
+        this.eventBus.on('translation:generated', (translations) => this.handle_translation_generated(translations));
 
         this.form.addEventListener('submit', (e) => this.handle_form_submit(e));
         if (this.cancel_btn) {
@@ -278,6 +282,15 @@ export default class ProductFormComponent extends BaseComponent {
 
     async handle_form_submit(e) {
         e.preventDefault();
+        // 防抖：避免重复提交导致重复创建产品
+        if (this.is_saving === true) {
+            return;
+        }
+        this.is_saving = true;
+
+        // 禁用保存按钮，提升交互明确性
+        const save_btn = this.form?.querySelector('button[type="submit"], button.save-product');
+        if (save_btn) { try { save_btn.disabled = true; } catch (_) {} }
         const form_data = new FormData(this.form);
         const product_id = form_data.get('id');
         // 收集变体结构：索引与颜色名
@@ -316,7 +329,13 @@ export default class ProductFormComponent extends BaseComponent {
         }
         
         try {
-            await apiClient.post('/products.php', form_data);
+            const response = await apiClient.post('/products.php', form_data);
+            
+            // 获取保存后的产品ID（优先后端返回的 product_id；更新时也返回）
+            const saved_product_id = response.product_id || product_id || null;
+            
+            // 同步翻译内容到数据库
+            await this.sync_translations_to_database(saved_product_id);
 
             this.hide_form();
             this.eventBus.emit('toast:show', { message: product_id ? '产品更新成功！' : '产品添加成功！', type: 'success' });
@@ -331,6 +350,9 @@ export default class ProductFormComponent extends BaseComponent {
             
         } catch (error) {
             this.eventBus.emit('toast:show', { message: `操作失败: ${error.message}`, type: 'error' });
+        } finally {
+            this.is_saving = false;
+            if (save_btn) { try { save_btn.disabled = false; } catch (_) {} }
         }
     }
 
@@ -791,6 +813,115 @@ export default class ProductFormComponent extends BaseComponent {
             const plus = this.media_dropzone.querySelector('.plus');
             if (plus) plus.style.visibility = '';
         }
+    }
+    
+    // 翻译功能处理方法
+    handle_translation_apply(translations) {
+        // 将翻译内容暂存到缓存中，不直接覆盖表单
+        this.cache_translations(translations);
+    }
+
+    handle_translation_generated(translations) {
+        console.log('翻译已生成:', translations);
+        // 可以在这里添加翻译生成后的处理逻辑
+    }
+
+    cache_translations(translations) {
+        // 将翻译内容暂存到sessionStorage中
+        if (translations && typeof translations === 'object') {
+            sessionStorage.setItem('pending_translations', JSON.stringify(translations));
+            this.eventBus.emit('toast:show', {
+                type: 'success',
+                message: '翻译内容已暂存，保存产品时将同步到数据库'
+            });
+        }
+    }
+
+    get_cached_translations() {
+        // 获取暂存的翻译内容
+        const cached = sessionStorage.getItem('pending_translations');
+        if (cached) {
+            try {
+                return JSON.parse(cached);
+            } catch (e) {
+                console.error('解析缓存的翻译内容失败:', e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    clear_cached_translations() {
+        // 清除暂存的翻译内容
+        sessionStorage.removeItem('pending_translations');
+    }
+
+    async sync_translations_to_database(product_id) {
+        // 同步翻译内容到数据库
+        const cached_translations = this.get_cached_translations();
+        if (!cached_translations || !product_id) {
+            return;
+        }
+
+        try {
+            // 调用翻译API保存翻译到数据库
+            const response = await apiClient.post('/translation.php', {
+                action: 'save_translations',
+                product_id: product_id,
+                translations: cached_translations
+            });
+
+            if (response.success) {
+                console.log('翻译内容已同步到数据库');
+                // 清除缓存
+                this.clear_cached_translations();
+            }
+        } catch (error) {
+            console.error('同步翻译内容到数据库失败:', error);
+            // 显示错误提示给用户
+            this.eventBus.emit('toast:show', {
+                type: 'error',
+                message: '翻译内容同步失败: ' + (error.message || '未知错误')
+            });
+        }
+    }
+
+    apply_translations_to_form(translations, target_language = 'it') {
+        if (!translations || typeof translations !== 'object') return;
+
+        // 应用产品名称翻译
+        if (translations.name && translations.name[target_language]) {
+            const nameInput = this.form.querySelector('#name');
+            if (nameInput) {
+                const currentValue = nameInput.value.trim();
+                if (!currentValue || confirm('是否要覆盖当前的产品名称？')) {
+                    nameInput.value = translations.name[target_language];
+                }
+            }
+        }
+
+        // 应用产品描述翻译
+        if (translations.description && translations.description[target_language]) {
+            const descriptionInput = this.form.querySelector('#description');
+            if (descriptionInput) {
+                const currentValue = descriptionInput.value.trim();
+                if (!currentValue || confirm('是否要覆盖当前的产品描述？')) {
+                    descriptionInput.value = translations.description[target_language];
+                }
+            }
+        }
+
+        // 显示成功消息
+        this.eventBus.emit('toast:show', {
+            type: 'success',
+            message: '翻译已应用到表单，请检查并确认内容'
+        });
+    }
+
+    // 获取当前表单的产品ID（用于翻译API调用）
+    get_product_id_for_translation() {
+        const productIdInput = this.form.querySelector('#product-id');
+        return productIdInput?.value ? parseInt(productIdInput.value) : null;
     }
     
     // 统一由 utils/session.js 处理

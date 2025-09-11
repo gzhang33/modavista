@@ -11,17 +11,16 @@ function configure_long_term_session() {
     // 设置会话垃圾回收最大生命周期为30天
     ini_set('session.gc_maxlifetime', $lifetime);
     
-    // 设置会话cookie参数
-    session_set_cookie_params([
-        'lifetime' => $lifetime,
-        'path' => '/',
-        'domain' => '',
-        'secure' => false, // 在开发环境中设为false，生产环境应设为true
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
+    // 设置会话cookie参数（兼容旧版PHP）
+    session_set_cookie_params(
+        $lifetime,
+        '/',
+        '',
+        false, // 在开发环境中设为false，生产环境应设为true
+        true   // httponly
+    );
     
-    // 启动会话
+    // 启动会话（避免重复启动）
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }

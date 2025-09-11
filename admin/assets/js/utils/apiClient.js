@@ -46,7 +46,7 @@ class ApiClient {
             const response = await fetch(config.url, {
                 method: config.method || 'GET',
                 headers: config.headers,
-                body: config.body ? (config.body instanceof FormData ? config.body : JSON.stringify(config.body)) : undefined,
+                body: config.body,
                 credentials: 'include' // 确保发送cookies
             });
 

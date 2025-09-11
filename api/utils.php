@@ -8,6 +8,11 @@
  * @param array $data 响应数据
  */
 function json_response($status_code, $data) {
+    // 清理输出缓冲，防止任何意外输出
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
     header("Content-Type: application/json; charset=UTF-8");
     http_response_code($status_code);
     echo json_encode($data, JSON_UNESCAPED_UNICODE);

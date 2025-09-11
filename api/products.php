@@ -422,7 +422,7 @@ function handle_post($conn) {
         $variants_meta_json = $_POST['variants_meta'] ?? null; // JSON: [{index:0,color:"Red"}, ...]
         if ($variants_meta_json) {
             // 查出当前变体所属的 product_id
-            $pid_stmt = $conn->prepare('SELECT product_id FROM product_variants WHERE id = ?');
+            $pid_stmt = $conn->prepare('SELECT product_id FROM product_variant WHERE id = ?');
             if (!$pid_stmt) { $conn->rollback(); json_response(500, ['message' => '查询产品失败: ' . $conn->error]); }
             $pid_stmt->bind_param('i', $variant_id);
             if (!$pid_stmt->execute()) { $pid_stmt->close(); $conn->rollback(); json_response(500, ['message' => '查询产品失败: ' . $conn->error]); }
@@ -455,7 +455,7 @@ function handle_post($conn) {
                     $upload = upload_media_for_field($field);
                     $default_image_new = $upload['default'];
 
-                    $v_ins = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+                    $v_ins = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
                     if (!$v_ins) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建变体失败: ' . $conn->error); }
                     $v_ins->bind_param('iiis', $product_id_for_new, $variant_color_id, $material_id_for_new, $default_image_new);
                     if (!$v_ins->execute()) { $v_ins->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建变体失败: ' . $conn->error); }
@@ -482,9 +482,20 @@ function handle_post($conn) {
             json_response(500, ['message' => '提交事务失败: ' . $conn->error]);
         }
 
+        // 获取该变体对应的 product_id（用于前端后续写入 i18n）
+        $pid_stmt = $conn->prepare('SELECT product_id FROM product_variant WHERE id = ?');
+        if ($pid_stmt && $pid_stmt->bind_param('i', $variant_id) && $pid_stmt->execute()) {
+            $pid_res = $pid_stmt->get_result();
+            $pid_row = $pid_res ? $pid_res->fetch_assoc() : null;
+            $pid_stmt->close();
+            $product_id_for_resp = $pid_row && isset($pid_row['product_id']) ? (int)$pid_row['product_id'] : null;
+        } else {
+            $product_id_for_resp = null;
+        }
+
         // 清理已无引用的本地图片文件（事务外）
         $files_removed = cleanup_orphan_images($conn);
-        json_response(200, ['message' => '产品更新成功', 'id' => $variant_id, 'files_removed' => $files_removed]);
+        json_response(200, ['message' => '产品更新成功', 'id' => $variant_id, 'product_id' => $product_id_for_resp, 'files_removed' => $files_removed]);
         return;
     }
 
@@ -626,7 +637,7 @@ function handle_post($conn) {
                 $provided_default_name = trim((string)$_POST[$default_field]);
             }
 
-            $v_stmt = $conn->prepare('INSERT INTO product_variants (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+            $v_stmt = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
             if (!$v_stmt) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建变体失败: ' . $conn->error); }
             $v_stmt->bind_param('iiis', $product_id, $variant_color_id, $material_id, $default_image);
             if (!$v_stmt->execute()) { $v_stmt->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建变体失败: ' . $conn->error); }

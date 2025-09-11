@@ -6,6 +6,7 @@
     <title>编辑产品</title>
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/add_product.css">
+    <link rel="stylesheet" href="assets/css/translation.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <meta name="robots" content="noindex, nofollow">
 </head>
@@ -57,6 +58,9 @@
                     <label for="description">产品描述</label>
                     <textarea id="description" name="description" rows="4" class="form-control" required placeholder="描述产品的特点、材质、设计理念等..."></textarea>
                 </div>
+                
+                <!-- 翻译组件占位符 -->
+                <div id="translation-component" class="translation-container"></div>
                 <div class="form-group">
                     <label for="media">产品媒体</label>
                     <div id="current-media-previews" class="media-previews media-sortable" aria-label="媒体列表（可拖拽排序）">
@@ -97,9 +101,12 @@
         import EventBus from './assets/js/EventBus.js';
         import ProductFormComponent from './assets/js/components/add_product.js';
         import ToastComponent from './assets/js/components/ToastComponent.js';
+        import TranslationComponent from './assets/js/components/TranslationComponent.js';
+        
         const eventBus = new EventBus();
         new ToastComponent('#toast-notification', eventBus);
         const formComp = new ProductFormComponent('#product-form-section', eventBus);
+        new TranslationComponent('#translation-component', eventBus);
         // 强制编辑模式：需要 URL 中的 id
         const sp = new URLSearchParams(location.search);
         const id = sp.get('id');

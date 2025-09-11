@@ -1,7 +1,7 @@
-// htdocs/admin/assets/js/components/dashboard_products.js
+// htdocs/admin/assets/js/components/dashboard_products.js - v1.1
 import BaseComponent from './BaseComponent.js';
-import apiClient from '/assets/js/utils/apiClient.js';
-import { get_base_name, extract_color_label, color_name_to_hex } from '/assets/js/utils/product_name_utils.js';
+import apiClient from '../utils/apiClient.js';
+import { get_base_name, extract_color_label, color_name_to_hex } from '/admin/assets/js/utils/product_name_utils.js';
 import { handle_session_expired } from '../utils/session.js';
 
 // Tiny inline placeholder to avoid missing asset references
@@ -46,6 +46,7 @@ export default class ProductTableComponent extends BaseComponent {
         });
 
         this.eventBus.on('products:filter-changed', (filters) => {
+            console.log('ProductTableComponent received products:filter-changed event:', filters);
             this.apply_filters(filters);
         });
 
@@ -64,39 +65,68 @@ export default class ProductTableComponent extends BaseComponent {
 
     async load_colors_map() {
         try {
-            const colors = await apiClient.get('/colors.php', { lang: 'zh' });
+            console.log('Loading color map...');
+            const colors = await apiClient.get('/colors.php', { lang: 'it' });
+            console.log('Colors loaded:', colors);
+
             if (Array.isArray(colors)) {
                 colors.forEach(c => {
-                    const en = (c.color_name || '').trim();
-                    const zh = (c.color_name_zh || c.color_name || '').trim();
-                    if (en) {
-                        this.color_en_to_zh.set(en.toLowerCase(), zh);
+                    // 如果是字符串，直接使用作为意大利语名称
+                    if (typeof c === 'string') {
+                        const it = c.trim();
+                        console.log('Processing color string:', it);
+                        // 对于字符串格式，我们假设英文名就是意大利语名的小写版本
+                        if (it) {
+                            this.color_en_to_zh.set(it.toLowerCase(), it);
+                        }
+                    } else {
+                        // 如果是对象格式，使用原有逻辑
+                        const en = (c.name_en || c.color_name || '').trim();
+                        const it = (c.name || c.color_name_it || c.color_name || '').trim();
+                        console.log('Processing color object:', en, '->', it);
+                        if (en) {
+                            this.color_en_to_zh.set(en.toLowerCase(), it);
+                        }
                     }
                 });
+                console.log('Color map created:', this.color_en_to_zh);
             }
         } catch (e) {
+            console.error('Error loading color map:', e);
             // ignore mapping failure; fallback to original values
         }
     }
 
-    translate_color_to_zh(color_value) {
+    translate_color_to_it(color_value) {
         if (!color_value) return '—';
-        // 如果已包含中文字符，直接返回
-        if (/[\u4e00-\u9fa5]/.test(color_value)) return color_value;
+        // 如果已包含意大利语字符，直接返回
+        if (/[àèéìíîòóùú]/.test(color_value)) return color_value;
         const mapped = this.color_en_to_zh.get(String(color_value).toLowerCase());
+        console.log('Translating color:', color_value, '->', mapped || color_value);
         return mapped || color_value;
     }
 
     async load_products(filters = { archived: 0 }) {
         try {
-            // 默认中文
-            this.all_products = await apiClient.get('/products.php', { archived: filters.archived, lang: 'zh' });
+            console.log('Loading products with filters:', filters);
+            console.log('API URL:', this.api_url);
+            console.log('apiClient baseURL:', apiClient.baseURL);
+
+            // 管理后台使用意大利语显示
+            const productsUrl = '/products.php';
+            console.log('Requesting:', productsUrl, { archived: filters.archived, lang: 'it' });
+
+            this.all_products = await apiClient.get(productsUrl, { archived: filters.archived, lang: 'it' });
+            console.log('Products loaded:', this.all_products);
+
             this.filtered_products = null;
             this.render();
             this.apply_list_animation();
             this.update_bulk_actions_panel();
             this.eventBus.emit('products:loaded', this.all_products);
         } catch (error) {
+            console.error('Error loading products:', error);
+            console.error('Error details:', error.message, error.stack);
             this.eventBus.emit('toast:show', { message: `加载产品数据失败: ${error.message}`, type: 'error' });
             this.all_products = [];
             this.filtered_products = null;
@@ -128,7 +158,7 @@ export default class ProductTableComponent extends BaseComponent {
 
             // 获取颜色名称（优先 API 返回，再回退解析；最后映射到中文）
             const color_raw = p.color || this.extract_color_label(p.name) || '—';
-            const color_name = this.translate_color_to_zh(color_raw);
+            const color_name = this.translate_color_to_it(color_raw);
             const material_name = p.material || '—';
             const name = p.base_name; // Use only base_name
             
@@ -142,8 +172,12 @@ export default class ProductTableComponent extends BaseComponent {
                 <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td>
                 <td class="product-created-at-cell">${this.format_created_at(p.createdAt)}</td>
                 <td class="product-actions-cell sticky-right">
-                    <a class="button button-small edit-btn" data-id="${p.id}" href="/admin/edit_product.php?id=${p.id}">编辑</a>
-                    <button class="button button-small delete-btn" data-id="${p.id}">删除</button>
+                    <a class="button button-small edit-btn" data-id="${p.id}" href="/admin/edit_product.php?id=${p.id}">
+                        <i class="fas fa-edit"></i>编辑
+                    </a>
+                    <button class="button button-small delete-btn" data-id="${p.id}">
+                        <i class="fas fa-trash"></i>删除
+                    </button>
                 </td>`;
             this.tableBody.appendChild(row);
         });
@@ -153,11 +187,6 @@ export default class ProductTableComponent extends BaseComponent {
 
 
 
-    get_base_name(name) { return get_base_name(name); }
-
-    extract_color_label(name) { return extract_color_label(name); }
-
-    color_name_to_hex(color_name) { return color_name_to_hex(color_name); }
 
     apply_list_animation() {
         const table = this.element.querySelector('#products-table');
@@ -345,7 +374,9 @@ export default class ProductTableComponent extends BaseComponent {
 
 // Filtering utilities
 ProductTableComponent.prototype.apply_filters = function(filters) {
+    console.log('ProductTableComponent.apply_filters called with:', filters);
     if (!filters || !Array.isArray(filters.conditions) || filters.conditions.length === 0) {
+        console.log('No filters to apply, showing all products');
         this.filtered_products = null;
         this.selected_product_ids.clear();
         this.render();
@@ -372,13 +403,21 @@ ProductTableComponent.prototype.apply_filters = function(filters) {
             case 'name': actual = p.name; break;
             case 'description': actual = p.description; break;
             case 'category': actual = p.category; break;
+            case 'color': actual = p.color; break;
+            case 'material': actual = p.material; break;
             case 'createdAt': actual = p.createdAt; break;
             default: actual = null;
         }
+        
 
         // Text/select comparisons
-        if (field === 'name' || field === 'description' || field === 'category') {
+        if (field === 'name' || field === 'description' || field === 'category' || field === 'color' || field === 'material') {
             const a = normalize_text(actual);
+            if (operator === 'in') {
+                // Handle array of values for 'in' operator
+                const values = Array.isArray(value) ? value : [value];
+                return values.some(v => a === normalize_text(v));
+            }
             const b = normalize_text(value);
             if (operator === 'contains') return a.includes(b);
             if (operator === 'equals') return a === b;
@@ -427,6 +466,8 @@ ProductTableComponent.prototype.apply_filters = function(filters) {
     };
 
     this.filtered_products = list.filter(passes);
+    console.log(`Filtered ${list.length} products down to ${this.filtered_products.length} products`);
+    console.log('Filtered products:', this.filtered_products);
     this.selected_product_ids.clear();
     this.render();
     this.apply_list_animation();

@@ -1,6 +1,9 @@
 # Dependencies
-node_modules/ 
+node_modules/
 vendor/
+
+# Build outputs
+dist/
 
 
 # Temporary files
@@ -42,14 +45,12 @@ coverage/
 test/screenshots/
 test/videos/
 test/traces/
+.playwright-mcp/
 
 # Images (optional - you may want to track some images)
 # images/*.jpg
 # images/*.png
 # images/*.gif
-
-# phpMyAdmin (if you don't want to include it)
-phpMyAdmin/
 
 # Backup files
 *.bak
@@ -60,30 +61,23 @@ phpMyAdmin/
 .env.local
 .env.*.local
 
-# Composer PHAR file (no longer used)
-# composer.phar
 
 # Database dumps and temporary files
 *.sql
 *.sqlite
 
-# Cursor files
+# Agent files
 .cursor/
 .cursorrules
 .cursorignore
-
+.claude/
+GEMINI.md
 
 # phpMyAdmin
 phpMyAdmin/
 
 # Images and media uploads (keep repo slim). Track a placeholder if needed.
-images/**/*.jpg
-images/**/*.jpeg
-images/**/*.png
-images/**/*.gif
-images/**/*.webp
-images/**/*.svg
-!images/.gitkeep
+
 
 # Lighthouse reports
 lh-*.json
@@ -100,3 +94,7 @@ lh-*.json
 
 # System-specific
 Desktop.ini
+
+# Deploy-related files
+
+deploy

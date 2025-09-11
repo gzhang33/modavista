@@ -1,8 +1,11 @@
 <?php
-session_start();
 // api/login.php
 require_once 'config.php';
 require_once 'utils.php';
+require_once 'session_config.php';
+
+// 配置长期会话
+configure_long_term_session();
 
 header("Access-Control-Allow-Origin: *"); 
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -32,6 +35,8 @@ if ($username === $correct_username && password_verify($password, ADMIN_PASSWORD
     // 登录成功，设置 session
     $_SESSION['admin_logged_in'] = true;
     $_SESSION['admin_username'] = $username;
+    $_SESSION['last_activity'] = time();
+    $_SESSION['login_time'] = time();
     
     json_response(200, ['success' => true, 'message' => '登录成功']);
 } else {

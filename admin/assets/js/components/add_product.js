@@ -1,6 +1,6 @@
 // htdocs/admin/assets/js/components/add_product.js
 import BaseComponent from './BaseComponent.js';
-import apiClient from '/assets/js/utils/apiClient.js';
+import apiClient from '/admin/assets/js/utils/apiClient.js';
 import { handle_session_expired } from '../utils/session.js';
 
 export default class ProductFormComponent extends BaseComponent {
@@ -30,6 +30,10 @@ export default class ProductFormComponent extends BaseComponent {
         this.eventBus.on('products:loaded', (products) => this.update_categories(products));
         this.eventBus.on('products:loaded', (products) => this.update_materials(products));
         this.eventBus.on('products:loaded', (products) => this.update_colors(products));
+        
+        // 监听翻译事件
+        this.eventBus.on('translation:apply', (translations) => this.handle_translation_apply(translations));
+        this.eventBus.on('translation:generated', (translations) => this.handle_translation_generated(translations));
 
         this.form.addEventListener('submit', (e) => this.handle_form_submit(e));
         if (this.cancel_btn) {
@@ -162,8 +166,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_categories(products) {
         let categories = [];
         try {
-            // add_product 页面下拉统一显示中文
-            categories = await apiClient.getCategories('zh');
+            // add_product 页面下拉统一显示意大利语
+            categories = await apiClient.getCategories('it');
         } catch (error) {
             console.error('Failed to load categories:', error);
             categories = Array.isArray(products)
@@ -175,8 +179,16 @@ export default class ProductFormComponent extends BaseComponent {
         this.category_select.innerHTML = '';
         categories.forEach(category => {
             const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
+            // 修复：使用正确的字段映射
+            // 如果category是对象（来自API），使用name作为显示文本和值
+            // 如果category是字符串（来自产品数据），直接使用
+            if (typeof category === 'object' && category.name) {
+                option.value = category.name;
+                option.textContent = category.name;
+            } else {
+                option.value = category;
+                option.textContent = category;
+            }
             this.category_select.appendChild(option);
         });
         this.category_select.value = current_val;
@@ -185,8 +197,8 @@ export default class ProductFormComponent extends BaseComponent {
     async update_materials(products) {
         let materials = [];
         try {
-            // add_product 页面下拉统一显示中文
-            materials = await apiClient.getMaterials('zh');
+            // add_product 页面下拉统一显示意大利语
+            materials = await apiClient.getMaterials('it');
         } catch (error) {
             console.error('Failed to load materials:', error);
             materials = Array.isArray(products)
@@ -198,8 +210,8 @@ export default class ProductFormComponent extends BaseComponent {
         this.material_select.innerHTML = '<option value="">请选择材质</option>';
         materials.forEach(material => {
             const option = document.createElement('option');
-            option.value = material.name_en; // 使用英文名作为值
-            option.textContent = material.name; // 使用本地化名称作为显示文本
+            option.value = material; // 使用材质名称作为值
+            option.textContent = material; // 使用材质名称作为显示文本
             this.material_select.appendChild(option);
         });
         this.material_select.value = current_val;
@@ -208,7 +220,7 @@ export default class ProductFormComponent extends BaseComponent {
     async update_colors(products) {
         let colors = [];
         try {
-            const lang = 'zh';
+            const lang = 'it';
             colors = await apiClient.getColors(lang);
         } catch (error) {
             console.error('Failed to load colors:', error);
@@ -221,29 +233,27 @@ export default class ProductFormComponent extends BaseComponent {
             this.color_select.innerHTML = '<option value="">请选择颜色</option>';
             colors.forEach(color => {
                 const option = document.createElement('option');
-                const value_en = (color && color.names && color.names.en) ? color.names.en : (color.name || color);
-                option.value = value_en;
-                option.textContent = color.name || color;
+                option.value = color; // 使用颜色名称作为值
+                option.textContent = color; // 使用颜色名称作为显示文本
                 this.color_select.appendChild(option);
             });
             this.color_select.value = current_val;
         }
         // 更新所有变体行的颜色选项
-        this.update_all_variant_color_options(colors.map(c => (typeof c === 'string' ? { name: c, names: { en: c, zh: c, it: c } } : c)));
+        this.update_all_variant_color_options(colors);
     }
     
     async populate_variant_color_options(row) {
         try {
-            const lang = 'zh';
+            const lang = 'it';
             const colors = await apiClient.getColors(lang);
             const color_select = row.querySelector('.variant-color-select');
             if (color_select) {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
                 colors.forEach(color => {
                     const option = document.createElement('option');
-                    const value_en = color?.names?.en || color.name;
-                    option.value = value_en;
-                    option.textContent = color.name;
+                    option.value = color; // 使用颜色名称作为值
+                    option.textContent = color; // 使用颜色名称作为显示文本
                     color_select.appendChild(option);
                 });
             }
@@ -261,9 +271,8 @@ export default class ProductFormComponent extends BaseComponent {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
                 colors.forEach(color => {
                     const option = document.createElement('option');
-                    const value_en = color?.names?.en || color.name;
-                    option.value = value_en;
-                    option.textContent = color.name;
+                    option.value = color; // 使用颜色名称作为值
+                    option.textContent = color; // 使用颜色名称作为显示文本
                     color_select.appendChild(option);
                 });
                 color_select.value = current_val;
@@ -273,6 +282,15 @@ export default class ProductFormComponent extends BaseComponent {
 
     async handle_form_submit(e) {
         e.preventDefault();
+        // 防抖：避免重复提交导致重复创建产品
+        if (this.is_saving === true) {
+            return;
+        }
+        this.is_saving = true;
+
+        // 禁用保存按钮，提升交互明确性
+        const save_btn = this.form?.querySelector('button[type="submit"], button.save-product');
+        if (save_btn) { try { save_btn.disabled = true; } catch (_) {} }
         const form_data = new FormData(this.form);
         const product_id = form_data.get('id');
         // 收集变体结构：索引与颜色名
@@ -311,7 +329,13 @@ export default class ProductFormComponent extends BaseComponent {
         }
         
         try {
-            await apiClient.post('/products.php', form_data);
+            const response = await apiClient.post('/products.php', form_data);
+            
+            // 获取保存后的产品ID（优先后端返回的 product_id；更新时也返回）
+            const saved_product_id = response.product_id || product_id || null;
+            
+            // 同步翻译内容到数据库（在页面跳转之前完成）
+            await this.sync_translations_to_database(saved_product_id, product_id);
 
             this.hide_form();
             this.eventBus.emit('toast:show', { message: product_id ? '产品更新成功！' : '产品添加成功！', type: 'success' });
@@ -326,6 +350,9 @@ export default class ProductFormComponent extends BaseComponent {
             
         } catch (error) {
             this.eventBus.emit('toast:show', { message: `操作失败: ${error.message}`, type: 'error' });
+        } finally {
+            this.is_saving = false;
+            if (save_btn) { try { save_btn.disabled = false; } catch (_) {} }
         }
     }
 
@@ -786,6 +813,150 @@ export default class ProductFormComponent extends BaseComponent {
             const plus = this.media_dropzone.querySelector('.plus');
             if (plus) plus.style.visibility = '';
         }
+    }
+    
+    // 翻译功能处理方法
+    handle_translation_apply(translations) {
+        // 将翻译内容暂存到缓存中，不直接覆盖表单
+        this.cache_translations(translations);
+    }
+
+    handle_translation_generated(translations) {
+        console.log('翻译已生成:', translations);
+        // 可以在这里添加翻译生成后的处理逻辑
+    }
+
+    cache_translations(translations) {
+        // 将翻译内容暂存到sessionStorage中
+        if (translations && typeof translations === 'object') {
+            sessionStorage.setItem('pending_translations', JSON.stringify(translations));
+            this.eventBus.emit('toast:show', {
+                type: 'success',
+                message: '翻译内容已暂存，保存产品时将同步到数据库'
+            });
+        }
+    }
+
+    get_cached_translations() {
+        // 获取暂存的翻译内容
+        const cached = sessionStorage.getItem('pending_translations');
+        if (cached) {
+            try {
+                return JSON.parse(cached);
+            } catch (e) {
+                console.error('解析缓存的翻译内容失败:', e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    clear_cached_translations() {
+        // 清除暂存的翻译内容
+        sessionStorage.removeItem('pending_translations');
+    }
+
+    async sync_translations_to_database(saved_product_id, original_product_id) {
+        // 同步暂存的翻译内容到数据库
+        if (!saved_product_id) {
+            console.log('没有产品ID，跳过翻译同步');
+            return;
+        }
+
+        // 直接从sessionStorage获取暂存的翻译
+        // 对于新产品，使用 'staged_translations_new'，对于编辑产品，使用实际的产品ID
+        const stagingKey = original_product_id ? `staged_translations_${original_product_id}` : 'staged_translations_new';
+        
+        try {
+            const staged = sessionStorage.getItem(stagingKey);
+            if (!staged) {
+                console.log('没有找到暂存的翻译内容，尝试的键:', stagingKey);
+                return;
+            }
+
+            const translations = JSON.parse(staged);
+            console.log('找到暂存的翻译内容:', translations);
+            
+            const requestData = {
+                action: 'save_translations',
+                product_id: saved_product_id,
+                translations: translations
+            };
+
+            const response = await apiClient.post('/translation.php', requestData);
+
+            if (response.success) {
+                // 清除暂存内容
+                sessionStorage.removeItem(stagingKey);
+                console.log('翻译内容已成功应用并保存到数据库');
+                this.eventBus.emit('toast:show', {
+                    type: 'success',
+                    message: '翻译内容已成功应用'
+                });
+            } else {
+                throw new Error(response.error?.message || '保存翻译失败');
+            }
+        } catch (error) {
+            console.error('同步翻译内容到数据库失败:', error);
+            this.eventBus.emit('toast:show', {
+                type: 'error',
+                message: '翻译内容同步失败: ' + (error.message || '未知错误')
+            });
+        }
+    }
+
+    // 获取翻译组件实例的辅助方法
+    getTranslationComponent() {
+        // 尝试从页面中找到翻译组件
+        const translationElement = document.querySelector('[data-component="translation"]');
+        if (translationElement && translationElement._componentInstance) {
+            return translationElement._componentInstance;
+        }
+        
+        // 如果没有找到，尝试通过全局变量访问
+        if (window.translationComponent) {
+            return window.translationComponent;
+        }
+        
+        return null;
+    }
+
+    apply_translations_to_form(translations, target_language = 'it') {
+        if (!translations || typeof translations !== 'object') return;
+
+        // 应用产品名称翻译
+        if (translations.name && translations.name[target_language]) {
+            const nameInput = this.form.querySelector('#name');
+            if (nameInput) {
+                const currentValue = nameInput.value.trim();
+                if (!currentValue || confirm('是否要覆盖当前的产品名称？')) {
+                    nameInput.value = translations.name[target_language];
+                }
+            }
+        }
+
+        // 应用产品描述翻译
+        if (translations.description && translations.description[target_language]) {
+            const descriptionInput = this.form.querySelector('#description');
+            if (descriptionInput) {
+                const currentValue = descriptionInput.value.trim();
+                if (!currentValue || confirm('是否要覆盖当前的产品描述？')) {
+                    descriptionInput.value = translations.description[target_language];
+                }
+            }
+        }
+
+        // 显示成功消息
+        this.eventBus.emit('toast:show', {
+            type: 'success',
+            message: '翻译已应用到表单，请检查并确认内容'
+        });
+    }
+
+    // 获取当前表单的产品ID（用于翻译API调用）
+    get_product_id_for_translation() {
+        const productIdInput = this.form.querySelector('#product-id');
+        return productIdInput?.value ? parseInt(productIdInput.value) : null;
     }
     
     // 统一由 utils/session.js 处理

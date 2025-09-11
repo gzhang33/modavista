@@ -36,38 +36,35 @@ switch ($method) {
 $conn->close();
 
 function get_categories($conn) {
-    // 语言参数处理：支持所有欧洲语言
-    $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : 'en';
-    $valid_languages = ['en', 'it', 'fr', 'de', 'es', 'pt', 'nl', 'pl'];
-    if (!in_array($lang, $valid_languages, true)) { $lang = 'en'; }
+    $raw = $_GET['lang'] ?? null;
+    $locale = normalize_language_code($raw);
 
-    // 构建动态SQL查询以支持所有语言字段
-    // 根据实际数据库结构构建查询
-    $sql = 'SELECT id, category_name_en, category_name_zh, category_name_it FROM categories ORDER BY category_name_en ASC';
-    
+    $sql = 'SELECT
+                c.id,
+                c.category_name_en,
+                COALESCE(ci.name, c.category_name_en) AS name
+            FROM category c
+            LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
+            ORDER BY COALESCE(ci.name, c.category_name_en) ASC';
+
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         json_response(500, ["message" => "查询准备失败: " . $conn->error]);
     }
-    
+
+    $stmt->bind_param('s', $locale);
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
-    
+
     $result = $stmt->get_result();
     $categories = [];
     while ($row = $result->fetch_assoc()) {
-        $name_en = $row['category_name_en'];
-        $localized_name = $name_en; // 默认使用英文
-        
-        // 根据语言选择本地化名称
-        if ($lang === 'zh' && !empty($row['category_name_zh'])) {
-            $localized_name = $row['category_name_zh'];
-        } elseif ($lang === 'it' && !empty($row['category_name_it'])) {
-            $localized_name = $row['category_name_it'];
-        }
-        
-        $categories[] = $localized_name;
+        $categories[] = [
+            'id' => $row['id'],
+            'name' => $row['name'], // Translated name
+            'english_name' => $row['category_name_en'] // English name for image key
+        ];
     }
     $stmt->close();
     json_response(200, $categories);
@@ -75,16 +72,15 @@ function get_categories($conn) {
 
 function add_category($conn) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $name = $data['name'] ?? null; // 英文
-    $name_zh = $data['name_zh'] ?? null;
-    $name_it = $data['name_it'] ?? null;
+    $name = $data['name'] ?? null; // 英文名称
+    $translations = $data['translations'] ?? []; // 多语言翻译
 
     if (empty($name)) {
         json_response(400, ['message' => '分类名称不能为空']);
     }
-    
-    // 新结构：若不存在则创建
-    $check = $conn->prepare('SELECT id FROM categories WHERE category_name = ?');
+
+    // 检查分类是否已存在
+    $check = $conn->prepare('SELECT id FROM category WHERE category_name_en = ?');
     $check->bind_param('s', $name);
     $check->execute();
     $res = $check->get_result();
@@ -94,15 +90,60 @@ function add_category($conn) {
     }
     $check->close();
 
-    $ins = $conn->prepare('INSERT INTO categories (category_name, category_name_zh, category_name_it) VALUES (?, ?, ?)');
+    // 开始事务
+    $conn->begin_transaction();
+
+    // 创建主分类记录
+    $ins = $conn->prepare('INSERT INTO category (category_name_en) VALUES (?)');
     if ($ins === false) {
+        $conn->rollback();
         json_response(500, ['message' => '创建分类失败: ' . $conn->error]);
     }
-    $ins->bind_param('sss', $name, $name_zh, $name_it);
-    $ins->execute();
-    $id = $ins->insert_id;
+    $ins->bind_param('s', $name);
+    if (!$ins->execute()) {
+        $ins->close();
+        $conn->rollback();
+        json_response(500, ['message' => '创建分类失败: ' . $conn->error]);
+    }
+    $category_id = $ins->insert_id;
     $ins->close();
-    json_response(201, ['message' => "分类 '{$name}' 添加成功", 'id' => (int)$id]);
+
+    // 添加英文翻译
+    $i18n_stmt = $conn->prepare('INSERT INTO category_i18n (category_id, locale, name, slug) VALUES (?, ?, ?, ?)');
+    if (!$i18n_stmt) {
+        $conn->rollback();
+        json_response(500, ['message' => '创建分类翻译失败: ' . $conn->error]);
+    }
+
+    $locale = 'en-GB';
+    $slug = ''; // 让触发器生成
+    $i18n_stmt->bind_param('isss', $category_id, $locale, $name, $slug);
+    if (!$i18n_stmt->execute()) {
+        $i18n_stmt->close();
+        $conn->rollback();
+        json_response(500, ['message' => '创建英文翻译失败: ' . $conn->error]);
+    }
+
+    // 添加其他语言翻译
+    foreach ($translations as $lang => $translation) {
+        if (empty($translation)) continue;
+
+        $locale_map = ['en' => 'en-GB', 'it' => 'it-IT'];
+        $locale = $locale_map[$lang] ?? null;
+        if (!$locale) continue;
+
+        $slug = ''; // 让触发器生成
+        $i18n_stmt->bind_param('isss', $category_id, $locale, $translation, $slug);
+        if (!$i18n_stmt->execute()) {
+            $i18n_stmt->close();
+            $conn->rollback();
+            json_response(500, ['message' => "创建 {$lang} 翻译失败: " . $conn->error]);
+        }
+    }
+    $i18n_stmt->close();
+
+    $conn->commit();
+    json_response(201, ['message' => "分类 '{$name}' 添加成功", 'id' => (int)$category_id]);
 }
 
 function delete_category($conn) {
@@ -112,8 +153,9 @@ function delete_category($conn) {
     if (empty($name)) {
         json_response(400, ['message' => '要删除的分类名称不能为空']);
     }
-    
-    $del = $conn->prepare('DELETE FROM categories WHERE category_name = ?');
+
+    // 删除分类（外键约束会自动删除相关的 i18n 记录）
+    $del = $conn->prepare('DELETE FROM category WHERE category_name_en = ?');
     if ($del === false) {
         json_response(500, ['message' => '删除失败: ' . $conn->error]);
     }

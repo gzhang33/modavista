@@ -5,7 +5,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'products');
+define('DB_NAME', 'DreaModa');
 
 // 管理员密码 (使用 password_hash() 生成)
 // 默认密码是: admin

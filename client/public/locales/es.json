@@ -179,6 +179,58 @@
     "error": "Ocurrió un error",
     "retry": "Intentar de Nuevo"
   },
+  "errors": {
+    "general": {
+      "title": "Error",
+      "message": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+      "network_error": "Error de conexión de red. Verifica tu conexión a internet e inténtalo de nuevo.",
+      "server_error": "Error del servidor. Inténtalo más tarde.",
+      "not_found": "El recurso solicitado no fue encontrado.",
+      "unauthorized": "No estás autorizado para realizar esta acción.",
+      "forbidden": "Acceso denegado.",
+      "validation_error": "Verifica tu entrada e inténtalo de nuevo.",
+      "timeout": "Tiempo de espera de la solicitud agotado. Inténtalo de nuevo.",
+      "unknown": "Ocurrió un error desconocido."
+    },
+    "api": {
+      "connection_failed": "Falló la conexión al servidor. Inténtalo más tarde.",
+      "invalid_response": "Respuesta inválida del servidor.",
+      "request_failed": "Solicitud API falló",
+      "rate_limited": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo."
+    },
+    "form": {
+      "required_field": "Este campo es obligatorio.",
+      "invalid_email": "Ingresa una dirección de email válida.",
+      "invalid_phone": "Ingresa un número de teléfono válido.",
+      "min_length": "Este campo debe tener al menos {min} caracteres.",
+      "max_length": "Este campo no debe exceder {max} caracteres.",
+      "invalid_format": "Formato inválido para este campo.",
+      "password_mismatch": "Las contraseñas no coinciden.",
+      "submit_error": "Falló el envío del formulario. Inténtalo de nuevo.",
+      "validation_error": "Corrige los errores a continuación e inténtalo de nuevo."
+    },
+    "products": {
+      "load_failed": "Falló la carga de productos. Actualiza la página.",
+      "not_found": "Producto no encontrado.",
+      "details_load_failed": "Falló la carga de detalles del producto.",
+      "search_failed": "Falló la búsqueda. Inténtalo de nuevo.",
+      "filter_failed": "Falló la aplicación de filtros. Inténtalo de nuevo."
+    },
+    "contact": {
+      "submit_failed": "Falló el envío del mensaje. Inténtalo de nuevo o contáctanos directamente.",
+      "submit_success": "¡Mensaje enviado con éxito! Te contactaremos pronto.",
+      "rate_limited": "Espera antes de enviar otro mensaje.",
+      "invalid_data": "Verifica tu información e inténtalo de nuevo."
+    },
+    "images": {
+      "load_failed": "Falló la carga de la imagen.",
+      "upload_failed": "Falló la subida de la imagen.",
+      "invalid_format": "Formato de imagen inválido.",
+      "file_too_large": "El archivo de imagen es demasiado grande.",
+      "category_load_failed": "Falló la carga de la imagen para la categoría: {categoryName}",
+      "product_load_failed": "Falló la carga de la imagen para el producto: {productName}"
+    }
+  },
   "seo": {
     "title": "DreaModa - Excelencia Italiana en Moda | Fabricante de Ropa al por Mayor",
     "description": "Fabricante italiano de moda premium especializado en ropa al por mayor. Descubre nuestra colección curada de prendas de moda de alta calidad para socios mayoristas exigentes de todo el mundo.",

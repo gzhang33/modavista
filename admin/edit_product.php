@@ -106,7 +106,13 @@
         const eventBus = new EventBus();
         new ToastComponent('#toast-notification', eventBus);
         const formComp = new ProductFormComponent('#product-form-section', eventBus);
-        new TranslationComponent('#translation-component', eventBus);
+        const translationComponent = new TranslationComponent('#translation-component', eventBus);
+        
+        // 将翻译组件实例保存到元素上，供其他组件访问
+        const translationElement = document.querySelector('#translation-component');
+        if (translationElement) {
+            translationElement._componentInstance = translationComponent;
+        }
         // 强制编辑模式：需要 URL 中的 id
         const sp = new URLSearchParams(location.search);
         const id = sp.get('id');

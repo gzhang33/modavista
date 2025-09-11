@@ -179,6 +179,58 @@
     "error": "Ein Fehler ist aufgetreten",
     "retry": "Erneut Versuchen"
   },
+  "errors": {
+    "general": {
+      "title": "Fehler",
+      "message": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "network_error": "Netzwerkverbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+      "server_error": "Serverfehler. Bitte versuchen Sie es später erneut.",
+      "not_found": "Die angeforderte Ressource wurde nicht gefunden.",
+      "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+      "forbidden": "Zugriff verweigert.",
+      "validation_error": "Bitte überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+      "timeout": "Anfrage-Timeout. Bitte versuchen Sie es erneut.",
+      "unknown": "Ein unbekannter Fehler ist aufgetreten."
+    },
+    "api": {
+      "connection_failed": "Verbindung zum Server fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      "invalid_response": "Ungültige Antwort vom Server.",
+      "request_failed": "API-Anfrage fehlgeschlagen",
+      "rate_limited": "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut."
+    },
+    "form": {
+      "required_field": "Dieses Feld ist erforderlich.",
+      "invalid_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      "invalid_phone": "Bitte geben Sie eine gültige Telefonnummer ein.",
+      "min_length": "Dieses Feld muss mindestens {min} Zeichen lang sein.",
+      "max_length": "Dieses Feld darf nicht mehr als {max} Zeichen haben.",
+      "invalid_format": "Ungültiges Format für dieses Feld.",
+      "password_mismatch": "Passwörter stimmen nicht überein.",
+      "submit_error": "Formularübermittlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "validation_error": "Bitte korrigieren Sie die Fehler unten und versuchen Sie es erneut."
+    },
+    "products": {
+      "load_failed": "Produktladen fehlgeschlagen. Bitte aktualisieren Sie die Seite.",
+      "not_found": "Produkt nicht gefunden.",
+      "details_load_failed": "Laden der Produktdetails fehlgeschlagen.",
+      "search_failed": "Suche fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "filter_failed": "Filteranwendung fehlgeschlagen. Bitte versuchen Sie es erneut."
+    },
+    "contact": {
+      "submit_failed": "Nachricht senden fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.",
+      "submit_success": "Nachricht erfolgreich gesendet! Wir werden Sie bald kontaktieren.",
+      "rate_limited": "Bitte warten Sie, bevor Sie eine weitere Nachricht senden.",
+      "invalid_data": "Bitte überprüfen Sie Ihre Informationen und versuchen Sie es erneut."
+    },
+    "images": {
+      "load_failed": "Fehler beim Laden des Bildes.",
+      "upload_failed": "Fehler beim Hochladen des Bildes.",
+      "invalid_format": "Ungültiges Bildformat.",
+      "file_too_large": "Die Bilddatei ist zu groß.",
+      "category_load_failed": "Fehler beim Laden des Bildes für die Kategorie: {categoryName}",
+      "product_load_failed": "Fehler beim Laden des Bildes für das Produkt: {productName}"
+    }
+  },
   "seo": {
     "title": "DreaModa - Italienische Mode-Exzellenz | Großhandels-Kleidungshersteller",
     "description": "Premium italienischer Modehersteller, spezialisiert auf Großhandelsbekleidung. Entdecken Sie unsere kuratierte Kollektion hochwertiger Modeartikel für anspruchsvolle Großhandelspartner weltweit.",

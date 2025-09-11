@@ -277,7 +277,7 @@ export default function ProductDetailPage() {
                   src={displayImages[selectedImageIndex]}
                   alt="Main product view"
                   className="w-full h-auto object-contain max-h-[500px] transition-opacity duration-300"
-                  onError={createImageErrorHandler(false)}
+                  onError={createImageErrorHandler({ debug: false, t })}
                 />
                 {product.featured === 'yes' && (
                   <Badge className="absolute top-4 right-4 bg-accent-gold text-charcoal">
@@ -303,7 +303,7 @@ export default function ProductDetailPage() {
                         src={image}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-auto object-contain"
-                        onError={createImageErrorHandler(false)}
+                        onError={createImageErrorHandler({ debug: false, t })}
                       />
                     </button>
                   ))}

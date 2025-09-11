@@ -334,8 +334,8 @@ export default class ProductFormComponent extends BaseComponent {
             // 获取保存后的产品ID（优先后端返回的 product_id；更新时也返回）
             const saved_product_id = response.product_id || product_id || null;
             
-            // 同步翻译内容到数据库
-            await this.sync_translations_to_database(saved_product_id);
+            // 同步翻译内容到数据库（在页面跳转之前完成）
+            await this.sync_translations_to_database(saved_product_id, product_id);
 
             this.hide_form();
             this.eventBus.emit('toast:show', { message: product_id ? '产品更新成功！' : '产品添加成功！', type: 'success' });
@@ -856,34 +856,69 @@ export default class ProductFormComponent extends BaseComponent {
         sessionStorage.removeItem('pending_translations');
     }
 
-    async sync_translations_to_database(product_id) {
-        // 同步翻译内容到数据库
-        const cached_translations = this.get_cached_translations();
-        if (!cached_translations || !product_id) {
+    async sync_translations_to_database(saved_product_id, original_product_id) {
+        // 同步暂存的翻译内容到数据库
+        if (!saved_product_id) {
+            console.log('没有产品ID，跳过翻译同步');
             return;
         }
 
+        // 直接从sessionStorage获取暂存的翻译
+        // 对于新产品，使用 'staged_translations_new'，对于编辑产品，使用实际的产品ID
+        const stagingKey = original_product_id ? `staged_translations_${original_product_id}` : 'staged_translations_new';
+        
         try {
-            // 调用翻译API保存翻译到数据库
-            const response = await apiClient.post('/translation.php', {
+            const staged = sessionStorage.getItem(stagingKey);
+            if (!staged) {
+                console.log('没有找到暂存的翻译内容，尝试的键:', stagingKey);
+                return;
+            }
+
+            const translations = JSON.parse(staged);
+            console.log('找到暂存的翻译内容:', translations);
+            
+            const requestData = {
                 action: 'save_translations',
-                product_id: product_id,
-                translations: cached_translations
-            });
+                product_id: saved_product_id,
+                translations: translations
+            };
+
+            const response = await apiClient.post('/translation.php', requestData);
 
             if (response.success) {
-                console.log('翻译内容已同步到数据库');
-                // 清除缓存
-                this.clear_cached_translations();
+                // 清除暂存内容
+                sessionStorage.removeItem(stagingKey);
+                console.log('翻译内容已成功应用并保存到数据库');
+                this.eventBus.emit('toast:show', {
+                    type: 'success',
+                    message: '翻译内容已成功应用'
+                });
+            } else {
+                throw new Error(response.error?.message || '保存翻译失败');
             }
         } catch (error) {
             console.error('同步翻译内容到数据库失败:', error);
-            // 显示错误提示给用户
             this.eventBus.emit('toast:show', {
                 type: 'error',
                 message: '翻译内容同步失败: ' + (error.message || '未知错误')
             });
         }
+    }
+
+    // 获取翻译组件实例的辅助方法
+    getTranslationComponent() {
+        // 尝试从页面中找到翻译组件
+        const translationElement = document.querySelector('[data-component="translation"]');
+        if (translationElement && translationElement._componentInstance) {
+            return translationElement._componentInstance;
+        }
+        
+        // 如果没有找到，尝试通过全局变量访问
+        if (window.translationComponent) {
+            return window.translationComponent;
+        }
+        
+        return null;
     }
 
     apply_translations_to_form(translations, target_language = 'it') {

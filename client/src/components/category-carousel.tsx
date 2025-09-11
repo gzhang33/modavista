@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Category } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { getCategoryImagePath, createCategoryImageErrorHandler } from "@/lib/image-utils";
 
 interface CategoryCarouselProps {
   onNavigateToCategory?: (category: string) => void;
@@ -12,6 +14,7 @@ interface CategoryCarouselProps {
 export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarouselProps) {
   const [, setLocation] = useLocation();
   const { currentLanguage, t } = useLanguage();
+  const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0); // Initial index will be set after categories load
@@ -19,6 +22,7 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
   const [isInitialized, setIsInitialized] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<NodeJS.Timeout>();
+  const wheelTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -29,12 +33,20 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data: { id: string; name: string; english_name: string }[] = await response.json();
-        const mappedCategories: Category[] = data.map(item => ({
-          id: item.id,
-          name: item.name.toUpperCase(),
-          image: `/images/categories/${item.english_name.toLowerCase()}.jpg`,
-          english_name: item.english_name
-        }));
+        
+        // 改进的图片路径构造逻辑
+        const mappedCategories: Category[] = await Promise.all(
+          data.map(async (item) => {
+            const imagePath = await getCategoryImagePath(item.english_name);
+            return {
+              id: item.id,
+              name: item.name.toUpperCase(),
+              image: imagePath,
+              english_name: item.english_name
+            };
+          })
+        );
+        
         setCategories(mappedCategories);
         const initialIndex = mappedCategories.length; // Start in the middle section
         setCurrentIndex(initialIndex);
@@ -46,10 +58,10 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
         console.error("Failed to fetch categories:", error);
         // Fallback to a default set of categories if API fails
         setCategories([
-          { id: 'Tops', name: 'TOPS', image: '/client/public/images/categories/tops.jpg', english_name: 'tops' },
-          { id: 'Outerwear', name: 'OUTERWEAR', image: '/client/public/images/categories/outerwear.jpg', english_name: 'outerwear' },
-          { id: 'Bottoms', name: 'BOTTOMS', image: '/client/public/images/categories/bottoms.jpg', english_name: 'bottoms' },
-          { id: 'Dresses', name: 'DRESSES', image: '/client/public/images/categories/dresses.jpg', english_name: 'dresses' }
+          { id: 'Tops', name: 'TOPS', image: '/placeholder-image.svg', english_name: 'tops' },
+          { id: 'Outerwear', name: 'OUTERWEAR', image: '/placeholder-image.svg', english_name: 'outerwear' },
+          { id: 'Bottoms', name: 'BOTTOMS', image: '/placeholder-image.svg', english_name: 'bottoms' },
+          { id: 'Dresses', name: 'DRESSES', image: '/placeholder-image.svg', english_name: 'dresses' }
         ]);
         setCurrentIndex(4); // Reset index for fallback
         setTimeout(() => {
@@ -273,6 +285,77 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
     setIsAutoScrolling(true);
   };
 
+  // 鼠标滚轮事件处理器
+  const handleWheel = useCallback((e: WheelEvent) => {
+    // 阻止默认的页面滚动行为
+    e.preventDefault();
+    
+    // 如果轮播未初始化或没有分类，不处理滚轮事件
+    if (!isInitialized || categories.length === 0) return;
+    
+    // 清除之前的防抖定时器
+    if (wheelTimeoutRef.current) {
+      clearTimeout(wheelTimeoutRef.current);
+    }
+    
+    // 设置防抖，避免过于频繁的滚动
+    wheelTimeoutRef.current = setTimeout(() => {
+      // 获取滚轮方向
+      const deltaY = e.deltaY;
+      
+      // 根据滚轮方向决定滚动方向
+      // 向上滚动（deltaY < 0）→ 向左滚动（previous）
+      // 向下滚动（deltaY > 0）→ 向右滚动（next）
+      if (deltaY < 0) {
+        // 向上滚动，向左移动
+        const newIndex = currentIndex - 1;
+        scrollToCenter(newIndex);
+      } else if (deltaY > 0) {
+        // 向下滚动，向右移动
+        const newIndex = currentIndex + 1;
+        scrollToCenter(newIndex);
+      }
+      
+      // 停止自动滚动
+      setIsAutoScrolling(false);
+    }, 50); // 50ms防抖延迟
+  }, [isInitialized, categories.length, currentIndex, scrollToCenter]);
+
+  // 添加鼠标滚轮事件监听器
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // 绑定滚轮事件监听器
+    container.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      // 清理事件监听器和防抖定时器
+      container.removeEventListener('wheel', handleWheel);
+      if (wheelTimeoutRef.current) {
+        clearTimeout(wheelTimeoutRef.current);
+      }
+    };
+  }, [handleWheel]);
+
+  // 创建图片错误处理函数
+  const createImageErrorHandler = (categoryName: string) => {
+    return createCategoryImageErrorHandler(categoryName, {
+      showToast: process.env.NODE_ENV === 'development',
+      onError: (error: string) => {
+        if (process.env.NODE_ENV === 'development') {
+          toast({
+            title: t('errors.images.load_failed', 'Image Load Failed'),
+            description: error, // 这里直接使用已经翻译好的错误消息
+            variant: "destructive",
+          });
+        }
+      },
+      debug: process.env.NODE_ENV === 'development',
+      t: t // 传递翻译函数
+    });
+  };
+
   return (
     <section className="py-16 bg-white" id="categories">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -332,6 +415,7 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
                     alt={category.name}
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"
+                    onError={createImageErrorHandler(category.name)}
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
                   

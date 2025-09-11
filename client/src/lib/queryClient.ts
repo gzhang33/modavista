@@ -9,13 +9,36 @@ const API_BASE_URL = import.meta.env.PROD
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     let errorMessage = res.statusText;
+    let errorCode = 'UNKNOWN_ERROR';
+    
     try {
       const errorData = await res.json();
       errorMessage = errorData.message || errorMessage;
+      errorCode = errorData.error?.code || errorCode;
     } catch {
       // 如果解析JSON失败，使用默认错误信息
+      if (res.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+        errorCode = 'SERVER_ERROR';
+      } else if (res.status === 404) {
+        errorMessage = 'The requested resource was not found.';
+        errorCode = 'NOT_FOUND';
+      } else if (res.status === 401) {
+        errorMessage = 'You are not authorized to perform this action.';
+        errorCode = 'UNAUTHORIZED';
+      } else if (res.status === 403) {
+        errorMessage = 'Access denied.';
+        errorCode = 'FORBIDDEN';
+      } else if (res.status >= 400 && res.status < 500) {
+        errorMessage = 'Please check your input and try again.';
+        errorCode = 'VALIDATION_ERROR';
+      }
     }
-    throw new Error(`${res.status}: ${errorMessage}`);
+    
+    const error = new Error(errorMessage);
+    (error as any).code = errorCode;
+    (error as any).status = res.status;
+    throw error;
   }
 }
 
@@ -44,7 +67,7 @@ export async function apiGet<T>(endpoint: string): Promise<T> {
   const result: ApiResponse<T> | PaginatedResponse<T> = await res.json();
   
   if (!result.success) {
-    throw new Error(result.message || 'API请求失败');
+    throw new Error(result.message || 'API request failed');
   }
   
   // 处理分页响应
@@ -60,7 +83,7 @@ export async function apiPost<T>(endpoint: string, data: unknown): Promise<T> {
   const result: ApiResponse<T> = await res.json();
   
   if (!result.success) {
-    throw new Error(result.message || 'API请求失败');
+    throw new Error(result.message || 'API request failed');
   }
   
   return result.data as T;

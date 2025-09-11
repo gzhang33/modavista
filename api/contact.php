@@ -3,6 +3,7 @@
 session_start();
 require_once 'config.php';
 require_once 'utils.php';
+require_once 'error_messages.php';
 
 // CORS
 header('Access-Control-Allow-Origin: *');
@@ -14,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_response(405, ['message' => '仅支持POST方法']);
+    json_error_response(405, 'METHOD_NOT_ALLOWED');
 }
 
 // 简单的速率限制
@@ -23,21 +24,21 @@ $rate_limit_file = sys_get_temp_dir() . '/contact_' . md5($ip);
 if (file_exists($rate_limit_file)) {
     $last_time = (int)file_get_contents($rate_limit_file);
     if (time() - $last_time < 60) { // 1分钟内只能发送一次
-        json_response(429, ['message' => '发送太频繁，请稍后再试']);
+        json_error_response(429, 'RATE_LIMITED');
     }
 }
 
 // 获取POST数据
 $input = json_decode(file_get_contents('php://input'), true);
 if (!$input) {
-    json_response(400, ['message' => '无效的JSON数据']);
+    json_error_response(400, 'INVALID_JSON');
 }
 
 // 验证必填字段
 $required_fields = ['name', 'email', 'message'];
 foreach ($required_fields as $field) {
     if (empty($input[$field])) {
-        json_response(400, ['message' => "缺少必填字段: $field"]);
+        json_error_response(400, 'REQUIRED_FIELD', ['field' => $field]);
     }
 }
 
@@ -49,15 +50,15 @@ $company = isset($input['company']) ? trim($input['company']) : '';
 $message = trim($input['message']);
 
 if (!$email) {
-    json_response(400, ['message' => '请提供有效的邮箱地址']);
+    json_error_response(400, 'INVALID_EMAIL');
 }
 
 if (strlen($name) < 2 || strlen($name) > 100) {
-    json_response(400, ['message' => '姓名长度应在2-100个字符之间']);
+    json_error_response(400, 'INVALID_LENGTH', ['min' => 2, 'max' => 100]);
 }
 
 if (strlen($message) < 10 || strlen($message) > 1000) {
-    json_response(400, ['message' => '消息长度应在10-1000个字符之间']);
+    json_error_response(400, 'INVALID_LENGTH', ['min' => 10, 'max' => 1000]);
 }
 
 // 保存到数据库（可选）
@@ -119,8 +120,5 @@ IP地址: $ip
 file_put_contents($rate_limit_file, time());
 
 // 返回成功响应
-json_response(200, [
-    'success' => true,
-    'message' => '消息发送成功！我们会尽快回复您。'
-]);
+json_success_response(200, 'CONTACT_SENT_SUCCESS');
 ?>

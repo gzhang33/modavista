@@ -252,8 +252,15 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
         <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-16">
-            <p className="text-xl text-red-500">Error loading products: {(error as Error).message}</p>
-            <p className="text-text-grey mt-2">Please try refreshing the page.</p>
+            <h1 className="text-2xl font-semibold text-charcoal mb-4">{t('errors.general.title', 'Error')}</h1>
+            <p className="text-xl text-red-500">{t('errors.products.load_failed', 'Failed to load products. Please refresh the page.')}</p>
+            <p className="text-text-grey mt-2">{t('errors.general.message', 'An unexpected error occurred. Please try again.')}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 bg-charcoal text-white hover:bg-gray-800"
+            >
+              {t('common.retry', 'Try Again')}
+            </Button>
           </div>
         </div>
         <Footer />
@@ -490,7 +497,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                         className={`object-contain group-hover:scale-105 transition-transform duration-500 ${
                           viewMode === 'list' ? 'w-full h-full' : 'w-full h-80'
                         }`}
-                        onError={createImageErrorHandler(true)} // Enable debug mode
+                        onError={createImageErrorHandler({ debug: true, t })} // Enable debug mode with translation
                       />
 
                       {/* 网格视图的产品名称覆盖层 */}

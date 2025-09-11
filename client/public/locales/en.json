@@ -179,6 +179,58 @@
     "error": "An error occurred",
     "retry": "Try Again"
   },
+  "errors": {
+    "general": {
+      "title": "Error",
+      "message": "An unexpected error occurred. Please try again.",
+      "network_error": "Network connection error. Please check your internet connection and try again.",
+      "server_error": "Server error. Please try again later.",
+      "not_found": "The requested resource was not found.",
+      "unauthorized": "You are not authorized to perform this action.",
+      "forbidden": "Access denied.",
+      "validation_error": "Please check your input and try again.",
+      "timeout": "Request timeout. Please try again.",
+      "unknown": "An unknown error occurred."
+    },
+    "api": {
+      "connection_failed": "Failed to connect to server. Please try again later.",
+      "invalid_response": "Invalid response from server.",
+      "request_failed": "API request failed",
+      "rate_limited": "Too many requests. Please wait a moment and try again."
+    },
+    "form": {
+      "required_field": "This field is required.",
+      "invalid_email": "Please enter a valid email address.",
+      "invalid_phone": "Please enter a valid phone number.",
+      "min_length": "This field must be at least {min} characters long.",
+      "max_length": "This field must not exceed {max} characters.",
+      "invalid_format": "Invalid format for this field.",
+      "password_mismatch": "Passwords do not match.",
+      "submit_error": "Failed to submit form. Please try again.",
+      "validation_error": "Please correct the errors below and try again."
+    },
+    "products": {
+      "load_failed": "Failed to load products. Please refresh the page.",
+      "not_found": "Product not found.",
+      "details_load_failed": "Failed to load product details.",
+      "search_failed": "Search failed. Please try again.",
+      "filter_failed": "Failed to apply filters. Please try again."
+    },
+    "contact": {
+      "submit_failed": "Failed to send message. Please try again or contact us directly.",
+      "submit_success": "Message sent successfully! We will contact you soon.",
+      "rate_limited": "Please wait before sending another message.",
+      "invalid_data": "Please check your information and try again."
+    },
+    "images": {
+      "load_failed": "Failed to load image.",
+      "upload_failed": "Failed to upload image.",
+      "invalid_format": "Invalid image format.",
+      "file_too_large": "Image file is too large.",
+      "category_load_failed": "Failed to load image for category: {categoryName}",
+      "product_load_failed": "Failed to load image for product: {productName}"
+    }
+  },
   "seo": {
     "title": "DreaModa - Italian Fashion Excellence | Wholesale Garment Manufacturer",
     "description": "Premium Italian fashion manufacturer specializing in wholesale garments. Discover our curated collection of high-quality fashion pieces for discerning wholesale partners worldwide.",

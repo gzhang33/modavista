@@ -3,6 +3,7 @@ session_start();
 // api/products.php（新版：i18n 多语言结构）
 require_once 'config.php';
 require_once 'utils.php';
+require_once 'error_messages.php';
 
 // CORS
 header('Access-Control-Allow-Origin: *');
@@ -19,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) {
-    json_response(500, ['message' => '数据库连接失败: ' . $conn->connect_error]);
+    json_error_response(500, 'DATABASE_CONNECTION_FAILED', ['error' => $conn->connect_error]);
 }
 $conn->set_charset('utf8mb4');
 
@@ -35,7 +36,7 @@ switch ($method) {
         handle_delete($conn);
         break;
     default:
-        json_response(405, ['message' => '不支持的方法']);
+        json_error_response(405, 'UNSUPPORTED_METHOD');
 }
 
 $conn->close();

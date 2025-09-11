@@ -6,6 +6,13 @@ export interface ImageProcessingOptions {
   debug?: boolean;
 }
 
+export interface ImageErrorHandlerOptions {
+  debug?: boolean;
+  showToast?: boolean;
+  onError?: (error: string) => void;
+  t?: (key: string, fallback?: string) => string; // 添加翻译函数参数
+}
+
 // 处理单个图片路径
 export function processImagePath(imagePath: string | undefined | null, options: ImageProcessingOptions = {}): string {
   const { debug = false } = options;
@@ -93,7 +100,9 @@ export function processImageArray(images: (string | undefined | null)[] | undefi
 }
 
 // 为img标签创建错误处理函数
-export function createImageErrorHandler(debug: boolean = false) {
+export function createImageErrorHandler(options: ImageErrorHandlerOptions = {}) {
+  const { debug = false, showToast = false, onError, t } = options;
+  
   return (e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
     const originalSrc = target.src;
@@ -109,8 +118,25 @@ export function createImageErrorHandler(debug: boolean = false) {
       if (debug) {
         console.log('Fallback to placeholder for:', originalSrc);
       }
+      
+      // 显示错误提示
+      if (showToast || onError) {
+        // 使用翻译函数生成多语言错误消息
+        const errorMessage = t 
+          ? t('errors.images.load_failed', 'Image load failed')
+          : 'Image load failed';
+        
+        if (onError) {
+          onError(errorMessage);
+        }
+      }
     }
   };
+}
+
+// 向后兼容的简单版本
+export function createSimpleImageErrorHandler(debug: boolean = false) {
+  return createImageErrorHandler({ debug });
 }
 
 // 预加载图片函数，用于检测图片是否可用
@@ -141,4 +167,81 @@ export async function preloadImages(images: string[]): Promise<string[]> {
   
   // 如果没有可用图片，返回placeholder
   return validImages.length > 0 ? validImages : ['/placeholder-image.svg'];
+}
+
+// 智能获取分类图片路径的函数
+export async function getCategoryImagePath(englishName: string): Promise<string> {
+  // 定义可能的文件名变体
+  const possibleNames = [
+    englishName.toLowerCase(),
+    englishName.toLowerCase().replace(/\s+/g, ''),
+    englishName.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    // 添加一些常见的映射
+    ...(englishName.toLowerCase() === 'abiti' ? ['dresses'] : []),
+    ...(englishName.toLowerCase() === 'capispalla' ? ['outerwear'] : []),
+    ...(englishName.toLowerCase() === 'pantaloni' ? ['bottoms'] : []),
+    ...(englishName.toLowerCase() === 'top' ? ['tops'] : []),
+  ];
+
+  // 去重
+  const uniqueNames = [...new Set(possibleNames)];
+
+  // 尝试预加载每个可能的图片路径
+  for (const name of uniqueNames) {
+    const imagePath = `/images/categories/${name}.jpg`;
+    try {
+      const isAvailable = await preloadImage(imagePath);
+      if (isAvailable) {
+        return imagePath;
+      }
+    } catch (error) {
+      // 继续尝试下一个
+      continue;
+    }
+  }
+
+  // 如果所有尝试都失败，返回placeholder
+  return '/placeholder-image.svg';
+}
+
+// 创建分类图片错误处理函数
+export function createCategoryImageErrorHandler(
+  categoryName: string,
+  options: {
+    showToast?: boolean;
+    onError?: (error: string) => void;
+    debug?: boolean;
+    t?: (key: string, fallback?: string) => string; // 添加翻译函数参数
+  } = {}
+) {
+  const { showToast = false, onError, debug = false, t } = options;
+  
+  return (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    
+    if (debug) {
+      console.error('Category image failed to load:', target.src, 'for category:', categoryName);
+    }
+    
+    // 如果已经是placeholder，不要再次设置以避免无限循环
+    if (!target.src.includes('placeholder-image.svg')) {
+      target.src = '/placeholder-image.svg';
+      
+      if (debug) {
+        console.log('Fallback to placeholder for category:', categoryName);
+      }
+      
+      // 显示错误提示
+      if (showToast || onError) {
+        // 使用翻译函数生成多语言错误消息
+        const errorMessage = t 
+          ? t('errors.images.category_load_failed', `Failed to load image for category: ${categoryName}`)
+          : `Failed to load image for category: ${categoryName}`;
+        
+        if (onError) {
+          onError(errorMessage);
+        }
+      }
+    }
+  };
 }

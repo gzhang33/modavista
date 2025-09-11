@@ -51,16 +51,16 @@ export default function ContactSection() {
     mutationFn: (data: ContactFormData) => apiPost('inquiries.php', data),
     onSuccess: () => {
       toast({
-        title: "Inquiry Sent Successfully",
-        description: "Thank you for your interest. We'll contact you within 2 days.",
+        title: t('errors.contact.submit_success', 'Message sent successfully! We will contact you soon.'),
+        description: t('contact.success_description', 'Thank you for your interest. We\'ll contact you within 2 days.'),
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['/api/inquiries'] });
     },
     onError: () => {
       toast({
-        title: "Submission Failed",
-        description: "Please try again or contact us directly.",
+        title: t('errors.contact.submit_failed', 'Failed to send message. Please try again or contact us directly.'),
+        description: t('errors.general.message', 'An unexpected error occurred. Please try again.'),
         variant: "destructive",
       });
     },

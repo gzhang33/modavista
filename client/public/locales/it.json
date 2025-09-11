@@ -179,6 +179,58 @@
     "error": "Si è verificato un errore",
     "retry": "Riprova"
   },
+  "errors": {
+    "general": {
+      "title": "Errore",
+      "message": "Si è verificato un errore imprevisto. Riprova.",
+      "network_error": "Errore di connessione di rete. Controlla la tua connessione internet e riprova.",
+      "server_error": "Errore del server. Riprova più tardi.",
+      "not_found": "La risorsa richiesta non è stata trovata.",
+      "unauthorized": "Non sei autorizzato a eseguire questa azione.",
+      "forbidden": "Accesso negato.",
+      "validation_error": "Controlla i tuoi input e riprova.",
+      "timeout": "Timeout della richiesta. Riprova.",
+      "unknown": "Si è verificato un errore sconosciuto."
+    },
+    "api": {
+      "connection_failed": "Connessione al server fallita. Riprova più tardi.",
+      "invalid_response": "Risposta non valida dal server.",
+      "request_failed": "Richiesta API fallita",
+      "rate_limited": "Troppe richieste. Aspetta un momento e riprova."
+    },
+    "form": {
+      "required_field": "Questo campo è obbligatorio.",
+      "invalid_email": "Inserisci un indirizzo email valido.",
+      "invalid_phone": "Inserisci un numero di telefono valido.",
+      "min_length": "Questo campo deve essere di almeno {min} caratteri.",
+      "max_length": "Questo campo non deve superare {max} caratteri.",
+      "invalid_format": "Formato non valido per questo campo.",
+      "password_mismatch": "Le password non corrispondono.",
+      "submit_error": "Invio del modulo fallito. Riprova.",
+      "validation_error": "Correggi gli errori qui sotto e riprova."
+    },
+    "products": {
+      "load_failed": "Caricamento prodotti fallito. Aggiorna la pagina.",
+      "not_found": "Prodotto non trovato.",
+      "details_load_failed": "Caricamento dettagli prodotto fallito.",
+      "search_failed": "Ricerca fallita. Riprova.",
+      "filter_failed": "Applicazione filtri fallita. Riprova."
+    },
+    "contact": {
+      "submit_failed": "Invio messaggio fallito. Riprova o contattaci direttamente.",
+      "submit_success": "Messaggio inviato con successo! Ti contatteremo presto.",
+      "rate_limited": "Aspetta prima di inviare un altro messaggio.",
+      "invalid_data": "Controlla le tue informazioni e riprova."
+    },
+    "images": {
+      "load_failed": "Errore nel caricamento dell'immagine.",
+      "upload_failed": "Errore nell'upload dell'immagine.",
+      "invalid_format": "Formato immagine non valido.",
+      "file_too_large": "Il file immagine è troppo grande.",
+      "category_load_failed": "Errore nel caricamento dell'immagine per la categoria: {categoryName}",
+      "product_load_failed": "Errore nel caricamento dell'immagine per il prodotto: {productName}"
+    }
+  },
   "seo": {
     "title": "DreaModa - Eccellenza Italiana della Moda | Produttore di Abbigliamento all'Ingrosso",
     "description": "Produttore italiano di moda premium specializzato in abbigliamento all'ingrosso. Scopri la nostra collezione curata di capi di moda di alta qualità per partner grossisti esigenti in tutto il mondo.",

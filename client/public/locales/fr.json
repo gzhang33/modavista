@@ -179,6 +179,58 @@
     "error": "Une erreur s'est produite",
     "retry": "Réessayer"
   },
+  "errors": {
+    "general": {
+      "title": "Erreur",
+      "message": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "network_error": "Erreur de connexion réseau. Veuillez vérifier votre connexion internet et réessayer.",
+      "server_error": "Erreur du serveur. Veuillez réessayer plus tard.",
+      "not_found": "La ressource demandée n'a pas été trouvée.",
+      "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+      "forbidden": "Accès refusé.",
+      "validation_error": "Veuillez vérifier vos informations et réessayer.",
+      "timeout": "Délai d'attente de la demande dépassé. Veuillez réessayer.",
+      "unknown": "Une erreur inconnue s'est produite."
+    },
+    "api": {
+      "connection_failed": "Échec de la connexion au serveur. Veuillez réessayer plus tard.",
+      "invalid_response": "Réponse invalide du serveur.",
+      "request_failed": "Échec de la requête API",
+      "rate_limited": "Trop de requêtes. Veuillez attendre un moment et réessayer."
+    },
+    "form": {
+      "required_field": "Ce champ est obligatoire.",
+      "invalid_email": "Veuillez saisir une adresse e-mail valide.",
+      "invalid_phone": "Veuillez saisir un numéro de téléphone valide.",
+      "min_length": "Ce champ doit contenir au moins {min} caractères.",
+      "max_length": "Ce champ ne doit pas dépasser {max} caractères.",
+      "invalid_format": "Format invalide pour ce champ.",
+      "password_mismatch": "Les mots de passe ne correspondent pas.",
+      "submit_error": "Échec de l'envoi du formulaire. Veuillez réessayer.",
+      "validation_error": "Veuillez corriger les erreurs ci-dessous et réessayer."
+    },
+    "products": {
+      "load_failed": "Échec du chargement des produits. Veuillez actualiser la page.",
+      "not_found": "Produit non trouvé.",
+      "details_load_failed": "Échec du chargement des détails du produit.",
+      "search_failed": "Échec de la recherche. Veuillez réessayer.",
+      "filter_failed": "Échec de l'application des filtres. Veuillez réessayer."
+    },
+    "contact": {
+      "submit_failed": "Échec de l'envoi du message. Veuillez réessayer ou nous contacter directement.",
+      "submit_success": "Message envoyé avec succès! Nous vous contacterons bientôt.",
+      "rate_limited": "Veuillez attendre avant d'envoyer un autre message.",
+      "invalid_data": "Veuillez vérifier vos informations et réessayer."
+    },
+    "images": {
+      "load_failed": "Échec du chargement de l'image.",
+      "upload_failed": "Échec du téléchargement de l'image.",
+      "invalid_format": "Format d'image invalide.",
+      "file_too_large": "Le fichier image est trop volumineux.",
+      "category_load_failed": "Échec du chargement de l'image pour la catégorie : {categoryName}",
+      "product_load_failed": "Échec du chargement de l'image pour le produit : {productName}"
+    }
+  },
   "seo": {
     "title": "DreaModa - Excellence Italienne de la Mode | Fabricant de Vêtements en Gros",
     "description": "Fabricant italien de mode premium spécialisé dans les vêtements de gros. Découvrez notre collection exclusive de pièces de mode de haute qualité pour les partenaires grossistes exigeants du monde entier.",

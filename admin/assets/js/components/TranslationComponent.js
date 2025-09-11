@@ -75,9 +75,8 @@ export default class TranslationComponent extends BaseComponent {
                         <!-- 翻译结果将动态插入这里 -->
                     </div>
                     
-                    <div class="translation__actions">
-                        <button class="translation__apply-btn btn btn--success">应用翻译</button>
-                        <button class="translation__cancel-btn btn btn--secondary">取消</button>
+                    <div class="translation__info">
+                        <p class="translation__info-text">翻译内容已暂存，点击"保存产品"时将自动应用</p>
                     </div>
                 </div>
             </div>
@@ -87,13 +86,9 @@ export default class TranslationComponent extends BaseComponent {
     bindEvents() {
         const generateBtn = this.element.querySelector('.translation__generate-btn');
         const sourceSelect = this.element.querySelector('.translation__source-select');
-        const applyBtn = this.element.querySelector('.translation__apply-btn');
-        const cancelBtn = this.element.querySelector('.translation__cancel-btn');
 
         generateBtn?.addEventListener('click', () => this.handleGenerateTranslation());
         sourceSelect?.addEventListener('change', (e) => this.handleSourceLanguageChange(e));
-        applyBtn?.addEventListener('click', () => this.handleApplyTranslations());
-        cancelBtn?.addEventListener('click', () => this.handleCancelTranslations());
     }
 
     handleSourceLanguageChange(event) {
@@ -145,13 +140,21 @@ export default class TranslationComponent extends BaseComponent {
     }
 
     async callTranslationAPI(content) {
+        const productId = this.getProductId();
+        
         const requestData = {
             action: 'translate_product',
             content: content,
             source_language: this.state.sourceLanguage,
             target_languages: this.state.targetLanguages,
-            product_id: this.getProductId()
+            product_id: productId,
+            is_new_product: this.isNewProduct()  // 标识新建产品模式
         };
+
+        console.log('Translation API request:', {
+            ...requestData,
+            content: 'content omitted for brevity'
+        });
 
         return await apiClient.post('/translation.php', requestData);
     }
@@ -162,8 +165,13 @@ export default class TranslationComponent extends BaseComponent {
         const productId = urlParams.get('id') || urlParams.get('product_id');
         if (productId) return parseInt(productId);
 
-        const idInput = document.querySelector('input[name="id"], input[name="product_id"]');
+        const idInput = document.querySelector('input[name="id"], input[name="product_id"], #product-id');
         return idInput?.value ? parseInt(idInput.value) : null;
+    }
+
+    // 检查是否为新建产品模式
+    isNewProduct() {
+        return this.getProductId() === null;
     }
 
     startTranslation() {
@@ -223,6 +231,10 @@ export default class TranslationComponent extends BaseComponent {
             this.state.translations = response.data.translations;
             this.renderTranslationResults();
             this.showResults();
+            
+            // 将翻译内容存储到sessionStorage暂存
+            this.stageTranslations(response.data.translations);
+            
             this.eventBus.emit('translation:generated', response.data.translations);
         } else {
             this.showError('翻译结果格式错误');
@@ -331,15 +343,80 @@ export default class TranslationComponent extends BaseComponent {
         results?.classList.add('hidden');
     }
 
-    handleApplyTranslations() {
-        this.eventBus.emit('translation:apply', this.state.translations);
-        this.hideResults();
-        this.showSuccess('翻译已应用到表单');
+    // 暂存翻译内容到sessionStorage
+    stageTranslations(translations) {
+        const productId = this.getProductId();
+        // 与add_product.js保持一致的命名规则
+        const stagingKey = productId ? `staged_translations_${productId}` : 'staged_translations_new';
+        
+        try {
+            sessionStorage.setItem(stagingKey, JSON.stringify(translations));
+            console.log('翻译内容已暂存到sessionStorage:', stagingKey, '产品ID:', productId);
+        } catch (error) {
+            console.error('暂存翻译内容失败:', error);
+        }
     }
 
-    handleCancelTranslations() {
-        this.state.translations = {};
-        this.hideResults();
+    // 获取暂存的翻译内容
+    getStagedTranslations() {
+        const productId = this.getProductId();
+        const stagingKey = productId ? `staged_translations_${productId}` : 'staged_translations_new';
+        
+        try {
+            const staged = sessionStorage.getItem(stagingKey);
+            return staged ? JSON.parse(staged) : null;
+        } catch (error) {
+            console.error('获取暂存翻译内容失败:', error);
+            return null;
+        }
+    }
+
+    // 清除暂存的翻译内容
+    clearStagedTranslations() {
+        const productId = this.getProductId();
+        const stagingKey = productId ? `staged_translations_${productId}` : 'staged_translations_new';
+        
+        try {
+            sessionStorage.removeItem(stagingKey);
+            console.log('已清除暂存的翻译内容:', stagingKey);
+        } catch (error) {
+            console.error('清除暂存翻译内容失败:', error);
+        }
+    }
+
+    // 应用暂存的翻译内容（供外部调用）
+    async applyStagedTranslations(productId) {
+        const stagingKey = `staged_translations_${productId || 'new'}`;
+        
+        try {
+            const staged = sessionStorage.getItem(stagingKey);
+            if (!staged) {
+                console.log('没有找到暂存的翻译内容');
+                return { success: true, message: '没有翻译内容需要应用' };
+            }
+
+            const translations = JSON.parse(staged);
+            
+            const requestData = {
+                action: 'save_translations',
+                product_id: productId,
+                translations: translations
+            };
+
+            const response = await apiClient.post('/translation.php', requestData);
+
+            if (response.success) {
+                // 清除暂存内容
+                sessionStorage.removeItem(stagingKey);
+                console.log('翻译内容已成功应用并保存到数据库');
+                return { success: true, message: '翻译内容已成功应用' };
+            } else {
+                throw new Error(response.error?.message || '保存翻译失败');
+            }
+        } catch (error) {
+            console.error('应用暂存翻译失败:', error);
+            return { success: false, error: error.message };
+        }
     }
 
     showError(message) {

@@ -7,6 +7,7 @@ import { Product } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -15,16 +16,19 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ isOpen, productId, onClose }: ProductModalProps) {
+  const { t, currentLanguage } = useLanguage();
+  const currentLangShort = (currentLanguage || 'en').split('-')[0];
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ['product', productId],
+    queryKey: ['product', productId, currentLangShort],
     queryFn: async () => {
       if (!productId) throw new Error('No product ID provided');
-      const response = await fetch(`/api/products.php?id=${productId}&lang=en`);
+      const response = await fetch(`/api/products.php?id=${productId}&lang=${currentLangShort}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch product');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch product');
       }
       const data = await response.json();
       
@@ -39,22 +43,22 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
         id: data.id,
         name: data.name,
         description: data.description || '',
-        category: data.category || 'Uncategorized',
-        fabric: data.material || 'Cotton',
-        style: 'casual',
-        season: 'all-season',
-        care: 'Machine wash',
-        origin: 'Made in China',
+        category: data.category || t('products.uncategorized', 'Uncategorized'),
+        fabric: data.material || t('products.cotton', 'Cotton'),
+        style: t('products.casual', 'casual'),
+        season: t('products.all_season', 'all-season'),
+        care: t('products.machine_wash', 'Machine wash'),
+        origin: t('products.made_in_china', 'Made in China'),
         sku: data.sku || '',
         images: data.media && data.media.length > 0 
           ? data.media 
           : (data.defaultImage ? [data.defaultImage] : []),
         specifications: {
-          'Material': data.material || '',
-          'Color': data.color || '',
-          'SKU': data.sku || ''
+          [t('products.material', 'Material')]: data.material || '',
+          [t('products.color', 'Color')]: data.color || '',
+          [t('products.sku', 'SKU')]: data.sku || ''
         },
-        featured: 'no',
+        featured: t('products.no', 'no'),
         defaultImage: data.defaultImage,
         createdAt: data.createdAt,
         color: data.color,
@@ -87,10 +91,10 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
       queryClient.invalidateQueries({ queryKey: ['/api/inquiries'] });
       onClose();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Request Failed",
-        description: "Please try again or contact us directly.",
+        title: t('errors.contact.submit_failed', 'Request Failed'),
+        description: error?.message || t('errors.general.message', 'An unexpected error occurred. Please try again.'),
         variant: "destructive",
       });
     },
@@ -142,7 +146,7 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
                 )}
                 alt={product.name}
                 className="w-full h-96 lg:h-full object-cover"
-                onError={createImageErrorHandler(false)}
+                onError={createImageErrorHandler({ debug: false, t })}
               />
             </div>
             
@@ -159,34 +163,34 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
               
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="font-semibold text-charcoal">Fabric:</span>
+                  <span className="font-semibold text-charcoal">{t('products.material', 'Material')}:</span>
                   <span className="text-text-grey">{product.fabric}</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="font-semibold text-charcoal">Care:</span>
+                  <span className="font-semibold text-charcoal">{t('products.care', 'Care')}:</span>
                   <span className="text-text-grey">{product.care}</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="font-semibold text-charcoal">Origin:</span>
+                  <span className="font-semibold text-charcoal">{t('products.origin', 'Origin')}:</span>
                   <span className="text-text-grey">{product.origin}</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="font-semibold text-charcoal">Style:</span>
+                  <span className="font-semibold text-charcoal">{t('products.style', 'Style')}:</span>
                   <span className="text-text-grey capitalize">{product.style}</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="font-semibold text-charcoal">Season:</span>
+                  <span className="font-semibold text-charcoal">{t('products.season', 'Season')}:</span>
                   <span className="text-text-grey capitalize">{product.season.replace('-', '/')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-semibold text-charcoal">SKU:</span>
+                  <span className="font-semibold text-charcoal">{t('products.sku', 'SKU')}:</span>
                   <span className="text-accent-gold font-semibold">{product.sku}</span>
                 </div>
               </div>
 
               {Object.keys(product.specifications).length > 0 && (
                 <div className="mb-8">
-                  <h4 className="font-semibold text-charcoal mb-4">Specifications:</h4>
+                  <h4 className="font-semibold text-charcoal mb-4">{t('products.specifications', 'Specifications')}:</h4>
                   <div className="space-y-2">
                     {Object.entries(product.specifications).map(([key, value]) => (
                       <div key={key} className="flex justify-between text-sm">
@@ -204,13 +208,13 @@ export default function ProductModal({ isOpen, productId, onClose }: ProductModa
                 className="w-full bg-accent-gold text-charcoal py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300"
                 data-testid="button-request-sample"
               >
-                {requestSampleMutation.isPending ? 'Sending Request...' : 'Request Sample'}
+                {requestSampleMutation.isPending ? t('product_detail.actions.sending', 'Sending Request...') : t('product_detail.actions.add_to_inquiry', 'Request Sample')}
               </Button>
             </div>
           </div>
         ) : (
           <div className="p-8 text-center">
-            <p className="text-text-grey">Product not found.</p>
+            <p className="text-text-grey">{t('product_detail.not_found.desc', 'Product not found.')}</p>
           </div>
         )}
       </DialogContent>

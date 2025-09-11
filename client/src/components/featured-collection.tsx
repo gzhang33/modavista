@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { processImagePath, createImageErrorHandler } from "@/lib/image-utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface FeaturedCollectionProps {
   filters: FilterState;
@@ -18,7 +19,18 @@ export default function FeaturedCollection({
   filters
 }: FeaturedCollectionProps) {
   const { t, currentLanguage } = useLanguage();
+  const { toast } = useToast();
   const currentLangShort = (currentLanguage || 'en').split('-')[0];
+  
+  // 图片错误处理函数
+  const handleImageError = (productName: string) => {
+    toast({
+      title: t('errors.images.load_failed', 'Image Load Failed'),
+      description: t('errors.images.product_load_failed', `Failed to load image for product: ${productName}`),
+      variant: "destructive",
+    });
+  };
+  
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products', 'featured', currentLangShort],
     queryFn: async () => {
@@ -130,7 +142,14 @@ export default function FeaturedCollection({
                       src={processImagePath(product.images[0], { debug: false })}
                       alt={product.name}
                       className="w-full h-96 object-contain group-hover:scale-105 transition-transform duration-500"
-                      onError={createImageErrorHandler(false)}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes('placeholder-image.svg')) {
+                          target.src = '/placeholder-image.svg';
+                          // 显示多语言错误提示
+                          handleImageError(product.name);
+                        }
+                      }}
                     />
                     {/* 产品名称 - 图片下方，无覆盖层 */}
                     <div className="mt-4">

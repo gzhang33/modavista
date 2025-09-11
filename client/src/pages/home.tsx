@@ -11,6 +11,7 @@ import { FilterState } from "@/types";
 import { useLocation } from "wouter";
 import { handleHashOnLoad } from "@/utils/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { generateOrganizationSchema, generateWebSiteSchema } from "@/utils/structuredData";
 
 interface HomeProps {}
 
@@ -39,9 +40,42 @@ export default function Home({}: HomeProps) {
     setLocation(`/products?category=${category}`);
   };
 
+  // 生成结构化数据
+  const organizationData = {
+    name: "DreaModa",
+    url: typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store',
+    logo: `${typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'}/images/dreamoda-logo.png`,
+    description: t('seo.description'),
+    address: {
+      streetAddress: "Via Gherardacci 47/C, Iolo",
+      addressLocality: "Prato",
+      addressRegion: "Tuscany",
+      postalCode: "59100",
+      addressCountry: "IT"
+    },
+    contactPoint: {
+      telephone: "+39 02 1234 5678",
+      contactType: "Business Inquiries",
+      email: "Hi@DreaModa.store"
+    },
+    sameAs: [
+      "https://www.instagram.com/dreamoda",
+      "https://www.facebook.com/dreamoda",
+      "https://www.linkedin.com/company/dreamoda"
+    ]
+  };
+
+  const structuredData = [
+    generateOrganizationSchema(organizationData),
+    generateWebSiteSchema(typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store')
+  ];
+
   return (
     <div className="min-h-screen bg-white">
-      <SEOHead />
+      <SEOHead 
+        structuredData={structuredData}
+        type="website"
+      />
       <Header />
       
       <HeroSection />

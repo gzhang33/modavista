@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -5,7 +6,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Globe, Check } from "lucide-react";
+import { Globe, Check, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES, LANGUAGE_TO_LOCALE } from "@/utils/translationUtils";
 
@@ -31,7 +32,11 @@ export default function LanguageSwitcher() {
   const { currentLanguage, availableLanguages, isLoading, changeLanguage } = useLanguage();
 
   const handleLanguageChange = async (languageCode: string) => {
-    await changeLanguage(languageCode);
+    try {
+      await changeLanguage(languageCode);
+    } catch (error) {
+      console.error('Failed to change language:', error);
+    }
   };
 
   // 获取当前语言的简短代码（从locale格式转换）
@@ -51,9 +56,9 @@ export default function LanguageSwitcher() {
 
   if (isLoading) {
     return (
-      <Button variant="ghost" size="sm" disabled>
-        <Globe size={16} className="mr-2" />
-        Loading...
+      <Button variant="ghost" size="sm" disabled className="text-gray-600">
+        <Loader2 size={16} className="mr-2 animate-spin" />
+        <span className="hidden sm:inline">Loading...</span>
       </Button>
     );
   }
@@ -75,7 +80,8 @@ export default function LanguageSwitcher() {
         <Button 
           variant="ghost" 
           size="sm"
-          className="text-gray-600 hover:text-accent-gold transition-colors duration-300"
+          className="text-gray-600 hover:text-accent-gold transition-colors duration-300 focus:ring-2 focus:ring-accent-gold focus:ring-opacity-50"
+          aria-label={`Current language: ${currentLang?.language_name_native || 'English'}`}
         >
           <Globe size={16} className="mr-2" />
           <span className="hidden sm:inline">
@@ -86,22 +92,23 @@ export default function LanguageSwitcher() {
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-48 shadow-lg border border-gray-200">
         {uniqueLanguages.map((language) => (
           <DropdownMenuItem
             key={language.language_code}
             onClick={() => handleLanguageChange(language.language_code)}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 focus:bg-gray-50 transition-colors duration-150"
+            disabled={isLoading}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <span className="text-lg">{FLAG_ICONS[language.language_code]}</span>
               <div className="flex flex-col">
-                <span className="font-medium">{language.language_name_native}</span>
+                <span className="font-medium text-gray-900">{language.language_name_native}</span>
                 <span className="text-xs text-gray-500">{language.language_name}</span>
               </div>
             </div>
             {language.language_code === currentShortCode && (
-              <Check size={16} className="text-accent-gold" />
+              <Check size={16} className="text-accent-gold flex-shrink-0" />
             )}
           </DropdownMenuItem>
         ))}

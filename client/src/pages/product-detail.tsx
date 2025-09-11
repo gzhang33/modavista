@@ -15,6 +15,7 @@ import { navigateToSection } from "@/utils/navigation";
 import { processImageArray, createImageErrorHandler } from "@/lib/image-utils";
 import { createLocalizedHref } from "@/utils/translationUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { generateProductSchema, generateBreadcrumbSchema } from "@/utils/structuredData";
 
 // Check icon component
 const CheckIcon = () => (
@@ -240,12 +241,42 @@ export default function ProductDetailPage() {
     }))
   ];
 
+  // 生成结构化数据
+  const structuredData = product ? [
+    generateProductSchema({
+      name: product.name,
+      description: product.description,
+      image: product.images || [],
+      brand: "DreaModa",
+      category: product.category,
+      material: product.material,
+      color: product.color,
+      offers: {
+        priceCurrency: "EUR",
+        availability: "https://schema.org/InStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: {
+          name: "DreaModa",
+          url: typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'
+        }
+      }
+    }),
+    generateBreadcrumbSchema([
+      { name: t('nav.home', 'Home'), url: createLocalizedHref('/') },
+      { name: t('nav.collections', 'Collections'), url: createLocalizedHref('/products') },
+      { name: product.name, url: createLocalizedHref(`/product/${id}`) }
+    ])
+  ] : [];
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       <SEOHead
         title={product ? `${product.name} - DreaModa Premium Wholesale Garments` : "Product - DreaModa"}
         description={product ? `${product.name} - Premium Italian fashion garment. ${product.description} Material: ${product.material}, Color: ${product.color}. Wholesale pricing available.` : "Premium Italian fashion garment for wholesale"}
         canonicalPath={`/product/${id}`}
+        image={product?.images?.[0]}
+        type="product"
+        structuredData={structuredData}
       />
       <Header />
       

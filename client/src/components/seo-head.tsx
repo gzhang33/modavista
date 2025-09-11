@@ -7,13 +7,19 @@ interface SEOHeadProps {
   description?: string;
   keywords?: string;
   canonicalPath?: string;
+  image?: string;
+  type?: string;
+  structuredData?: any;
 }
 
 export default function SEOHead({
   title,
   description,
   keywords,
-  canonicalPath = ""
+  canonicalPath = "",
+  image,
+  type = "website",
+  structuredData
 }: SEOHeadProps) {
   const { t, currentLanguage, availableLanguages } = useLanguage();
 
@@ -57,6 +63,8 @@ export default function SEOHead({
   const finalTitle = title || t(currentSEO.title);
   const finalDescription = description || t(currentSEO.description);
   const finalKeywords = keywords || t(currentSEO.keywords);
+  const finalImage = image || (typeof window !== 'undefined' ? `${window.location.origin}/images/dreamoda-og-image.jpg` : '/images/dreamoda-og-image.jpg');
+  const finalType = type;
 
   useEffect(() => {
     // 更新页面标题
@@ -69,7 +77,22 @@ export default function SEOHead({
     // 添加Open Graph标签
     updateMetaTag('og:title', finalTitle, 'property');
     updateMetaTag('og:description', finalDescription, 'property');
-    updateMetaTag('og:type', 'website', 'property');
+    updateMetaTag('og:type', finalType, 'property');
+    updateMetaTag('og:image', finalImage, 'property');
+    updateMetaTag('og:url', `${typeof window !== 'undefined' ? window.location.origin : ''}${canonicalPath || (typeof window !== 'undefined' ? window.location.pathname : '')}`, 'property');
+    updateMetaTag('og:site_name', 'DreaModa', 'property');
+    updateMetaTag('og:locale', LANGUAGE_TO_LOCALE[currentLanguage] || 'en-GB', 'property');
+
+    // 添加Twitter Card标签
+    updateMetaTag('twitter:card', 'summary_large_image', 'name');
+    updateMetaTag('twitter:title', finalTitle, 'name');
+    updateMetaTag('twitter:description', finalDescription, 'name');
+    updateMetaTag('twitter:image', finalImage, 'name');
+
+    // 添加其他SEO标签
+    updateMetaTag('robots', 'index, follow', 'name');
+    updateMetaTag('author', 'DreaModa', 'name');
+    updateMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1', 'name');
 
     // 添加多语言hreflang标签
     updateHreflangTags(canonicalPath);
@@ -77,7 +100,12 @@ export default function SEOHead({
     // 添加规范链接
     updateCanonicalLink(canonicalPath);
 
-  }, [finalTitle, finalDescription, finalKeywords, currentLanguage, canonicalPath]);
+    // 添加结构化数据
+    if (structuredData) {
+      updateStructuredData(structuredData);
+    }
+
+  }, [finalTitle, finalDescription, finalKeywords, finalImage, finalType, currentLanguage, canonicalPath, structuredData]);
 
   return null; // 这个组件不渲染任何内容，只管理head标签
 }
@@ -144,6 +172,18 @@ function updateCanonicalLink(canonicalPath: string) {
   const baseUrl = window.location.origin;
   const path = canonicalPath || window.location.pathname;
   canonical.href = `${baseUrl}${path}`;
+}
+
+// 辅助函数：更新结构化数据
+function updateStructuredData(structuredData: any) {
+  // 移除现有的结构化数据
+  document.querySelectorAll('script[type="application/ld+json"]').forEach(script => script.remove());
+
+  // 添加新的结构化数据
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify(structuredData);
+  document.head.appendChild(script);
 }
 
 

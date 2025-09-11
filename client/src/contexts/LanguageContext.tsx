@@ -8,6 +8,8 @@ import {
   shouldRedirectToLocalizedPath,
   redirectToLocalizedPath,
   saveLanguagePreference,
+  isFirstVisit,
+  markAsVisited,
   LANGUAGE_TO_LOCALE
 } from '@/utils/translationUtils';
 
@@ -100,23 +102,33 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     }
   };
 
-  // 初始化语言检测（混合方案）
+  // 初始化语言检测（优化版）
   const initializeLanguage = async () => {
     try {
-      console.log('Initializing language with hybrid approach...');
+      console.log('Initializing language with optimized approach...');
 
-      // 1. 使用混合方案检测语言优先级
+      // 1. 检查是否为首次访问
+      const firstVisit = isFirstVisit();
+      console.log('Is first visit:', firstVisit);
+
+      // 2. 使用混合方案检测语言优先级
       const detectedLanguage = detectLanguagePriority();
       console.log('Detected language:', detectedLanguage);
 
-      // 2. 获取可用语言列表
+      // 3. 获取可用语言列表
       await fetchLanguages();
 
-      // 3. 设置检测到的语言
+      // 4. 设置检测到的语言
       setCurrentLanguage(detectedLanguage);
 
-      // 4. 加载对应语言的静态翻译
+      // 5. 加载对应语言的静态翻译
       await fetchStaticTranslations(detectedLanguage);
+
+      // 6. 如果是首次访问，标记为已访问
+      if (firstVisit) {
+        markAsVisited();
+        console.log('First visit detected, language auto-detected from browser');
+      }
 
       setIsInitialized(true);
       setIsLoading(false);

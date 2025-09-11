@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import ProductsPage from "@/pages/products";
 import ProductDetailPage from "@/pages/product-detail";
 import ProductModal from "@/components/product-modal";
+import PerformanceOptimizer from "@/components/performance-optimizer";
 import { ProductModalState } from "@/types";
 import { SUPPORTED_LANGUAGES, getLanguageFromURL } from "@/utils/translationUtils";
 
@@ -60,6 +61,7 @@ function MultilingualRoutes() {
   return (
     <>
       <ScrollToTop />
+      <PerformanceOptimizer />
 
       {/* 产品模态框 */}
       <ProductModal

@@ -214,43 +214,58 @@ export function getLanguageFromLocalStorage(): string | null {
   return localStorage.getItem('user_language');
 }
 
-// 从浏览器语言检测
+// 从浏览器语言检测（增强版）
 export function getLanguageFromBrowser(): string | null {
   if (typeof window === 'undefined') return null;
 
-  const browserLang = navigator.language.split('-')[0].toLowerCase();
-  return SUPPORTED_LANGUAGES.includes(browserLang) ? browserLang : null;
+  // 获取浏览器语言偏好列表
+  const languages = navigator.languages || [navigator.language];
+  
+  // 遍历语言偏好列表，找到第一个支持的语言
+  for (const lang of languages) {
+    const langCode = lang.split('-')[0].toLowerCase();
+    if (SUPPORTED_LANGUAGES.includes(langCode)) {
+      console.log('Browser language detected:', langCode, 'from:', lang);
+      return langCode;
+    }
+  }
+  
+  // 如果没有找到支持的语言，返回null
+  console.log('No supported browser language found, available languages:', languages);
+  return null;
 }
 
-// 混合方案语言检测优先级
+// 混合方案语言检测优先级（优化版）
 export function detectLanguagePriority(): string {
-  // 优先级：URL路径 > Session Storage > Local Storage > 浏览器语言 > 默认英文
+  // 优先级：URL路径 > 用户明确选择（Session/Local Storage） > 浏览器语言 > 默认英文
 
-  // 1. 检查URL路径
+  // 1. 检查URL路径（最高优先级）
   const urlLang = getLanguageFromURL();
   if (urlLang) {
     console.log('Language detected from URL path:', urlLang);
     return urlLang;
   }
 
-  // 2. 检查Session Storage
+  // 2. 检查用户明确的语言选择（Session Storage优先，因为它是会话级别的）
   const sessionLang = getLanguageFromSession();
   if (sessionLang && SUPPORTED_LANGUAGES.includes(sessionLang)) {
-    console.log('Language detected from Session Storage:', sessionLang);
+    console.log('Language detected from Session Storage (user choice):', sessionLang);
     return sessionLang;
   }
 
-  // 3. 检查Local Storage
+  // 3. 检查持久化的用户语言偏好（Local Storage）
   const localLang = getLanguageFromLocalStorage();
   if (localLang && SUPPORTED_LANGUAGES.includes(localLang)) {
-    console.log('Language detected from Local Storage:', localLang);
+    console.log('Language detected from Local Storage (user preference):', localLang);
     return localLang;
   }
 
-  // 4. 检查浏览器语言
+  // 4. 检查浏览器语言（自动检测）
   const browserLang = getLanguageFromBrowser();
   if (browserLang) {
-    console.log('Language detected from browser:', browserLang);
+    console.log('Language auto-detected from browser:', browserLang);
+    // 自动检测到浏览器语言时，保存到存储中以便下次使用
+    saveLanguagePreference(browserLang);
     return browserLang;
   }
 
@@ -300,6 +315,22 @@ export function getPathWithoutLanguage(): string {
   }
 
   return window.location.pathname;
+}
+
+// 检查是否为首次访问
+export function isFirstVisit(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const hasVisited = localStorage.getItem('has_visited');
+  return !hasVisited;
+}
+
+// 标记用户已访问
+export function markAsVisited(): void {
+  if (typeof window === 'undefined') return;
+  
+  localStorage.setItem('has_visited', 'true');
+  console.log('User marked as visited');
 }
 
 // 保存用户语言偏好
@@ -393,5 +424,5 @@ export function useLocalizedHref() {
 export function shouldAddLanguagePrefix(path: string): boolean {
   // 只有绝对路径且当前有非英文语言时才添加前缀
   const urlLang = getLanguageFromURL();
-  return path.startsWith('/') && urlLang && urlLang !== 'en';
+  return path.startsWith('/') && Boolean(urlLang) && urlLang !== 'en';
 }

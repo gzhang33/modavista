@@ -25,7 +25,7 @@ define('ADMIN_PASSWORD_HASH', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at
 // ===========================================
 
 // 图片上传目录（相对于网站根目录）
-define('UPLOAD_DIR', dirname(__DIR__) . '/images/');
+define('UPLOAD_DIR', dirname(__DIR__) . '/product_images/');
 
 // 允许的图片格式
 if (!defined('UPLOAD_ALLOWED_EXTS')) {

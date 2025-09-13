@@ -28,10 +28,10 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     
     <!-- Critical CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" as="style">
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="/images/dreamoda-og-image.jpg" as="image" type="image/jpeg">
+    <link rel="preload" href="/product_images/products/dreamoda-og-image.jpg" as="image" type="image/jpeg" onerror="this.style.display='none'">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://dreamoda.store/">
@@ -46,8 +46,8 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    <!-- 生产环境使用构建后的文件 -->
+    <script type="module" src="/dist/assets/index.js"></script>
+    <link rel="stylesheet" href="/dist/assets/index.css">
   </body>
 </html>

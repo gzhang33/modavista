@@ -11,7 +11,9 @@ $cache_expiry = [];
 // 文件缓存目录
 $cache_dir = __DIR__ . '/../cache/translations/';
 if (!is_dir($cache_dir)) {
-    mkdir($cache_dir, 0755, true);
+    if (!mkdir($cache_dir, 0755, true)) {
+        error_log("Failed to create cache directory: " . $cache_dir);
+    }
 }
 
 /**
@@ -309,18 +311,21 @@ function get_all_translations($language_code = null) {
 // API端点处理
 // 仅当直接访问该文件时，才作为 API 端点输出响应
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'] ?? '')) {
-    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    $action = $_GET['action'] ?? '';
+    try {
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $action = $_GET['action'] ?? '';
 
-    switch ($method) {
-        case 'GET':
-            switch ($action) {
-                case 'languages':
-                    json_response(200, [
-                        'languages' => get_available_languages(),
-                        'current' => get_current_language()
-                    ]);
-                    break;
+        switch ($method) {
+            case 'GET':
+                switch ($action) {
+                    case 'languages':
+                        $languages = get_available_languages();
+                        $current = get_current_language();
+                        json_response(200, [
+                            'languages' => $languages,
+                            'current' => $current
+                        ]);
+                        break;
 
                 case 'translation':
                     $content_key = $_GET['key'] ?? '';
@@ -387,8 +392,15 @@ if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'] ?? '')) {
             }
             break;
 
-        default:
-            json_response(405, ['error' => 'Method not allowed']);
+            default:
+                json_response(405, ['error' => 'Method not allowed']);
+        }
+    } catch (Exception $e) {
+        error_log("Language API error: " . $e->getMessage());
+        json_response(500, [
+            'error' => 'Internal server error',
+            'message' => 'An error occurred while processing the request'
+        ]);
     }
 }
 ?>

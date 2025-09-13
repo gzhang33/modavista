@@ -9,7 +9,7 @@ Disallow: /admin/
 Disallow: /api/
 
 # Allow all other content
-Allow: /images/
+Allow: /product_images/
 Allow: /locales/
 Allow: /products
 Allow: /product/

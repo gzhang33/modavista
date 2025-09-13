@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FilterState, FilterOption, FABRICS, SEASONS, STYLES } from "@/types";
+import { FilterState, FilterOption, FABRICS, SEASONS } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CategoryFilterProps {
@@ -125,7 +125,7 @@ export default function CategoryFilter({ filters, onUpdateFilters }: CategoryFil
               <SelectValue placeholder={t('filters.all_styles', 'All Styles')} />
             </SelectTrigger>
             <SelectContent>
-              {STYLES.map((style) => (
+              {[].map((style: any) => (
                 <SelectItem key={style.id} value={style.id}>
                   {style.label}
                 </SelectItem>

@@ -7,7 +7,7 @@ require_once 'utils.php';
 require_auth();
 
 $method = $_SERVER['REQUEST_METHOD'];
-$images_dir = '../images/';
+$images_dir = IMAGES_PRODUCTS_DIR; // 物理目录：.../public_html/product_images/products/
 
 switch ($method) {
     case 'GET':
@@ -25,8 +25,8 @@ switch ($method) {
 }
 
 function get_media($dir) {
-    // 获取所有图片文件
-    $files = glob($dir . '{*.jpg,*.jpeg,*.png,*.gif,*.webp}', GLOB_BRACE);
+    // 获取所有图片文件（仅 products 子目录）
+    $files = glob(rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . '{*.jpg,*.jpeg,*.png,*.gif,*.webp}', GLOB_BRACE);
 
     // 查询使用情况：来自 product_variants.default_image 与 product_media.image_path
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -57,7 +57,8 @@ function get_media($dir) {
 
     $media_items = [];
     foreach ($files as $file) {
-        $path = 'images/' . basename($file);
+        // 数据库存储与前端使用统一为 'products/<filename>'
+        $path = 'products/' . basename($file);
         $media_items[] = [
             'path' => $path,
             'is_used' => isset($used_images[$path])
@@ -77,7 +78,18 @@ function delete_media($dir) {
 
     // 安全检查，确保路径在允许的目录下
     $real_base_dir = realpath($dir);
-    $real_file_path = realpath('../' . $path_to_delete);
+    // 支持传入 'products/filename.jpg' 或 '/product_images/products/filename.jpg'
+    $normalized = $path_to_delete;
+    if (strpos($normalized, '/product_images/products/') === 0) {
+        $normalized = substr($normalized, strlen('/product_images/'));
+    }
+    if (strpos($normalized, 'product_images/products/') === 0) {
+        $normalized = substr($normalized, strlen('product_images/'));
+    }
+    if (strpos($normalized, 'products/') === 0) {
+        $normalized = substr($normalized, strlen('products/'));
+    }
+    $real_file_path = realpath(rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $normalized);
     if ($real_file_path === false) {
         json_response(404, ['message' => '文件未找到']);
     }
@@ -131,7 +143,8 @@ function cleanup_orphan_handler($dir) {
         if (strpos($real, $base_dir) !== 0) { continue; }
         $basename = basename($real);
         if (in_array($basename, ['placeholder.svg','placeholder-optimized.svg'], true)) { continue; }
-        $db_path = 'images/' . $basename;
+        // 与数据库一致：products/<filename>
+        $db_path = 'products/' . $basename;
         if (!isset($referenced[$db_path])) {
             @unlink($real);
             if (!file_exists($real)) { $deleted++; }

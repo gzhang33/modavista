@@ -1,6 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LANGUAGE_TO_LOCALE } from "@/utils/translationUtils";
 import { useEffect } from "react";
+import { IMAGE_PATHS } from "@/lib/image-config";
 
 interface SEOHeadProps {
   title?: string;
@@ -63,7 +64,7 @@ export default function SEOHead({
   const finalTitle = title || t(currentSEO.title);
   const finalDescription = description || t(currentSEO.description);
   const finalKeywords = keywords || t(currentSEO.keywords);
-  const finalImage = image || (typeof window !== 'undefined' ? `${window.location.origin}/images/dreamoda-og-image.jpg` : '/images/dreamoda-og-image.jpg');
+  const finalImage = image || IMAGE_PATHS.getFullUrl(IMAGE_PATHS.DEFAULT_OG);
   const finalType = type;
 
   useEffect(() => {

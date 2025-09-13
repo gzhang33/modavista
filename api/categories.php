@@ -10,11 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // 数据库连接
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-if ($conn->connect_error) {
-    json_response(500, ["message" => "数据库连接失败: " . $conn->connect_error]);
+try {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    if ($conn->connect_error) {
+        error_log("Categories API - Database connection failed: " . $conn->connect_error);
+        json_response(500, ["message" => "数据库连接失败: " . $conn->connect_error]);
+    }
+    $conn->set_charset("utf8mb4");
+} catch (Exception $e) {
+    error_log("Categories API - Database connection exception: " . $e->getMessage());
+    json_response(500, ["message" => "数据库连接异常"]);
 }
-$conn->set_charset("utf8mb4");
 
 $method = $_SERVER['REQUEST_METHOD'];
 

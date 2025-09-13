@@ -2,7 +2,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import type { ApiResponse, PaginatedResponse } from "@shared/schema";
 
 // API基础URL配置
-const API_BASE_URL = import.meta.env.PROD 
+const API_BASE_URL = (import.meta as any).env?.PROD 
   ? '/api' // 生产环境：相对路径，避免跨域
   : '/api'; // 开发环境：通过Vite代理
 

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+// import { Toaster } from "@/components/ui/toaster";
+// import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -151,10 +151,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
+        {/* <TooltipProvider> */}
+          {/* <Toaster /> */}
           <Router />
-        </TooltipProvider>
+        {/* </TooltipProvider> */}
       </LanguageProvider>
     </QueryClientProvider>
   );

@@ -53,7 +53,13 @@ function get_db_connection() {
         $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
         if ($conn->connect_error) {
-            json_response(500, ["error" => "Database connection failed"]);
+            // 记录详细错误信息
+            error_log("Database connection failed: " . $conn->connect_error);
+            json_response(500, [
+                "error" => "Database connection failed",
+                "message" => "Unable to connect to database",
+                "debug" => $conn->connect_error
+            ]);
         }
 
         $conn->set_charset("utf8mb4");

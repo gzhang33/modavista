@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
@@ -58,10 +58,10 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
         console.error("Failed to fetch categories:", error);
         // Fallback to a default set of categories if API fails
         setCategories([
-          { id: 'Tops', name: 'TOPS', image: '/images/placeholder-image.svg', english_name: 'tops' },
-          { id: 'Outerwear', name: 'OUTERWEAR', image: '/images/placeholder-image.svg', english_name: 'outerwear' },
-          { id: 'Bottoms', name: 'BOTTOMS', image: '/images/placeholder-image.svg', english_name: 'bottoms' },
-          { id: 'Dresses', name: 'DRESSES', image: '/images/placeholder-image.svg', english_name: 'dresses' }
+          { id: 'Tops', name: 'TOPS', image: '/product_images/placeholder-image.svg', english_name: 'tops' },
+          { id: 'Outerwear', name: 'OUTERWEAR', image: '/product_images/placeholder-image.svg', english_name: 'outerwear' },
+          { id: 'Bottoms', name: 'BOTTOMS', image: '/product_images/placeholder-image.svg', english_name: 'bottoms' },
+          { id: 'Dresses', name: 'DRESSES', image: '/product_images/placeholder-image.svg', english_name: 'dresses' }
         ]);
         setCurrentIndex(4); // Reset index for fallback
         setTimeout(() => {

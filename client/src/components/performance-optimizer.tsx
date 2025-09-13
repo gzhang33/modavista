@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { IMAGE_PATHS } from '@/lib/image-config';
 
 // 性能优化组件
 export default function PerformanceOptimizer() {
@@ -15,8 +16,9 @@ export default function PerformanceOptimizer() {
       // 预加载关键图片
       const imageLink = document.createElement('link');
       imageLink.rel = 'preload';
-      imageLink.href = '/images/dreamoda-og-image.jpg';
+      imageLink.href = IMAGE_PATHS.DEFAULT_OG;
       imageLink.as = 'image';
+      imageLink.onerror = () => imageLink.style.display = 'none';
       document.head.appendChild(imageLink);
     };
 

@@ -16,7 +16,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/images/index_background.png')"
+          backgroundImage: "url('/product_images/index_background.png')"
         }}
       />
       {/* Add soft dark overlay to make text more readable */}

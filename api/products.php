@@ -4,6 +4,7 @@ session_start();
 require_once 'config.php';
 require_once 'utils.php';
 require_once 'error_messages.php';
+require_once 'image_manager.php';
 
 // CORS
 header('Access-Control-Allow-Origin: *');
@@ -18,11 +19,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     require_auth();
 }
 
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-if ($conn->connect_error) {
-    json_error_response(500, 'DATABASE_CONNECTION_FAILED', ['error' => $conn->connect_error]);
+try {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    if ($conn->connect_error) {
+        error_log("Products API - Database connection failed: " . $conn->connect_error);
+        json_error_response(500, 'DATABASE_CONNECTION_FAILED', ['error' => $conn->connect_error]);
+    }
+    $conn->set_charset('utf8mb4');
+} catch (Exception $e) {
+    error_log("Products API - Database connection exception: " . $e->getMessage());
+    json_error_response(500, 'DATABASE_CONNECTION_FAILED', ['error' => 'Database connection exception']);
 }
-$conn->set_charset('utf8mb4');
 
 $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
@@ -860,7 +867,7 @@ function upload_media_for_field($field) {
             $unique = 'media-' . uniqid() . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
             $target = $dir . $unique;
             if (move_uploaded_file($tmp, $target)) {
-                $db_path = 'images/' . $unique;
+                $db_path = 'products/' . $unique; // 使用products子目录
                 $uploaded[] = $db_path;
                 $name_to_path[$orig] = $db_path; // 用原始文件名做映射
             }
@@ -918,8 +925,8 @@ function cleanup_orphan_images($conn, $dir = UPLOAD_DIR) {
         if (strpos($real, $base_dir) !== 0) { continue; }
 
         $basename = basename($real);
-        // 规范化为数据库路径格式
-        $db_path = 'images/' . $basename;
+        // 规范化为数据库路径格式（数据库中保存为 products/<filename>）
+        $db_path = 'products/' . $basename;
 
         // 跳过占位文件（仅作为安全网
         if ($basename === 'placeholder.svg' || $basename === 'placeholder-optimized.svg') { continue; }

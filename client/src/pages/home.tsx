@@ -44,7 +44,7 @@ export default function Home({}: HomeProps) {
   const organizationData = {
     name: "DreaModa",
     url: typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store',
-    logo: `${typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'}/images/dreamoda-logo.png`,
+    logo: `${typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'}/product_images/dreamoda-logo.png`,
     description: t('seo.description'),
     address: {
       streetAddress: "Via Gherardacci 47/C, Iolo",

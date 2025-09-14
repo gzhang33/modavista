@@ -40,20 +40,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
-      // 产品图片代理配置 - 仅代理上传的图片（以media-开头的文件）
-      '/product_images/media-': {
+      '/storage/uploads': {
         target: 'http://localhost',
         changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/product_images/, '/storage/uploads/product_images')
+        secure: false
       },
-      // 兼容旧的连字符格式，也仅代理上传的图片
-      '/product-images/media-': {
-        target: 'http://localhost',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/product-images/, '/storage/uploads/product_images')
-      }
+      
     },
     fs: {
       strict: true,

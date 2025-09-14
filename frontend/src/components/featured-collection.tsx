@@ -50,7 +50,7 @@ export default function FeaturedCollection({
         care: 'machine-wash',
         origin: 'italy',
         sku: item.sku || '',
-        images: item.defaultImage ? [item.defaultImage] : ['/product_images/placeholder-image.svg'],
+        images: item.defaultImage ? [item.defaultImage] : ['/storage/uploads/product_images/placeholder-image.svg'],
         specifications: {},
         featured: 'yes'
       }));
@@ -144,7 +144,7 @@ export default function FeaturedCollection({
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (!target.src.includes('placeholder-image.svg')) {
-                          target.src = '/product_images/placeholder-image.svg';
+                          target.src = '/storage/uploads/product_images/placeholder-image.svg';
                           // 显示多语言错误提示
                           handleImageError(product.name);
                         }

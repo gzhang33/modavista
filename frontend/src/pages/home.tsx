@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import { handleHashOnLoad } from "@/utils/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/utils/structuredData";
+import { IMAGE_PATHS } from "@/lib/image-config";
 
 interface HomeProps {}
 
@@ -45,7 +46,7 @@ export default function Home({}: HomeProps) {
   const organizationData = {
     name: "DreaModa",
     url: typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store',
-    logo: `${typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'}/dreamoda-logo.png`,
+    logo: `${typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'}${IMAGE_PATHS.DREAMODA_LOGO}`,
     description: t('seo.description'),
     address: {
       streetAddress: "Via Gherardacci 47/C, Iolo",

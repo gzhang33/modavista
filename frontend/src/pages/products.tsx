@@ -168,10 +168,10 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
       const categoryMatch =
         product.category === categoryName ||
         product.category === filters.category ||
-        product.category === categoryEnglishName || // Added this line for english_name matching
+        (categoryEnglishName && product.category === categoryEnglishName) || // Added this line for english_name matching
         product.category?.toLowerCase().includes(categoryName.toLowerCase()) ||
         product.category?.toLowerCase().includes(filters.category.toLowerCase()) ||
-        product.category?.toLowerCase().includes(categoryEnglishName.toLowerCase()); // Added this line for english_name matching
+        (categoryEnglishName && product.category?.toLowerCase().includes(categoryEnglishName.toLowerCase())); // Added this line for english_name matching
 
       if (!categoryMatch) {
         return false;

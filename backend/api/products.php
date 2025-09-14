@@ -749,7 +749,11 @@ function handle_post($conn) {
 
 // === DELETE === 删除变体（批量/单个）并清理孤儿产品
 function handle_delete($conn) {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $raw_input = file_get_contents('php://input');
+    error_log("DELETE raw input: " . $raw_input);
+    $data = json_decode($raw_input, true);
+    error_log("JSON decode error: " . json_last_error_msg());
+    error_log("DELETE decoded data: " . print_r($data, true));
 
     $ids = [];
     if (isset($data['ids']) && is_array($data['ids'])) {
@@ -757,6 +761,7 @@ function handle_delete($conn) {
     } elseif (isset($_GET['id'])) {
         $ids = [(int)$_GET['id']];
     }
+    error_log("DELETE final IDs: " . print_r($ids, true));
 
     if (empty($ids)) {
         json_response(400, ['message' => '缺少要删除的变体 ID']);

@@ -35,7 +35,7 @@ export default function CompanyInfo() {
           
           <div className="relative">
             <img
-              src="/company-info.jpg"
+              src="/storage/uploads/company-info.jpg"
               alt="Modern textile manufacturing facility"
               className="rounded-lg shadow-lg w-full h-auto"
             />

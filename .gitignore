@@ -2,9 +2,6 @@
 node_modules/
 vendor/
 
-# Build outputs
-dist/
-
 
 # Temporary files
 *.tmp
@@ -35,22 +32,6 @@ Thumbs.db
 *.cache
 cache/
 
-# Testing
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-.phpunit.result.cache
-coverage/
-test/screenshots/
-test/videos/
-test/traces/
-.playwright-mcp/
-
-# Images (optional - you may want to track some images)
-# images/*.jpg
-# images/*.png
-# images/*.gif
 
 # Backup files
 *.bak
@@ -61,28 +42,13 @@ test/traces/
 .env.local
 .env.*.local
 
-
-# Database dumps and temporary files
-*.sql
-*.sqlite
-
 # Agent files
 .cursor/
 .cursorrules
 .cursorignore
 .claude/
 GEMINI.md
-
-# phpMyAdmin
-phpMyAdmin/
-
-# Storage directory (dynamic content)
-storage/
-!storage/.gitkeep
-
-# User uploads and media
-product_images/
-uploads/
+.playwright-mcp/
 
 # Lighthouse reports
 lh-*.json
@@ -94,12 +60,3 @@ lh-*.json
 *.7z
 *.rar
 
-# Source maps (optional)
-*.map
-
-# System-specific
-Desktop.ini
-
-# Deploy-related files
-
-deploy

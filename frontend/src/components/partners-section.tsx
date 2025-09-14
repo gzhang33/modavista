@@ -2,18 +2,18 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 // European countries data with flag images and names
 const mainstreamCountries = [
-  { name: "Italy", flag: "/flags/italy.svg", alt: "Italy" },
-  { name: "France", flag: "/flags/france.svg", alt: "France" },
-  { name: "Spain", flag: "/flags/spain.svg", alt: "Spain" },
-  { name: "United Kingdom", flag: "/flags/uk.svg", alt: "United Kingdom" },
-  { name: "Germany", flag: "/flags/germany.svg", alt: "Germany" }
+  { name: "Italy", flag: "/storage/uploads/flags/italy.svg", alt: "Italy" },
+  { name: "France", flag: "/storage/uploads/flags/france.svg", alt: "France" },
+  { name: "Spain", flag: "/storage/uploads/flags/spain.svg", alt: "Spain" },
+  { name: "United Kingdom", flag: "/storage/uploads/flags/uk.svg", alt: "United Kingdom" },
+  { name: "Germany", flag: "/storage/uploads/flags/germany.svg", alt: "Germany" }
 ];
 
 const otherCountries = [
-  { name: "Austria", flag: "/flags/austria.svg", alt: "Austria" },
-  { name: "Netherlands", flag: "/flags/netherlands.svg", alt: "Netherlands" },
-  { name: "Belgium", flag: "/flags/belgium.svg", alt: "Belgium" },
-  { name: "Switzerland", flag: "/flags/switzerland.svg", alt: "Switzerland" }
+  { name: "Austria", flag: "/storage/uploads/flags/austria.svg", alt: "Austria" },
+  { name: "Netherlands", flag: "/storage/uploads/flags/netherlands.svg", alt: "Netherlands" },
+  { name: "Belgium", flag: "/storage/uploads/flags/belgium.svg", alt: "Belgium" },
+  { name: "Switzerland", flag: "/storage/uploads/flags/switzerland.svg", alt: "Switzerland" }
 ];
 
 export default function PartnersSection() {

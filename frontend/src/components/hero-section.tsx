@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { navigateToSection } from "@/utils/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { IMAGE_PATHS } from "@/lib/image-config";
 
 export default function HeroSection() {
   const [location] = useLocation();
@@ -16,7 +17,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/index_background.png')"
+          backgroundImage: `url(${IMAGE_PATHS.INDEX_BACKGROUND})`
         }}
       />
       {/* Add soft dark overlay to make text more readable */}

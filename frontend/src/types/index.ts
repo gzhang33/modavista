@@ -37,6 +37,7 @@ export interface FilterOption {
   id: string;
   name: string;
   label: string;
+  english_name?: string;
 }
 
 // 从DreaModa API动态获取的静态数据，这里保留作为后备

@@ -32,18 +32,13 @@ export default function ProductDetailPage() {
   });
   
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
-
-  // Image navigation functions - moved after displayImages definition
-
-  // Touch/swipe support - moved after displayImages definition
-
-  // Keyboard navigation - moved after displayImages definition
-
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -90,6 +85,66 @@ export default function ProductDetailPage() {
     },
     enabled: !!id,
   });
+
+  const displayImages = product ? processImageArray(
+    product.images && product.images.length > 0 
+      ? product.images 
+      : (product.defaultImage ? [product.defaultImage] : []),
+    { debug: false }
+  ) : [];
+
+  const goToPreviousImage = () => {
+    setSelectedImageIndex((prev) => 
+      prev === 0 ? displayImages.length - 1 : prev - 1
+    );
+  };
+
+  const goToNextImage = () => {
+    setSelectedImageIndex((prev) => 
+      prev === displayImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNextImage();
+    } else if (isRightSwipe) {
+      goToPreviousImage();
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (displayImages.length <= 1) return;
+      
+      if (event.key === 'ArrowLeft') {
+        goToPreviousImage();
+      } else if (event.key === 'ArrowRight') {
+        goToNextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [displayImages.length]);
 
   const requestSampleMutation = useMutation({
     mutationFn: async () => {
@@ -197,7 +252,7 @@ export default function ProductDetailPage() {
             <div className="text-center py-16">
               <h1 className="text-2xl font-semibold text-gray-900 mb-4">{t('product_detail.not_found.title', 'Product Not Found')}</h1>
               <p className="text-gray-600 mb-8">{t('product_detail.not_found.desc', 'Sorry, the product you are looking for does not exist or has been removed.')}</p>
-              <Link href={createLocalizedHref('/products')}>
+              <Link href={createLocalizedHref('/products')}> 
                 <Button className="bg-charcoal text-white hover:bg-gray-800">
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   {t('product_detail.actions.view_all_products', 'View all products')}
@@ -211,70 +266,9 @@ export default function ProductDetailPage() {
     );
   }
 
-  const displayImages = processImageArray(
-    product.images && product.images.length > 0 
-      ? product.images 
-      : (product.defaultImage ? [product.defaultImage] : []),
-    { debug: false }
-  );
+  
 
-  // Image navigation functions
-  const goToPreviousImage = () => {
-    setSelectedImageIndex((prev) => 
-      prev === 0 ? displayImages.length - 1 : prev - 1
-    );
-  };
-
-  const goToNextImage = () => {
-    setSelectedImageIndex((prev) => 
-      prev === displayImages.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  // Touch/swipe support
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      goToNextImage();
-    } else if (isRightSwipe) {
-      goToPreviousImage();
-    }
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (displayImages.length <= 1) return;
-      
-      if (event.key === 'ArrowLeft') {
-        goToPreviousImage();
-      } else if (event.key === 'ArrowRight') {
-        goToNextImage();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [displayImages.length]);
+  
 
 
   // Convert specifications to table format

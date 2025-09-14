@@ -9,7 +9,7 @@ export const IMAGE_PATHS = {
   UPLOADS: '/product_images/uploads',
   
   // 默认图片
-  DEFAULT_OG: '/product_images/products/dreamoda-og-image.jpg',
+  DEFAULT_OG: '/dreamoda-og-image.jpg',
   PLACEHOLDER: '/product_images/placeholder.svg',
   
   // 动态生成路径的函数

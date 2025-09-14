@@ -6,20 +6,31 @@ export default function PerformanceOptimizer() {
   useEffect(() => {
     // 预加载关键资源
     const preloadCriticalResources = () => {
-      // 预加载关键字体
-      const fontLink = document.createElement('link');
-      fontLink.rel = 'preload';
-      fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-      fontLink.as = 'style';
-      document.head.appendChild(fontLink);
+      // 仅在生产环境使用字体预连接，避免本地未使用的预加载警告
+      if (import.meta.env.PROD) {
+        const preconnect1 = document.createElement('link');
+        preconnect1.rel = 'preconnect';
+        preconnect1.href = 'https://fonts.googleapis.com';
+        preconnect1.crossOrigin = 'anonymous';
+        document.head.appendChild(preconnect1);
+
+        const preconnect2 = document.createElement('link');
+        preconnect2.rel = 'preconnect';
+        preconnect2.href = 'https://fonts.gstatic.com';
+        preconnect2.crossOrigin = 'anonymous';
+        document.head.appendChild(preconnect2);
+      }
 
       // 预加载关键图片
-      const imageLink = document.createElement('link');
-      imageLink.rel = 'preload';
-      imageLink.href = IMAGE_PATHS.DEFAULT_OG;
-      imageLink.as = 'image';
-      imageLink.onerror = () => imageLink.style.display = 'none';
-      document.head.appendChild(imageLink);
+      // 使用prefetch避免“预加载未使用”的警告，同时在生产启用
+      if (import.meta.env.PROD) {
+        const imageLink = document.createElement('link');
+        imageLink.rel = 'prefetch';
+        imageLink.href = IMAGE_PATHS.DEFAULT_OG;
+        imageLink.as = 'image';
+        imageLink.onerror = () => imageLink.remove();
+        document.head.appendChild(imageLink);
+      }
     };
 
     // 添加性能监控

@@ -75,22 +75,25 @@ function handle_get($conn) {
                 COALESCE(pi.description, p.description) AS product_description,
                 COALESCE(ci.name, c.category_name_en) AS category_name,
                     COALESCE(cli.name, clr.color_name) AS color_name,
-                    COALESCE(mi.name, m.material_name) AS material_name
+                    COALESCE(mi.name, m.material_name) AS material_name,
+                    COALESCE(si.name, s.season_name) AS season_name
                 FROM product_variant v
                 JOIN product p ON v.product_id = p.id
                 LEFT JOIN category c ON p.category_id = c.id
                 LEFT JOIN color clr ON v.color_id = clr.id
-                LEFT JOIN material m ON v.material_id = m.id
+                LEFT JOIN material m ON p.material_id = m.id
+                LEFT JOIN seasons s ON p.season_id = s.id
                 LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
                 LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
                 LEFT JOIN color_i18n cli ON clr.id = cli.color_id AND cli.locale = ?
                 LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?
+                LEFT JOIN seasons_i18n si ON s.id = si.season_id AND si.locale = ?
                 WHERE v.id = ?';
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             json_response(500, ['message' => '查询准备失败: ' . $conn->error]);
         }
-        $stmt->bind_param('ssssi', $locale, $locale, $locale, $locale, $variant_id);
+        $stmt->bind_param('sssssi', $locale, $locale, $locale, $locale, $locale, $variant_id);
         if (!$stmt->execute()) {
             json_response(500, ['message' => '查询执行失败: ' . $stmt->error]);
         }
@@ -153,6 +156,7 @@ function handle_get($conn) {
             'category_id' => $row['category_id'] ? (int)$row['category_id'] : null,
             'color' => $row['color_name'],
             'material' => $row['material_name'],
+            'season' => $row['season_name'] ?? null,
             'sku' => $row['sku'],
             'status' => $row['product_status'],
             'defaultImage' => $row['default_image'],
@@ -245,7 +249,7 @@ function handle_get($conn) {
             JOIN product p ON v.product_id = p.id
             LEFT JOIN category c ON p.category_id = c.id
             LEFT JOIN color clr ON v.color_id = clr.id
-            LEFT JOIN material m ON v.material_id = m.id
+            LEFT JOIN material m ON p.material_id = m.id
             LEFT JOIN seasons s ON p.season_id = s.id
             LEFT JOIN product_i18n pi ON p.id = pi.product_id AND pi.locale = ?
             LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
@@ -319,12 +323,26 @@ function handle_post($conn) {
         $conn->begin_transaction();
 
         // 更新 products（可选字段）
-        if ($base_name !== null || $description !== null || $category_id !== null) {
+        $material_id = isset($_POST['material_id']) ? (int)$_POST['material_id'] : null;
+        $material_name = $_POST['material'] ?? null;
+        if ($material_name && !$material_id) {
+            $material_id = resolve_material_id($conn, $material_name);
+        }
+        
+        $season_id = isset($_POST['season_id']) ? (int)$_POST['season_id'] : null;
+        $season_name = $_POST['season'] ?? null;
+        if ($season_name && !$season_id) {
+            $season_id = resolve_season_id($conn, $season_name);
+        }
+        
+        if ($base_name !== null || $description !== null || $category_id !== null || $material_id !== null || $season_id !== null) {
             $sql = 'UPDATE product p
                     JOIN product_variant v ON v.product_id = p.id
                     SET p.base_name = COALESCE(?, p.base_name),
                         p.description = COALESCE(?, p.description),
-                        p.category_id = COALESCE(?, p.category_id)
+                        p.category_id = COALESCE(?, p.category_id),
+                        p.material_id = COALESCE(?, p.material_id),
+                        p.season_id = COALESCE(?, p.season_id)
                     WHERE v.id = ?';
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
@@ -332,7 +350,9 @@ function handle_post($conn) {
                 json_response(500, ['message' => '更新准备失败: ' . $conn->error]);
             }
             $nullable_category = $category_id; // may be null
-            $stmt->bind_param('ssii', $base_name, $description, $nullable_category, $variant_id);
+            $nullable_material = $material_id; // may be null
+            $nullable_season = $season_id; // may be null
+            $stmt->bind_param('ssiiii', $base_name, $description, $nullable_category, $nullable_material, $nullable_season, $variant_id);
             if (!$stmt->execute()) {
                 $stmt->close();
                 $conn->rollback();
@@ -440,12 +460,7 @@ function handle_post($conn) {
             if (!$pid_row || empty($pid_row['product_id'])) { $conn->rollback(); json_response(404, ['message' => '产品不存在']); }
             $product_id_for_new = (int)$pid_row['product_id'];
 
-            // 解析材质（沿用提交的 material 名称）
-            $material_name_for_new = $_POST['material'] ?? null;
-            $material_id_for_new = null;
-            if ($material_name_for_new) {
-                $material_id_for_new = resolve_material_id($conn, $material_name_for_new);
-            }
+            // 材质信息现在在product级别，不需要在这里处理
 
             $decoded_meta = json_decode($variants_meta_json, true);
             if (is_array($decoded_meta) && !empty($decoded_meta)) {
@@ -463,9 +478,9 @@ function handle_post($conn) {
                     $upload = upload_media_for_field($field);
                     $default_image_new = $upload['default'];
 
-                    $v_ins = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+                    $v_ins = $conn->prepare('INSERT INTO product_variant (product_id, color_id, default_image) VALUES (?, ?, ?)');
                     if (!$v_ins) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建变体失败: ' . $conn->error); }
-                    $v_ins->bind_param('iiis', $product_id_for_new, $variant_color_id, $material_id_for_new, $default_image_new);
+                    $v_ins->bind_param('iis', $product_id_for_new, $variant_color_id, $default_image_new);
                     if (!$v_ins->execute()) { $v_ins->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建变体失败: ' . $conn->error); }
                     $new_variant_id = $v_ins->insert_id;
                     $v_ins->close();
@@ -513,6 +528,7 @@ function handle_post($conn) {
     $category_id = isset($_POST['category_id']) ? (int)$_POST['category_id'] : null;
     $category_name = $_POST['category_name'] ?? ($_POST['category'] ?? null);
     $material_name = $_POST['material'] ?? null;
+    $season_name = $_POST['season'] ?? null;
     $variants_meta_json = $_POST['variants_meta'] ?? null; // JSON: [{index:0,color:"Red"}, ...]
     // 新增：支持简单的 variants 数组（例如 variants[] 或 JSON 字符串）
     $variants_array = [];
@@ -536,13 +552,19 @@ function handle_post($conn) {
         $category_id = resolve_category_id($conn, $category_name);
     }
     if (!$category_id) {
-        json_response(400, ['message' => '缺少 category_id 或 category_name']);
+        json_response(400, ['message' => '无法解析分类: ' . ($category_name ?: 'empty') . '，请检查分类数据是否存在']);
     }
     
     // 解析材质ID
     $material_id = null;
     if ($material_name) {
         $material_id = resolve_material_id($conn, $material_name);
+    }
+    
+    // 解析季节ID
+    $season_id = null;
+    if ($season_name) {
+        $season_id = resolve_season_id($conn, $season_name);
     }
 
     // 解析颜色ID（来自颜色名称）
@@ -556,12 +578,12 @@ function handle_post($conn) {
     $conn->begin_transaction();
 
     // 新建产品（使用新的表名和状态字段）
-    $p_stmt = $conn->prepare('INSERT INTO product (base_name, description, category_id, status) VALUES (?, ?, ?, "published")');
+    $p_stmt = $conn->prepare('INSERT INTO product (base_name, description, category_id, material_id, season_id, status) VALUES (?, ?, ?, ?, ?, "published")');
     if (!$p_stmt) {
         $conn->rollback();
         json_response(500, ['message' => '创建产品失败: ' . $conn->error]);
     }
-    $p_stmt->bind_param('ssi', $base_name, $description, $category_id);
+    $p_stmt->bind_param('ssiii', $base_name, $description, $category_id, $material_id, $season_id);
     if (!$p_stmt->execute()) {
         $p_stmt->close();
         $conn->rollback();
@@ -589,9 +611,13 @@ function handle_post($conn) {
         json_response(400, ['message' => '颜色名称不能为空']);
     }
     $color_id_main = resolve_color_id($conn, $color_main);
-    $v_main = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+    if (!$color_id_main) {
+        $conn->rollback();
+        json_response(400, ['message' => '无法解析颜色: ' . $color_main . '，请检查颜色数据是否存在']);
+    }
+    $v_main = $conn->prepare('INSERT INTO product_variant (product_id, color_id, default_image) VALUES (?, ?, ?)');
     if (!$v_main) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
-    $v_main->bind_param('iiis', $product_id, $color_id_main, $material_id, $default_image_main);
+    $v_main->bind_param('iis', $product_id, $color_id_main, $default_image_main);
     if (!$v_main->execute()) { $v_main->close(); $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
     $main_variant_id = $v_main->insert_id;
     $v_main->close();
@@ -645,9 +671,9 @@ function handle_post($conn) {
                 $provided_default_name = trim((string)$_POST[$default_field]);
             }
 
-            $v_stmt = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, ?)');
+            $v_stmt = $conn->prepare('INSERT INTO product_variant (product_id, color_id, default_image) VALUES (?, ?, ?)');
             if (!$v_stmt) { $conn->rollback(); respond_error(500, 'DB_PREPARE_FAILED', '创建变体失败: ' . $conn->error); }
-            $v_stmt->bind_param('iiis', $product_id, $variant_color_id, $material_id, $default_image);
+            $v_stmt->bind_param('iis', $product_id, $variant_color_id, $default_image);
             if (!$v_stmt->execute()) { $v_stmt->close(); $conn->rollback(); respond_error(500, 'DB_EXECUTE_FAILED', '创建变体失败: ' . $conn->error); }
             $variant_id = $v_stmt->insert_id;
             $v_stmt->close();
@@ -692,7 +718,7 @@ function handle_post($conn) {
         }
     } elseif (!empty($variants_array)) {
         // 简单变体数组（仅颜色，无独立媒体上传）
-        $v_stmt = $conn->prepare('INSERT INTO product_variant (product_id, color_id, material_id, default_image) VALUES (?, ?, ?, NULL)');
+        $v_stmt = $conn->prepare('INSERT INTO product_variant (product_id, color_id, default_image) VALUES (?, ?, NULL)');
         if (!$v_stmt) { $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
         foreach ($variants_array as $color_name) {
             $color = trim((string)$color_name);
@@ -702,7 +728,7 @@ function handle_post($conn) {
                 json_response(400, ['message' => '颜色名称不能为空']);
             }
             $color_id = resolve_color_id($conn, $color);
-            $v_stmt->bind_param('iii', $product_id, $color_id, $material_id);
+            $v_stmt->bind_param('ii', $product_id, $color_id);
             if (!$v_stmt->execute()) { $v_stmt->close(); $conn->rollback(); json_response(500, ['message' => '创建变体失败: ' . $conn->error]); }
             $created_variant_ids[] = $v_stmt->insert_id;
         }
@@ -784,6 +810,8 @@ function handle_delete($conn) {
 function resolve_category_id($conn, $category_name) {
     $category_name = trim((string)$category_name);
     if ($category_name === '') { return null; }
+    
+    // 首先尝试直接匹配英文名称
     $sel = $conn->prepare('SELECT id FROM category WHERE category_name_en = ?');
     $sel->bind_param('s', $category_name);
     $sel->execute();
@@ -791,19 +819,43 @@ function resolve_category_id($conn, $category_name) {
     $row = $res->fetch_assoc();
     $sel->close();
     if ($row) { return (int)$row['id']; }
-
-    // 若不存在则创建
-    $ins = $conn->prepare('INSERT INTO category (category_name_en) VALUES (?)');
-    $ins->bind_param('s', $category_name);
-    $ins->execute();
-    $id = $ins->insert_id;
-    $ins->close();
-    return (int)$id;
+    
+    // 如果直接匹配失败，尝试通过i18n表查找对应的英文名称
+    $i18n_sel = $conn->prepare('
+        SELECT c.id 
+        FROM category c 
+        JOIN category_i18n ci ON c.id = ci.category_id 
+        WHERE ci.name = ? AND ci.language_code IN ("en", "it", "de", "es", "fr")
+    ');
+    $i18n_sel->bind_param('s', $category_name);
+    $i18n_sel->execute();
+    $i18n_res = $i18n_sel->get_result();
+    $i18n_row = $i18n_res->fetch_assoc();
+    $i18n_sel->close();
+    if ($i18n_row) { return (int)$i18n_row['id']; }
+    
+    // 如果找不到映射，获取第一个可用的category作为默认值
+    $default_sel = $conn->prepare('SELECT id FROM category ORDER BY id LIMIT 1');
+    $default_sel->execute();
+    $default_res = $default_sel->get_result();
+    $default_row = $default_res->fetch_assoc();
+    $default_sel->close();
+    
+    if ($default_row) {
+        error_log("Category not found, using default: " . $category_name . " -> " . $default_row['id']);
+        return (int)$default_row['id'];
+    }
+    
+    // 如果连默认值都没有，记录错误
+    error_log("Category not found and no default available: " . $category_name);
+    return null;
 }
 
 function resolve_material_id($conn, $material_name) {
     $material_name = trim((string)$material_name);
     if ($material_name === '') { return null; }
+    
+    // 首先尝试直接匹配英文名称
     $sel = $conn->prepare('SELECT id FROM material WHERE material_name = ?');
     $sel->bind_param('s', $material_name);
     $sel->execute();
@@ -811,19 +863,39 @@ function resolve_material_id($conn, $material_name) {
     $row = $res->fetch_assoc();
     $sel->close();
     if ($row) { return (int)$row['id']; }
-
-    // 若不存在则创建
-    $ins = $conn->prepare('INSERT INTO material (material_name) VALUES (?)');
-    $ins->bind_param('s', $material_name);
-    $ins->execute();
-    $id = $ins->insert_id;
-    $ins->close();
-    return (int)$id;
+    
+    // 如果直接匹配失败，尝试通过i18n表查找对应的英文名称
+    $i18n_sel = $conn->prepare('
+        SELECT m.id 
+        FROM material m 
+        JOIN material_i18n mi ON m.id = mi.material_id 
+        WHERE mi.name = ? AND mi.language_code IN ("en", "it", "de", "es", "fr")
+    ');
+    $i18n_sel->bind_param('s', $material_name);
+    $i18n_sel->execute();
+    $i18n_res = $i18n_sel->get_result();
+    $i18n_row = $i18n_res->fetch_assoc();
+    $i18n_sel->close();
+    if ($i18n_row) { return (int)$i18n_row['id']; }
+    
+    // 禁止创建新记录 - 根据需求要求
+    error_log("Material not found and creation disabled: " . $material_name);
+    return null;
 }
 
 function resolve_color_id($conn, $color_name) {
     $color_name = trim((string)$color_name);
-    if ($color_name === '') { return null; }
+    if ($color_name === '') { 
+        // 如果颜色名为空，获取默认颜色
+        $default_sel = $conn->prepare('SELECT id FROM color ORDER BY id LIMIT 1');
+        $default_sel->execute();
+        $default_res = $default_sel->get_result();
+        $default_row = $default_res->fetch_assoc();
+        $default_sel->close();
+        return $default_row ? (int)$default_row['id'] : null;
+    }
+    
+    // 首先尝试直接匹配英文名称
     $sel = $conn->prepare('SELECT id FROM color WHERE color_name = ?');
     $sel->bind_param('s', $color_name);
     $sel->execute();
@@ -831,14 +903,70 @@ function resolve_color_id($conn, $color_name) {
     $row = $res->fetch_assoc();
     $sel->close();
     if ($row) { return (int)$row['id']; }
+    
+    // 如果直接匹配失败，尝试通过i18n表查找对应的英文名称
+    $i18n_sel = $conn->prepare('
+        SELECT c.id 
+        FROM color c 
+        JOIN color_i18n ci ON c.id = ci.color_id 
+        WHERE ci.name = ? AND ci.language_code IN ("en", "it", "de", "es", "fr")
+    ');
+    $i18n_sel->bind_param('s', $color_name);
+    $i18n_sel->execute();
+    $i18n_res = $i18n_sel->get_result();
+    $i18n_row = $i18n_res->fetch_assoc();
+    $i18n_sel->close();
+    if ($i18n_row) { return (int)$i18n_row['id']; }
+    
+    // 禁止创建新记录 - 根据需求要求
+    
+    // 如果创建失败，获取第一个可用的color作为默认值
+    $default_sel = $conn->prepare('SELECT id FROM color ORDER BY id LIMIT 1');
+    $default_sel->execute();
+    $default_res = $default_sel->get_result();
+    $default_row = $default_res->fetch_assoc();
+    $default_sel->close();
+    
+    if ($default_row) {
+        error_log("Color not found, using default: " . $color_name . " -> " . $default_row['id']);
+        return (int)$default_row['id'];
+    }
+    
+    // 如果连默认值都没有，记录错误
+    error_log("Color not found and no default available: " . $color_name);
+    return null;
+}
 
-    // 若不存在则创建
-    $ins = $conn->prepare('INSERT INTO color (color_name) VALUES (?)');
-    $ins->bind_param('s', $color_name);
-    $ins->execute();
-    $id = $ins->insert_id;
-    $ins->close();
-    return (int)$id;
+function resolve_season_id($conn, $season_name) {
+    $season_name = trim((string)$season_name);
+    if ($season_name === '') { return null; }
+    
+    // 首先尝试直接匹配英文名称
+    $sel = $conn->prepare('SELECT id FROM seasons WHERE season_name = ?');
+    $sel->bind_param('s', $season_name);
+    $sel->execute();
+    $res = $sel->get_result();
+    $row = $res->fetch_assoc();
+    $sel->close();
+    if ($row) { return (int)$row['id']; }
+    
+    // 如果直接匹配失败，尝试通过i18n表查找对应的英文名称
+    $i18n_sel = $conn->prepare('
+        SELECT s.id 
+        FROM seasons s 
+        JOIN season_i18n si ON s.id = si.season_id 
+        WHERE si.name = ? AND si.language_code IN ("en", "it", "de", "es", "fr")
+    ');
+    $i18n_sel->bind_param('s', $season_name);
+    $i18n_sel->execute();
+    $i18n_res = $i18n_sel->get_result();
+    $i18n_row = $i18n_res->fetch_assoc();
+    $i18n_sel->close();
+    if ($i18n_row) { return (int)$i18n_row['id']; }
+    
+    // 禁止创建新记录 - 根据需求要求
+    error_log("Season not found and creation disabled: " . $season_name);
+    return null;
 }
 
 function upload_media_for_field($field) {

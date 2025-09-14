@@ -47,10 +47,21 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="season">季节</label>
+                        <select id="season" name="season" class="form-control" required>
+                            <option value="">请选择季节</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="color">颜色</label>
                         <select id="color" name="color" class="form-control" required>
                             <option value="">请选择颜色</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <!-- 占位符，保持布局平衡 -->
                     </div>
                 </div>
                 <div class="form-group">

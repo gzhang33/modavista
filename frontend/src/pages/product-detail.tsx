@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ShoppingCart, Heart, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 import { Product } from "@shared/schemas/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useParams, useLocation } from "wouter";
@@ -17,10 +17,6 @@ import { createLocalizedHref } from "@/utils/translationUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { generateProductSchema, generateBreadcrumbSchema } from "@/utils/structuredData";
 
-// Check icon component
-const CheckIcon = () => (
-  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-);
 
 export default function ProductDetailPage() {
   const { t, currentLanguage } = useLanguage();
@@ -41,6 +37,12 @@ export default function ProductDetailPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  // Image navigation functions - moved after displayImages definition
+
+  // Touch/swipe support - moved after displayImages definition
+
+  // Keyboard navigation - moved after displayImages definition
 
 
   const { data: product, isLoading, error } = useQuery<Product>({
@@ -67,9 +69,9 @@ export default function ProductDetailPage() {
         category: data.category || t('products.uncategorized', 'Uncategorized'),
         fabric: data.material || t('products.cotton', 'Cotton'),
         style: t('products.casual', 'casual'),
-        season: t('products.all_season', 'all-season'),
+        season: data.season || t('products.all_season', 'all-season'),
         care: t('products.machine_wash', 'Machine wash'),
-        origin: t('products.made_in_china', 'Made in China'),
+        origin: t('products.made_in_italy', 'Made in Italy'),
         sku: data.sku || '',
         images: data.media && data.media.length > 0 
           ? data.media 
@@ -216,24 +218,70 @@ export default function ProductDetailPage() {
     { debug: false }
   );
 
-  // Generate product features list
-  const productFeatures = [
-    `Made with premium ${product.fabric || product.material} fabric`,
-    `Suitable for ${product.season.replace('-', '/')} season wear`,
-    `${product.style} style design, suitable for various occasions`,
-    `Strict ${product.care} care requirements`,
-    `Origin: ${product.origin}`,
-    `SKU: ${product.sku}`
-  ];
+  // Image navigation functions
+  const goToPreviousImage = () => {
+    setSelectedImageIndex((prev) => 
+      prev === 0 ? displayImages.length - 1 : prev - 1
+    );
+  };
+
+  const goToNextImage = () => {
+    setSelectedImageIndex((prev) => 
+      prev === displayImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Touch/swipe support
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNextImage();
+    } else if (isRightSwipe) {
+      goToPreviousImage();
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (displayImages.length <= 1) return;
+      
+      if (event.key === 'ArrowLeft') {
+        goToPreviousImage();
+      } else if (event.key === 'ArrowRight') {
+        goToNextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [displayImages.length]);
+
 
   // Convert specifications to table format
   const specificationRows = [
     { name: "Product Code", value: product.sku },
     { name: "Category", value: product.category },
-    { name: "Fabric", value: product.fabric || product.material },
-    { name: "Style", value: product.style },
     { name: "Season", value: product.season.replace('-', '/') },
-    { name: "Care Instructions", value: product.care },
     { name: "Origin", value: product.origin },
     ...Object.entries(product.specifications).map(([key, value]) => ({
       name: key,
@@ -303,13 +351,48 @@ export default function ProductDetailPage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
             {/* Product Gallery */}
             <div className="flex flex-col">
-              <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden flex items-center justify-center p-4 mb-4">
+              <div 
+                className="relative w-full bg-white rounded-lg shadow-lg overflow-hidden flex items-center justify-center p-4 mb-4"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
                 <img
                   src={displayImages[selectedImageIndex]}
                   alt="Main product view"
                   className="w-full h-auto object-contain max-h-[500px] transition-opacity duration-300"
                   onError={createImageErrorHandler({ debug: false, t })}
                 />
+                
+                {/* Navigation Buttons */}
+                {displayImages.length > 1 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg border-0"
+                      onClick={goToPreviousImage}
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg border-0"
+                      onClick={goToNextImage}
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    
+                    {/* Image Counter */}
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                      {selectedImageIndex + 1} / {displayImages.length}
+                    </div>
+                  </>
+                )}
+                
                 {product.featured === 'yes' && (
                   <Badge className="absolute top-4 right-4 bg-accent-gold text-charcoal">
                     Featured
@@ -371,47 +454,19 @@ export default function ProductDetailPage() {
                   {requestSampleMutation.isPending ? t('product_detail.actions.sending', 'Sending Request...') : t('product_detail.actions.add_to_inquiry', 'Request Sample')}
                 </Button>
                 
-                <div className="flex gap-4">
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                <Link href={createLocalizedHref('/products')}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
-                    <Heart className="mr-2 h-4 w-4" />
-                    {t('product_detail.actions.favorite', 'Favorite')}
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    {t('product_detail.actions.back_to_list', 'Back to List')}
                   </Button>
-                  <Link href={createLocalizedHref('/products')} className="flex-1">
-                    <Button 
-                      variant="outline" 
-                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      {t('product_detail.actions.back_to_list', 'Back to List')}
-                    </Button>
-                  </Link>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* Product Details Section */}
-          <div className="mt-16">
-            <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('product_detail.title', 'Product Details')}</h2>
-              <p className="text-gray-600 mb-8 leading-relaxed">
-                {product.description || t('product_detail.description_rich', `${product.name} is made with carefully selected materials, embodying our unwavering pursuit of quality and design. Each product undergoes strict quality control to ensure the best customer experience.`)}
-              </p>
-
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('product_detail.features', 'Product Features')}</h3>
-              <ul className="space-y-3">
-                {productFeatures.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <CheckIcon />
-                    <span className="ml-3 text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
 
           {/* Specifications Table */}
           <div className="mt-8">

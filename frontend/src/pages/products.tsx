@@ -105,9 +105,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
         category: item.category || t('products.uncategorized', 'Uncategorized'),
         fabric: item.material || t('products.cotton', 'Cotton'),
         style: t('products.casual', 'casual'), // 默认值
-        season: t('products.all_season', 'all-season'), // 默认值
+        season: item.season || t('products.all_season', 'all-season'),
         care: item.care || t('products.machine_wash', 'Machine wash'),
-        origin: item.origin || t('products.made_in_china', 'Made in China'),
+        origin: t('products.made_in_italy', 'Made in Italy'),
         sku: item.sku || '',
         images: item.media && item.media.length > 0
           ? item.media

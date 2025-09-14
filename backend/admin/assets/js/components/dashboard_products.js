@@ -75,7 +75,7 @@ export default class ProductTableComponent extends BaseComponent {
                     if (typeof c === 'string') {
                         const it = c.trim();
                         console.log('Processing color string:', it);
-                        // 对于字符串格式，我们假设英文名就是意大利语名的小写版本
+                        // 对于字符串格式，直接使用原值
                         if (it) {
                             this.color_en_to_zh.set(it.toLowerCase(), it);
                         }
@@ -139,7 +139,7 @@ export default class ProductTableComponent extends BaseComponent {
         this.tableBody.innerHTML = '';
         const list = this.get_current_list();
         if (!list || list.length === 0) {
-            this.tableBody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的产品</td></tr>';
+            this.tableBody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的产品</td></tr>';
             this.selectAllCheckbox.checked = false;
             this.selectAllCheckbox.disabled = true;
             return;
@@ -179,6 +179,7 @@ export default class ProductTableComponent extends BaseComponent {
                 <td class="product-name-cell">${name}</td>
                 <td class="product-color-cell">${color_name}</td>
                 <td class="product-material-cell">${material_name}</td>
+                <td class="product-season-cell">${p.season || '—'}</td>
                 <td><span class="product-category-cell">${p.category || '未分类'}</span></td>
                 <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td>
                 <td class="product-created-at-cell">${this.format_created_at(p.createdAt)}</td>

@@ -106,14 +106,6 @@ export default class ProductFormComponent extends BaseComponent {
         // if (this.variants_container) this.variants_container.innerHTML = ''; // REMOVED
         if (this.variants_meta_input) this.variants_meta_input.value = '';
         
-        // 确保下拉菜单选项已加载
-        await Promise.all([
-            this.update_categories([]),
-            this.update_materials([]),
-            this.update_seasons([]),
-            this.update_colors([])
-        ]);
-        
         // 如果只传了 id，需要先拉取详情（独立编辑模式）
         if (product && product.id && (!product.name && !product.base_name && !product.category)) {
             try {
@@ -123,6 +115,14 @@ export default class ProductFormComponent extends BaseComponent {
                 this.eventBus.emit('toast:show', { message: '加载产品详情失败', type: 'error' });
             }
         }
+
+        // 确保下拉菜单选项已加载
+        await Promise.all([
+            this.update_categories([]),
+            this.update_materials([]),
+            this.update_seasons([]),
+            this.update_colors([])
+        ]);
 
         if (product) {
             this.form_title.textContent = '编辑产品';
@@ -136,24 +136,28 @@ export default class ProductFormComponent extends BaseComponent {
                 name_input.value = product.base_name || '';
             }
             
-            // 设置分类
+            // 设置分类 - API返回的是英语名称，需要转换为意大利语
             if (this.category_select && product.category) {
-                this.category_select.value = product.category;
+                const italianCategory = this.getItalianNameFromMapping(this.categoryMapping, product.category);
+                this.category_select.value = italianCategory || product.category;
             }
             
-            // 设置材质
+            // 设置材质 - API返回的是英语名称，需要转换为意大利语
             if (this.material_select && product.material) {
-                this.material_select.value = product.material;
+                const italianMaterial = this.getItalianNameFromMapping(this.materialMapping, product.material);
+                this.material_select.value = italianMaterial || product.material;
             }
             
-            // 设置季节
+            // 设置季节 - API返回的是英语名称，需要转换为意大利语
             if (this.season_select && product.season) {
-                this.season_select.value = product.season;
+                const italianSeason = this.getItalianNameFromMapping(this.seasonMapping, product.season);
+                this.season_select.value = italianSeason || product.season;
             }
             
-            // 设置颜色
+            // 设置颜色 - API返回的是英语名称，需要转换为意大利语
             if (this.color_select && product.color) {
-                this.color_select.value = product.color;
+                const italianColor = this.getItalianNameFromMapping(this.colorMapping, product.color);
+                this.color_select.value = italianColor || product.color;
             }
             
             // 设置描述
@@ -172,6 +176,20 @@ export default class ProductFormComponent extends BaseComponent {
             this.form.querySelector('#product-id').value = '';
         }
         this.element.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 辅助函数：根据映射关系将英语名称转换为意大利语名称
+    getItalianNameFromMapping(mapping, englishName) {
+        if (!mapping || !englishName) return null;
+        
+        // mapping 是一个对象，key 是意大利语，value 是英语
+        // 我们需要找到 value 等于 englishName 的 key
+        for (const [italianName, englishNameInMap] of Object.entries(mapping)) {
+            if (englishNameInMap === englishName) {
+                return italianName;
+            }
+        }
+        return null;
     }
 
     hide_form() {

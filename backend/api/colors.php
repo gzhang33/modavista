@@ -39,15 +39,20 @@ function get_colors($conn) {
     // 支持两位语言码或完整 locale，统一规范化
     $raw = $_GET['lang'] ?? null;
     $locale = normalize_language_code($raw);
+    
+    // 检查是否需要返回映射关系（Admin界面使用）
+    $admin_mode = isset($_GET['admin']) && $_GET['admin'] === '1';
 
     // 使用新的 i18n 结构查询颜色
     $sql = 'SELECT
                 c.id,
                 COALESCE(ci.name, c.color_name) AS name,
                 c.color_code,
-                c.color_name AS name_en
+                c.color_name AS name_en,
+                COALESCE(en_ci.name, c.color_name) AS name_en_gb
             FROM color c
             LEFT JOIN color_i18n ci ON c.id = ci.color_id AND ci.locale = ?
+            LEFT JOIN color_i18n en_ci ON c.id = en_ci.color_id AND en_ci.locale = "en-GB"
             ORDER BY COALESCE(ci.name, c.color_name) ASC';
 
     $stmt = $conn->prepare($sql);
@@ -60,14 +65,40 @@ function get_colors($conn) {
     }
     $result = $stmt->get_result();
     $colors = [];
+    $color_mapping = []; // 意大利语 -> 英语映射
+    
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
+        $name_en_gb = $row['name_en_gb'];
         if (!empty($name) && $name !== null) {
-            $colors[] = $name;
+            if ($admin_mode) {
+                // Admin模式：返回完整的对象数组，包含映射关系
+                $colors[] = [
+                    'id' => $row['id'],
+                    'name' => $name,
+                    'name_en_gb' => $name_en_gb,
+                    'color_code' => $row['color_code']
+                ];
+            } else {
+                // 普通模式：只返回名称数组
+                $colors[] = $name;
+            }
+            // 建立映射关系
+            $color_mapping[$name] = $name_en_gb;
         }
     }
     $stmt->close();
-    json_response(200, $colors);
+    
+    if ($admin_mode) {
+        // Admin模式：返回完整数据和映射
+        json_response(200, [
+            'colors' => $colors,
+            'mapping' => $color_mapping
+        ]);
+    } else {
+        // 普通模式：只返回名称数组
+        json_response(200, $colors);
+    }
 }
 
 function add_color($conn) {

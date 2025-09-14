@@ -44,13 +44,18 @@ $conn->close();
 function get_categories($conn) {
     $raw = $_GET['lang'] ?? null;
     $locale = normalize_language_code($raw);
+    
+    // 检查是否需要返回映射关系（Admin界面使用）
+    $admin_mode = isset($_GET['admin']) && $_GET['admin'] === '1';
 
     $sql = 'SELECT
                 c.id,
                 c.category_name_en,
-                COALESCE(ci.name, c.category_name_en) AS name
+                COALESCE(ci.name, c.category_name_en) AS name,
+                COALESCE(en_ci.name, c.category_name_en) AS name_en_gb
             FROM category c
             LEFT JOIN category_i18n ci ON c.id = ci.category_id AND ci.locale = ?
+            LEFT JOIN category_i18n en_ci ON c.id = en_ci.category_id AND en_ci.locale = "en-GB"
             ORDER BY COALESCE(ci.name, c.category_name_en) ASC';
 
     $stmt = $conn->prepare($sql);
@@ -65,15 +70,40 @@ function get_categories($conn) {
 
     $result = $stmt->get_result();
     $categories = [];
+    $category_mapping = []; // 意大利语 -> 英语映射
+    
     while ($row = $result->fetch_assoc()) {
-        $categories[] = [
-            'id' => $row['id'],
-            'name' => $row['name'], // Translated name
-            'english_name' => $row['category_name_en'] // English name for image key
-        ];
+        if ($admin_mode) {
+            // Admin模式：返回完整的对象数组，包含映射关系
+            $categories[] = [
+                'id' => $row['id'],
+                'name' => $row['name'], // Translated name
+                'name_en_gb' => $row['name_en_gb'], // English name
+                'english_name' => $row['category_name_en'] // English name for image key
+            ];
+        } else {
+            // 普通模式：保持原有格式
+            $categories[] = [
+                'id' => $row['id'],
+                'name' => $row['name'], // Translated name
+                'english_name' => $row['category_name_en'] // English name for image key
+            ];
+        }
+        // 建立映射关系
+        $category_mapping[$row['name']] = $row['name_en_gb'];
     }
     $stmt->close();
-    json_response(200, $categories);
+    
+    if ($admin_mode) {
+        // Admin模式：返回完整数据和映射
+        json_response(200, [
+            'categories' => $categories,
+            'mapping' => $category_mapping
+        ]);
+    } else {
+        // 普通模式：保持原有格式
+        json_response(200, $categories);
+    }
 }
 
 function add_category($conn) {

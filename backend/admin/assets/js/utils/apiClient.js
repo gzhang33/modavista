@@ -108,36 +108,91 @@ class ApiClient {
         return this.request(endpoint, { method: 'DELETE' });
     }
 
-    // 获取分类（支持语言参数）
-    async getCategories(lang = 'en') {
+    // 获取分类（支持语言参数和Admin模式）
+    async getCategories(lang = 'en', adminMode = false) {
         try {
-            const categories = await this.get('/categories.php', { lang });
-            return Array.isArray(categories) ? categories : [];
+            const params = { lang };
+            if (adminMode) {
+                params.admin = '1';
+            }
+            const response = await this.get('/categories.php', params);
+            
+            if (adminMode && response.categories) {
+                // Admin模式：返回完整数据和映射
+                return response;
+            }
+            
+            // 普通模式：返回分类数组
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('获取分类失败:', error);
-            return [];
+            return adminMode ? { categories: [], mapping: {} } : [];
         }
     }
 
-    // 获取材质（支持语言参数）
-    async getMaterials(lang = 'en') {
+    // 获取材质（支持语言参数和Admin模式）
+    async getMaterials(lang = 'en', adminMode = false) {
         try {
-            const materials = await this.get('/materials.php', { lang });
-            return Array.isArray(materials) ? materials : [];
+            const params = { lang };
+            if (adminMode) {
+                params.admin = '1';
+            }
+            const response = await this.get('/materials.php', params);
+            
+            if (adminMode && response.materials) {
+                // Admin模式：返回完整数据和映射
+                return response;
+            }
+            
+            // 普通模式：返回材质数组
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('获取材质失败:', error);
-            return [];
+            return adminMode ? { materials: [], mapping: {} } : [];
         }
     }
 
-    // 获取颜色（支持语言参数）
-    async getColors(lang = 'en') {
+    // 获取颜色（支持语言参数和Admin模式）
+    async getColors(lang = 'en', adminMode = false) {
         try {
-            const colors = await this.get('/colors.php', { lang });
-            return Array.isArray(colors) ? colors : [];
+            const params = { lang };
+            if (adminMode) {
+                params.admin = '1';
+            }
+            const response = await this.get('/colors.php', params);
+            
+            if (adminMode && response.colors) {
+                // Admin模式：返回完整数据和映射
+                return response;
+            }
+            
+            // 普通模式：返回颜色数组
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('获取颜色失败:', error);
-            return [];
+            return adminMode ? { colors: [], mapping: {} } : [];
+        }
+    }
+
+    // 获取季节（支持语言参数和Admin模式）
+    async getSeasons(lang = 'en', adminMode = false) {
+        try {
+            const params = { lang };
+            if (adminMode) {
+                params.admin = '1';
+            }
+            const response = await this.get('/seasons.php', params);
+            
+            if (adminMode && response.seasons) {
+                // Admin模式：返回完整数据和映射
+                return response;
+            }
+            
+            // 普通模式：返回季节数组
+            return Array.isArray(response) ? response.map(s => s.name) : [];
+        } catch (error) {
+            console.error('获取季节失败:', error);
+            return adminMode ? { seasons: [], mapping: {} } : [];
         }
     }
 }

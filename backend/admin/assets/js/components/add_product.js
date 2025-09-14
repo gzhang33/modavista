@@ -20,15 +20,23 @@ export default class ProductFormComponent extends BaseComponent {
         this.main_dropzone_url = null; // 记录主上传框的临时 URL，便于替换与释放
         this.category_select = this.element.querySelector('#category');
         this.material_select = this.element.querySelector('#material');
+        this.season_select = this.element.querySelector('#season');
         this.color_select = this.element.querySelector('#color');
         this.add_variant_btn = this.element.querySelector('#add-variant-row');
         this.variants_meta_input = this.element.querySelector('#variants-meta');
         
         this.api_url = '../api/products.php';
+        
+        // 存储多语言映射关系
+        this.categoryMapping = {}; // 意大利语 -> 英语
+        this.materialMapping = {};
+        this.colorMapping = {};
+        this.seasonMapping = {};
 
         this.eventBus.on('product:edit', (product) => this.show_form(product));
         this.eventBus.on('products:loaded', (products) => this.update_categories(products));
         this.eventBus.on('products:loaded', (products) => this.update_materials(products));
+        this.eventBus.on('products:loaded', (products) => this.update_seasons(products));
         this.eventBus.on('products:loaded', (products) => this.update_colors(products));
         
         // 监听翻译事件
@@ -71,7 +79,22 @@ export default class ProductFormComponent extends BaseComponent {
         // Ensure categories and materials are loaded when the form page is standalone
         this.update_categories([]);
         this.update_materials([]);
+        this.update_seasons([]);
         this.update_colors([]);
+    }
+
+    // 统一处理图片路径的工具函数
+    normalizeImagePath(raw) {
+        if (!raw) return null;
+        if (raw.startsWith('http')) {
+            return raw;
+        } else if (raw.startsWith('products/')) {
+            return '/storage/uploads/product_images/' + raw.substring(9);
+        } else if (raw.startsWith('/')) {
+            return raw;
+        } else {
+            return '/storage/uploads/product_images/' + raw;
+        }
     }
 
     async show_form(product = null) {
@@ -87,6 +110,7 @@ export default class ProductFormComponent extends BaseComponent {
         await Promise.all([
             this.update_categories([]),
             this.update_materials([]),
+            this.update_seasons([]),
             this.update_colors([])
         ]);
         
@@ -120,6 +144,11 @@ export default class ProductFormComponent extends BaseComponent {
             // 设置材质
             if (this.material_select && product.material) {
                 this.material_select.value = product.material;
+            }
+            
+            // 设置季节
+            if (this.season_select && product.season) {
+                this.season_select.value = product.season;
             }
             
             // 设置颜色
@@ -164,96 +193,145 @@ export default class ProductFormComponent extends BaseComponent {
     }
     
     async update_categories(products) {
-        let categories = [];
+        let categoryData = [];
         try {
-            // add_product 页面下拉统一显示意大利语
-            categories = await apiClient.getCategories('it');
+            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
+            const response = await apiClient.getCategories('it', true);
+            if (response.categories && response.mapping) {
+                categoryData = response.categories;
+                this.categoryMapping = response.mapping;
+            }
         } catch (error) {
             console.error('Failed to load categories:', error);
-            categories = Array.isArray(products)
-                ? [...new Set(products.map(p => p.category).filter(Boolean))].sort()
+            categoryData = Array.isArray(products)
+                ? [...new Set(products.map(p => p.category).filter(Boolean))].map(cat => ({ name: cat }))
                 : [];
         }
         const current_val = this.category_select?.value || '';
         if (!this.category_select) return;
         this.category_select.innerHTML = '';
-        categories.forEach(category => {
+        categoryData.forEach(category => {
             const option = document.createElement('option');
-            // 修复：使用正确的字段映射
-            // 如果category是对象（来自API），使用name作为显示文本和值
-            // 如果category是字符串（来自产品数据），直接使用
-            if (typeof category === 'object' && category.name) {
-                option.value = category.name;
-                option.textContent = category.name;
-            } else {
-                option.value = category;
-                option.textContent = category;
-            }
+            // 使用意大利语名称作为值和显示文本
+            const displayName = category.name || category;
+            option.value = displayName;
+            option.textContent = displayName;
             this.category_select.appendChild(option);
         });
         this.category_select.value = current_val;
     }
 
     async update_materials(products) {
-        let materials = [];
+        let materialData = [];
         try {
-            // add_product 页面下拉统一显示意大利语
-            materials = await apiClient.getMaterials('it');
+            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
+            const response = await apiClient.getMaterials('it', true);
+            if (response.materials && response.mapping) {
+                materialData = response.materials;
+                this.materialMapping = response.mapping;
+            }
         } catch (error) {
             console.error('Failed to load materials:', error);
-            materials = Array.isArray(products)
-                ? [...new Set(products.map(p => p.material).filter(Boolean))].sort()
+            materialData = Array.isArray(products)
+                ? [...new Set(products.map(p => p.material).filter(Boolean))].map(mat => ({ name: mat }))
                 : [];
         }
         const current_val = this.material_select?.value || '';
         if (!this.material_select) return;
         this.material_select.innerHTML = '<option value="">请选择材质</option>';
-        materials.forEach(material => {
+        materialData.forEach(material => {
             const option = document.createElement('option');
-            option.value = material; // 使用材质名称作为值
-            option.textContent = material; // 使用材质名称作为显示文本
+            const displayName = material.name || material;
+            option.value = displayName; // 使用意大利语名称作为值
+            option.textContent = displayName; // 使用意大利语名称作为显示文本
             this.material_select.appendChild(option);
         });
         this.material_select.value = current_val;
     }
 
-    async update_colors(products) {
-        let colors = [];
+    async update_seasons(products) {
+        let seasonData = [];
         try {
-            const lang = 'it';
-            colors = await apiClient.getColors(lang);
+            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
+            const response = await apiClient.getSeasons('it', true);
+            if (response.seasons && response.mapping) {
+                seasonData = response.seasons;
+                this.seasonMapping = response.mapping;
+            }
+        } catch (error) {
+            console.error('Failed to load seasons:', error);
+            seasonData = Array.isArray(products)
+                ? [...new Set(products.map(p => p.season).filter(Boolean))].map(season => ({ name: season }))
+                : [];
+        }
+        const current_val = this.season_select?.value || '';
+        if (!this.season_select) return;
+        this.season_select.innerHTML = '<option value="">请选择季节</option>';
+        seasonData.forEach(season => {
+            const option = document.createElement('option');
+            const displayName = season.name || season;
+            option.value = displayName; // 使用意大利语名称作为值
+            option.textContent = displayName; // 使用意大利语名称作为显示文本
+            this.season_select.appendChild(option);
+        });
+        this.season_select.value = current_val;
+    }
+
+    async update_colors(products) {
+        let colorData = [];
+        try {
+            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
+            const response = await apiClient.getColors('it', true);
+            if (response.colors && response.mapping) {
+                colorData = response.colors;
+                this.colorMapping = response.mapping;
+            }
         } catch (error) {
             console.error('Failed to load colors:', error);
-            colors = Array.isArray(products)
-                ? [...new Set(products.map(p => p.color).filter(Boolean))].sort()
+            colorData = Array.isArray(products)
+                ? [...new Set(products.map(p => p.color).filter(Boolean))].map(color => ({ name: color }))
                 : [];
         }
         const current_val = this.color_select?.value || '';
         if (this.color_select) {
             this.color_select.innerHTML = '<option value="">请选择颜色</option>';
-            colors.forEach(color => {
+            colorData.forEach(color => {
                 const option = document.createElement('option');
-                option.value = color; // 使用颜色名称作为值
-                option.textContent = color; // 使用颜色名称作为显示文本
+                const displayName = color.name || color;
+                option.value = displayName; // 使用意大利语名称作为值
+                option.textContent = displayName; // 使用意大利语名称作为显示文本
                 this.color_select.appendChild(option);
             });
             this.color_select.value = current_val;
         }
         // 更新所有变体行的颜色选项
-        this.update_all_variant_color_options(colors);
+        this.update_all_variant_color_options(colorData);
     }
     
     async populate_variant_color_options(row) {
         try {
-            const lang = 'it';
-            const colors = await apiClient.getColors(lang);
+            // 如果已经有颜色映射数据，直接使用；否则重新获取
+            let colorData = [];
+            if (Object.keys(this.colorMapping).length > 0) {
+                // 使用已经缓存的数据
+                colorData = Object.keys(this.colorMapping).map(name => ({ name }));
+            } else {
+                // 重新获取
+                const response = await apiClient.getColors('it', true);
+                if (response.colors && response.mapping) {
+                    colorData = response.colors;
+                    this.colorMapping = response.mapping;
+                }
+            }
+            
             const color_select = row.querySelector('.variant-color-select');
             if (color_select) {
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
-                colors.forEach(color => {
+                colorData.forEach(color => {
                     const option = document.createElement('option');
-                    option.value = color; // 使用颜色名称作为值
-                    option.textContent = color; // 使用颜色名称作为显示文本
+                    const displayName = color.name || color;
+                    option.value = displayName; // 使用意大利语名称作为值
+                    option.textContent = displayName; // 使用意大利语名称作为显示文本
                     color_select.appendChild(option);
                 });
             }
@@ -262,17 +340,18 @@ export default class ProductFormComponent extends BaseComponent {
         }
     }
 
-    update_all_variant_color_options(colors) {
+    update_all_variant_color_options(colorData) {
         const variant_rows = this.siblings_panel?.querySelectorAll('.variant-row') || [];
         variant_rows.forEach(row => {
             const color_select = row.querySelector('.variant-color-select');
             if (color_select) {
                 const current_val = color_select.value;
                 color_select.innerHTML = '<option value="">请选择颜色</option>';
-                colors.forEach(color => {
+                colorData.forEach(color => {
                     const option = document.createElement('option');
-                    option.value = color; // 使用颜色名称作为值
-                    option.textContent = color; // 使用颜色名称作为显示文本
+                    const displayName = color.name || color;
+                    option.value = displayName; // 使用意大利语名称作为值
+                    option.textContent = displayName; // 使用意大利语名称作为显示文本
                     color_select.appendChild(option);
                 });
                 color_select.value = current_val;
@@ -294,8 +373,11 @@ export default class ProductFormComponent extends BaseComponent {
         const form_data = new FormData(this.form);
         const product_id = form_data.get('id');
 
+        // 将意大利语值转换为英语值（保存时使用英语）
+        this.convertFormValuesToEnglish(form_data);
+        
         // Debug: Log all form data entries
-        console.log("--- Form Data Before Submission ---");
+        console.log("--- Form Data After Conversion ---");
         for (let pair of form_data.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
@@ -320,7 +402,9 @@ export default class ProductFormComponent extends BaseComponent {
             }
             const declared_index_attr = file_input?.getAttribute('data-variant-index');
             const declared_index = declared_index_attr ? parseInt(declared_index_attr, 10) : i;
-            variants_meta.push({ index: declared_index, color });
+            // 将变体颜色转换为英语
+            const englishColor = this.colorMapping[color] || color;
+            variants_meta.push({ index: declared_index, color: englishColor });
         }
 
         if (variants_meta.length > 0) {
@@ -456,19 +540,17 @@ export default class ProductFormComponent extends BaseComponent {
 
     handle_variant_media_change(event, variant_index) {
         const files = Array.from(event.target.files || []);
-        // 清除旧的变体预览与URL
-        this.clear_variant_preview_urls_by_index(variant_index);
-        const preview_container = document.getElementById(`variant-preview-${variant_index}`);
-        if (preview_container) {
-            preview_container.innerHTML = '';
-        }
-        // 将变体上传按钮与预览合并：在有文件时用首图填充上传框，点击可替换
-        const row = this.siblings_panel?.querySelector(`#variant-preview-${variant_index}`)?.closest('.variant-row');
-        if (row) {
-            const dropzone = row.querySelector('.variant-dropzone');
-            const file_input = row.querySelector('.variant-file-input');
-            if (dropzone && file_input) {
-                if (files.length > 0) {
+        
+        if (files.length > 0) {
+            // 显示所有选择的图片预览
+            this.render_variant_media_previews(files, variant_index);
+            
+            // 将变体上传按钮与预览合并：用首图填充上传框，点击可替换
+            const row = this.siblings_panel?.querySelector(`#variant-preview-${variant_index}`)?.closest('.variant-row');
+            if (row) {
+                const dropzone = row.querySelector('.variant-dropzone');
+                const file_input = row.querySelector('.variant-file-input');
+                if (dropzone && file_input) {
                     const url = files[0] ? URL.createObjectURL(files[0]) : '';
                     dropzone.classList.add('has-preview');
                     dropzone.style.backgroundImage = `url('${url}')`;
@@ -482,8 +564,22 @@ export default class ProductFormComponent extends BaseComponent {
                     // 点击预览替换文件
                     const open_picker = () => file_input.click();
                     dropzone.onclick = open_picker;
-                } else {
-                    // 无文件时恢复默认上传按钮
+                }
+            }
+        } else {
+            // 清除预览
+            this.clear_variant_preview_urls_by_index(variant_index);
+            const preview_container = document.getElementById(`variant-preview-${variant_index}`);
+            if (preview_container) {
+                preview_container.innerHTML = '';
+            }
+            
+            // 恢复默认上传按钮
+            const row = this.siblings_panel?.querySelector(`#variant-preview-${variant_index}`)?.closest('.variant-row');
+            if (row) {
+                const dropzone = row.querySelector('.variant-dropzone');
+                const file_input = row.querySelector('.variant-file-input');
+                if (dropzone && file_input) {
                     dropzone.classList.remove('has-preview');
                     dropzone.style.backgroundImage = '';
                     const plus = dropzone.querySelector('.plus');
@@ -610,8 +706,11 @@ export default class ProductFormComponent extends BaseComponent {
                     wrapper.className = 'media-preview-item draggable';
                     wrapper.setAttribute('data-path', m);
                     wrapper.setAttribute('draggable', 'true');
+                    // 处理图片路径，与dashboard保持一致
+                    const image_src = this.normalizeImagePath(m);
+                    
                     wrapper.innerHTML = `
-                        <img src="${m && m.startsWith('/') ? m : ('/' + m)}" alt="media">
+                        <img src="${image_src}" alt="media">
                         <button type="button" class="media-remove" aria-label="删除" data-path="${m}">×</button>
                     `;
                     fragment.appendChild(wrapper);
@@ -677,11 +776,13 @@ export default class ProductFormComponent extends BaseComponent {
     // 处理文件选择并展示即时预览
     handle_media_change(event) {
         const files = Array.from(event.target.files || []);
-        // 不再渲染额外“新选择的图片预览”，直接与上传按钮合并
-        this.clear_new_media_previews();
-        // 将主产品上传按钮与预览合并：在有文件时用首图填充上传框，点击可替换
-        if (this.media_dropzone) {
-            if (files.length > 0) {
+        
+        if (files.length > 0) {
+            // 显示所有选择的图片预览
+            this.render_selected_media_previews(files);
+            
+            // 将主产品上传按钮与预览合并：用首图填充上传框，点击可替换
+            if (this.media_dropzone) {
                 // 释放旧 URL
                 if (this.main_dropzone_url) {
                     try { URL.revokeObjectURL(this.main_dropzone_url); } catch (_) {}
@@ -700,7 +801,11 @@ export default class ProductFormComponent extends BaseComponent {
                 if (overlay_input) overlay_input.style.pointerEvents = 'none';
                 const open_picker = () => this.media_input && this.media_input.click();
                 this.media_dropzone.onclick = open_picker;
-            } else {
+            }
+        } else {
+            // 清除预览
+            this.clear_new_media_previews();
+            if (this.media_dropzone) {
                 this.media_dropzone.classList.remove('has-preview');
                 this.media_dropzone.style.backgroundImage = '';
                 const plus = this.media_dropzone.querySelector('.plus');
@@ -779,7 +884,8 @@ export default class ProductFormComponent extends BaseComponent {
         // Render existing sibling chips
         list.forEach(it => {
             const is_active = String(it.id) === String(product.id);
-            const img = it.defaultImage ? (it.defaultImage.startsWith('/') ? it.defaultImage : `/${it.defaultImage}`) : 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><rect width="50" height="50" fill="#f1f5f9"/></svg>');
+            // 处理图片路径，与dashboard保持一致
+            const img = this.normalizeImagePath(it.defaultImage) || 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><rect width="50" height="50" fill="#f1f5f9"/></svg>');
             
             // 创建与产品媒体预览相同的结构
             const wrapper = document.createElement('div');
@@ -978,6 +1084,33 @@ export default class ProductFormComponent extends BaseComponent {
     get_product_id_for_translation() {
         const productIdInput = this.form.querySelector('#product-id');
         return productIdInput?.value ? parseInt(productIdInput.value) : null;
+    }
+    
+    // 将表单中的意大利语值转换为英语值（保存时使用）
+    convertFormValuesToEnglish(formData) {
+        // 转换分类
+        const category = formData.get('category');
+        if (category && this.categoryMapping[category]) {
+            formData.set('category', this.categoryMapping[category]);
+        }
+        
+        // 转换材质
+        const material = formData.get('material');
+        if (material && this.materialMapping[material]) {
+            formData.set('material', this.materialMapping[material]);
+        }
+        
+        // 转换颜色
+        const color = formData.get('color');
+        if (color && this.colorMapping[color]) {
+            formData.set('color', this.colorMapping[color]);
+        }
+        
+        // 转换季节
+        const season = formData.get('season');
+        if (season && this.seasonMapping[season]) {
+            formData.set('season', this.seasonMapping[season]);
+        }
     }
     
     // 统一由 utils/session.js 处理

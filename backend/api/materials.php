@@ -39,14 +39,19 @@ function get_materials($conn) {
     // 支持两位语言码或完整 locale，统一规范化
     $raw = $_GET['lang'] ?? null;
     $locale = normalize_language_code($raw);
+    
+    // 检查是否需要返回映射关系（Admin界面使用）
+    $admin_mode = isset($_GET['admin']) && $_GET['admin'] === '1';
 
     // 使用新的 i18n 结构查询材质
     $sql = 'SELECT
                 m.id,
                 COALESCE(mi.name, m.material_name) AS name,
-                m.material_name AS name_en
+                m.material_name AS name_en,
+                COALESCE(en_mi.name, m.material_name) AS name_en_gb
             FROM material m
             LEFT JOIN material_i18n mi ON m.id = mi.material_id AND mi.locale = ?
+            LEFT JOIN material_i18n en_mi ON m.id = en_mi.material_id AND en_mi.locale = "en-GB"
             ORDER BY COALESCE(mi.name, m.material_name) ASC';
 
     $stmt = $conn->prepare($sql);
@@ -59,14 +64,39 @@ function get_materials($conn) {
     }
     $result = $stmt->get_result();
     $materials = [];
+    $material_mapping = []; // 意大利语 -> 英语映射
+    
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
+        $name_en_gb = $row['name_en_gb'];
         if (!empty($name) && $name !== null) {
-            $materials[] = $name;
+            if ($admin_mode) {
+                // Admin模式：返回完整的对象数组，包含映射关系
+                $materials[] = [
+                    'id' => $row['id'],
+                    'name' => $name,
+                    'name_en_gb' => $name_en_gb
+                ];
+            } else {
+                // 普通模式：只返回名称数组
+                $materials[] = $name;
+            }
+            // 建立映射关系
+            $material_mapping[$name] = $name_en_gb;
         }
     }
     $stmt->close();
-    json_response(200, $materials);
+    
+    if ($admin_mode) {
+        // Admin模式：返回完整数据和映射
+        json_response(200, [
+            'materials' => $materials,
+            'mapping' => $material_mapping
+        ]);
+    } else {
+        // 普通模式：只返回名称数组
+        json_response(200, $materials);
+    }
 }
 
 function add_material($conn) {

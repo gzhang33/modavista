@@ -21,13 +21,18 @@ $conn->set_charset("utf8mb4");
 $raw = $_GET['lang'] ?? null;
 $locale = normalize_language_code($raw);
 
+// 检查是否需要返回映射关系（Admin界面使用）
+$admin_mode = isset($_GET['admin']) && $_GET['admin'] === '1';
+
 // 使用i18n表查询季节数据
 $sql = 'SELECT
             s.id,
             COALESCE(si.name, s.season_name) AS name,
-            s.season_name AS name_en
+            s.season_name AS name_en,
+            COALESCE(en_si.name, s.season_name) AS name_en_gb
         FROM seasons s
         LEFT JOIN seasons_i18n si ON s.id = si.season_id AND si.locale = ?
+        LEFT JOIN seasons_i18n en_si ON s.id = en_si.season_id AND en_si.locale = "en-GB"
         ORDER BY s.id ASC';
 
 $stmt = $conn->prepare($sql);
@@ -42,14 +47,38 @@ if (!$stmt->execute()) {
 
 $result = $stmt->get_result();
 $seasons = [];
+$season_mapping = []; // 意大利语 -> 英语映射
+
 while ($row = $result->fetch_assoc()) {
-    $seasons[] = [
-        'id' => $row['id'],
-        'name' => $row['name']
-    ];
+    if ($admin_mode) {
+        // Admin模式：返回完整的对象数组，包含映射关系
+        $seasons[] = [
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'name_en_gb' => $row['name_en_gb']
+        ];
+    } else {
+        // 普通模式：保持原有格式
+        $seasons[] = [
+            'id' => $row['id'],
+            'name' => $row['name']
+        ];
+    }
+    // 建立映射关系
+    $season_mapping[$row['name']] = $row['name_en_gb'];
 }
 
 $stmt->close();
 $conn->close();
-json_response(200, $seasons);
+
+if ($admin_mode) {
+    // Admin模式：返回完整数据和映射
+    json_response(200, [
+        'seasons' => $seasons,
+        'mapping' => $season_mapping
+    ]);
+} else {
+    // 普通模式：保持原有格式
+    json_response(200, $seasons);
+}
 ?>

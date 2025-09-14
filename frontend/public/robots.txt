@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://dreamoda.store/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/
+
+# Allow all other content
+Allow: /product_images/
+Allow: /locales/
+Allow: /products
+Allow: /product/
+
+# Crawl delay (optional)
+Crawl-delay: 1

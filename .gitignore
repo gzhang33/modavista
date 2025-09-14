@@ -76,8 +76,13 @@ GEMINI.md
 # phpMyAdmin
 phpMyAdmin/
 
-# Images and media uploads (keep repo slim). Track a placeholder if needed.
+# Storage directory (dynamic content)
+storage/
+!storage/.gitkeep
 
+# User uploads and media
+product_images/
+uploads/
 
 # Lighthouse reports
 lh-*.json

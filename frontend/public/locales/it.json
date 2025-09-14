@@ -229,6 +229,7 @@
     "contact": {
       "submit_failed": "Invio messaggio fallito. Riprova o contattaci direttamente.",
       "submit_success": "Messaggio inviato con successo! Ti contatteremo presto.",
+      "success_description": "Grazie per il tuo interesse. Ti contatteremo entro 48 ore.",
       "rate_limited": "Aspetta prima di inviare un altro messaggio.",
       "invalid_data": "Controlla le tue informazioni e riprova."
     },

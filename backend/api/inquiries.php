@@ -157,7 +157,7 @@ function handle_post($conn) {
     }
     
     // 验证必需字段
-    $required_fields = ['firstName', 'lastName', 'email', 'company', 'businessType', 'message'];
+    $required_fields = ['firstName', 'lastName', 'email', 'message'];
     foreach ($required_fields as $field) {
         if (empty($input[$field])) {
             json_response(400, [
@@ -193,6 +193,10 @@ function handle_post($conn) {
         // 组合姓名
         $full_name = trim($input['firstName'] . ' ' . $input['lastName']);
         
+        // 处理可选字段
+        $company = $input['company'] ?? '';
+        $business_type = $input['businessType'] ?? 'retail';
+        
         // 插入询价记录 - 包含所有必需字段
         $sql = "INSERT INTO contact_messages (
                     name, email, company, business_type, message, inquiry_type, ip_address, created_at
@@ -202,8 +206,8 @@ function handle_post($conn) {
         $stmt->bind_param('sssssss', 
             $full_name,
             $input['email'],
-            $input['company'],
-            $input['businessType'],
+            $company,
+            $business_type,
             $input['message'],
             $inquiry_type,
             $ip_address
@@ -219,8 +223,8 @@ function handle_post($conn) {
 
 姓名: {$full_name}
 邮箱: {$input['email']}
-公司: {$input['company']}
-业务类型: {$input['businessType']}
+公司: " . ($input['company'] ?? '未提供') . "
+业务类型: " . ($input['businessType'] ?? 'retail') . "
 询价类型: {$inquiry_type}
 
 消息:

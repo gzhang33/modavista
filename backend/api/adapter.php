@@ -168,7 +168,7 @@ function handleInquiries() {
         }
         
         // 验证必需字段
-        $requiredFields = ['firstName', 'lastName', 'email', 'company', 'businessType', 'message'];
+        $requiredFields = ['firstName', 'lastName', 'email', 'message'];
         foreach ($requiredFields as $field) {
             if (empty($input[$field])) {
                 apiResponse(false, null, "缺少必需字段: $field", 400);
@@ -184,8 +184,8 @@ function handleInquiries() {
             'firstName' => $input['firstName'],
             'lastName' => $input['lastName'],
             'email' => $input['email'],
-            'company' => $input['company'],
-            'businessType' => $input['businessType'],
+            'company' => $input['company'] ?? '',
+            'businessType' => $input['businessType'] ?? 'retail',
             'message' => $input['message'],
             'productId' => $input['productId'] ?? null,
             'inquiryType' => $input['inquiryType'] ?? 'general',

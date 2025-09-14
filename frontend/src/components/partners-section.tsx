@@ -77,7 +77,7 @@ export default function PartnersSection() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .logo-scroller {
           overflow: hidden;
           -webkit-mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);

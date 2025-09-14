@@ -31,7 +31,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   const [filters, setFilters] = useState<FilterState>({
     category: 'all',
     fabric: 'all',
-    season: 'all',
+    season: '3', // Default to "Tutte le stagioni" (All Season)
     style: 'all'
   });
   
@@ -76,15 +76,31 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
     });
   }, [currentLangShort]);
 
-  // Parse URL parameters and set initial filters
+  // Parse URL parameters and set initial filters - wait for filterOptions to be loaded
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+    if (filterOptions.categories.length === 0) return; // Wait for filter options to load
+    
+    const urlParams = new URLSearchParams(window.location.search);
     const categoryParam = urlParams.get('category');
     
+    console.log('URL category parameter:', categoryParam);
+    console.log('Available filter options:', filterOptions.categories);
+    
     if (categoryParam && categoryParam !== 'all') {
-      setFilters(prev => ({ ...prev, category: categoryParam }));
+      // Check if the category exists in filter options
+      const categoryExists = filterOptions.categories.some(cat => {
+        console.log(`Checking category: id=${cat.id}, name=${cat.name}, english_name=${cat.english_name} against param=${categoryParam}`);
+        return cat.id === categoryParam || cat.name === categoryParam || cat.english_name === categoryParam;
+      });
+      
+      if (categoryExists) {
+        console.log('Setting category filter to:', categoryParam);
+        setFilters(prev => ({ ...prev, category: categoryParam }));
+      } else {
+        console.log('Category not found in filter options:', categoryParam);
+      }
     }
-  }, [location]);
+  }, [location, filterOptions.categories]);
 
   const { data: products = [], isLoading, error } = useQuery<Product[]>({
     queryKey: ['products', currentLangShort],
@@ -139,15 +155,23 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
 
   // Filter products based on current filters and search query
   const filteredProducts = products.filter(product => {
-    // Category filter - support Chinese category matching
+    // Category filter - support both category ID, name, and english_name matching
     if (filters.category !== 'all') {
+      const selectedCategory = filterOptions.categories.find(cat => 
+        cat.id === filters.category || 
+        cat.name === filters.category ||
+        cat.english_name === filters.category
+      );
+      const categoryName = selectedCategory ? selectedCategory.name : filters.category;
+      const categoryEnglishName = selectedCategory ? selectedCategory.english_name : filters.category;
+      
       const categoryMatch =
+        product.category === categoryName ||
         product.category === filters.category ||
+        product.category === categoryEnglishName || // Added this line for english_name matching
+        product.category?.toLowerCase().includes(categoryName.toLowerCase()) ||
         product.category?.toLowerCase().includes(filters.category.toLowerCase()) ||
-        filterOptions.categories.find(cat =>
-          cat.id === filters.category &&
-          (cat.name === product.category || cat.label === product.category)
-        );
+        product.category?.toLowerCase().includes(categoryEnglishName.toLowerCase()); // Added this line for english_name matching
 
       if (!categoryMatch) {
         return false;
@@ -168,9 +192,20 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
       }
     }
 
-    // Season filter
-    if (filters.season !== 'all' && product.season !== filters.season) {
-      return false;
+    // Season filter - handle both season ID and season name matching
+    if (filters.season !== '3') { // '3' is the default "All Seasons" option
+      const selectedSeason = filterOptions.seasons.find(s => s.id === filters.season);
+      const seasonName = selectedSeason ? selectedSeason.name : filters.season;
+      
+      const seasonMatch = 
+        product.season === seasonName ||
+        product.season === filters.season ||
+        product.season?.toLowerCase().includes(seasonName.toLowerCase()) ||
+        product.season?.toLowerCase().includes(filters.season.toLowerCase());
+      
+      if (!seasonMatch) {
+        return false;
+      }
     }
 
     // Style filter
@@ -195,16 +230,23 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   });
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    console.log('Updating filters:', newFilters);
+    setFilters(prev => {
+      const updated = { ...prev, ...newFilters };
+      console.log('New filter state:', updated);
+      return updated;
+    });
   };
 
   console.log('Products loaded:', products.length, 'Filtered:', filteredProducts.length);
+  console.log('Current filters:', filters);
+  console.log('Filter options:', filterOptions);
 
   const clearFilters = () => {
     setFilters({
       category: 'all',
       fabric: 'all',
-      season: 'all',
+      season: '3', // Default to "Tutte le stagioni" (All Season)
       style: 'all'
     });
     setSearchQuery('');
@@ -383,7 +425,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
               <div className="mb-6">
                 <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
                 <div className="space-y-2">
-                  {filterOptions.seasons.slice(1).map((season) => (
+                  {filterOptions.seasons.map((season) => (
                     <div key={season.id} className="flex items-center space-x-3">
                       <Checkbox
                         id={season.id}

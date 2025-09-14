@@ -97,7 +97,7 @@ class EnvLoader {
             'SITE_NAME' => 'DreaModa Fashion Collection',
             'SITE_URL' => 'https://dreamoda.store',
             'FRONTEND_URL' => 'https://dreamoda.store',
-            'API_BASE_URL' => 'https://dreamoda.store/api',
+            'API_BASE_URL' => 'https://dreamoda.store/backend/api',
             'UPLOAD_MAX_SIZE' => '5242880',
             'UPLOAD_ALLOWED_EXTS' => 'jpg,jpeg,png,gif,webp',
             'UPLOAD_DIR' => 'storage/uploads',
@@ -106,7 +106,7 @@ class EnvLoader {
             'CONTACT_EMAIL' => 'Hi@DreaModa.store',
             'CACHE_TTL' => '3600',
             'LOG_LEVEL' => 'debug',
-            'CORS_ALLOWED_ORIGINS' => 'https://dreamoda.store,http://localhost:5173',
+            'CORS_ALLOWED_ORIGINS' => 'https://dreamoda.store,https://www.dreamoda.store,http://localhost:5173',
             'CORS_ALLOWED_METHODS' => 'GET,POST,PUT,DELETE,OPTIONS',
             'CORS_ALLOWED_HEADERS' => 'Content-Type,Authorization,X-Requested-With'
         ];

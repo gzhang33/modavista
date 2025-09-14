@@ -406,7 +406,7 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
               <div
                 key={`${category.id}-${index}`}
                 className="flex-shrink-0 w-80 cursor-pointer group category-card"
-                onClick={() => handleCategoryClick(category.id)}
+                onClick={() => handleCategoryClick(category.english_name)}
                 data-testid={`category-card-${category.id}`}
               >
                 <div className="relative overflow-hidden rounded-lg shadow-lg h-64 group-hover:scale-110 transition-transform duration-500 bg-gray-200">

@@ -229,6 +229,7 @@
     "contact": {
       "submit_failed": "Failed to send message. Please try again or contact us directly.",
       "submit_success": "Message sent successfully! We will contact you soon.",
+      "success_description": "Thank you for your interest. We'll contact you within 48 hours.",
       "rate_limited": "Please wait before sending another message.",
       "invalid_data": "Please check your information and try again."
     },

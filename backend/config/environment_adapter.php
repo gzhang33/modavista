@@ -85,9 +85,9 @@ class EnvironmentAdapter {
                 ],
                 'error' => [
                     'reporting' => E_ALL,
-                    'display' => true,  // 生产环境调试用
+                    'display' => false,  // Hostinger生产环境关闭错误显示
                     'log' => true,
-                    'log_file' => __DIR__ . '/../logs/php_errors.log'
+                    'log_file' => __DIR__ . '/../../storage/logs/php_errors.log'
                 ],
                 'session' => [
                     'secure' => true,
@@ -95,7 +95,7 @@ class EnvironmentAdapter {
                     'samesite' => 'Strict'
                 ],
                 'cors' => [
-                    'allowed_origins' => explode(',', EnvLoader::get('CORS_ALLOWED_ORIGINS_PROD', 'https://dreamoda.store')),
+                    'allowed_origins' => explode(',', EnvLoader::get('CORS_ALLOWED_ORIGINS_PROD', 'https://dreamoda.store,https://www.dreamoda.store')),
                     'allowed_methods' => 'GET,POST,PUT,DELETE,OPTIONS',
                     'allowed_headers' => 'Content-Type,Authorization,X-Requested-With'
                 ]
@@ -125,7 +125,7 @@ class EnvironmentAdapter {
                     'reporting' => E_ALL,
                     'display' => true,
                     'log' => true,
-                    'log_file' => __DIR__ . '/../logs/php_errors.log'
+                    'log_file' => __DIR__ . '/../../storage/logs/php_errors.log'
                 ],
                 'session' => [
                     'secure' => false,

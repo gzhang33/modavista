@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, CheckCircle } from "lucide-react";
 import { insertInquirySchema } from "@shared/schemas/schema";
 import { apiPost } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,7 @@ export default function ContactSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useLanguage();
+  const [isSubmitted, setIsSubmitted] = useState(false);
   
   // 生成谷歌地图链接的函数
   const getGoogleMapsLink = () => {
@@ -52,12 +53,18 @@ export default function ContactSection() {
   const submitInquiryMutation = useMutation({
     mutationFn: (data: ContactFormData) => apiPost('inquiries.php', data),
     onSuccess: () => {
+      setIsSubmitted(true);
       toast({
         title: t('errors.contact.submit_success', 'Message sent successfully! We will contact you soon.'),
-        description: t('contact.success_description', 'Thank you for your interest. We\'ll contact you within 2 days.'),
+        description: t('errors.contact.success_description', 'Thank you for your interest. We\'ll contact you within 24 hours.'),
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['/api/inquiries'] });
+      
+      // 5秒后重置成功状态
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 5000);
     },
     onError: () => {
       toast({
@@ -91,6 +98,21 @@ export default function ContactSection() {
               <h4 className="text-2xl font-playfair font-semibold text-charcoal mb-6">
                 {t('home.contact.form.title')}
               </h4>
+              
+              {/* Success Message */}
+              {isSubmitted && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3">
+                  <CheckCircle className="text-green-600 text-xl flex-shrink-0" />
+                  <div>
+                    <p className="text-green-800 font-semibold">
+                      {t('errors.contact.submit_success', 'Message sent successfully! We will contact you soon.')}
+                    </p>
+                    <p className="text-green-700 text-sm mt-1">
+                      {t('errors.contact.success_description', 'Thank you for your interest. We\'ll contact you within 24 hours.')}
+                    </p>
+                  </div>
+                </div>
+              )}
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

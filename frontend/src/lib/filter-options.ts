@@ -5,6 +5,7 @@ export interface FilterOption {
   id: string;
   name: string;
   label: string;
+  english_name?: string;
 }
 
 export interface FilterOptionsData {
@@ -35,11 +36,13 @@ export async function fetchCategories(languageCode: string = 'en'): Promise<Filt
     if (Array.isArray(categories)) {
       categories.forEach(category => {
         const name = typeof category === 'string' ? category : category.name || category;
+        const englishName = typeof category === 'object' ? category.english_name : name;
         if (name && name !== 'all') {
           options.push({
-            id: name.toLowerCase().replace(/\s+/g, '-'),
+            id: (englishName || name).toLowerCase().replace(/\s+/g, '-'),
             name: name,
-            label: name
+            label: name,
+            english_name: englishName
           });
         }
       });
@@ -153,9 +156,7 @@ export async function fetchSeasons(languageCode: string = 'en'): Promise<FilterO
     const seasons = await response.json();
     console.log('Fetched seasons:', seasons);
     
-    const options: FilterOption[] = [
-      { id: 'all', name: 'All Seasons', label: 'All Seasons' }
-    ];
+    const options: FilterOption[] = [];
     
     if (Array.isArray(seasons)) {
       seasons.forEach(season => {
@@ -173,7 +174,6 @@ export async function fetchSeasons(languageCode: string = 'en'): Promise<FilterO
   } catch (error) {
     console.error('Failed to fetch seasons:', error);
     return [
-      { id: 'all', name: 'All Seasons', label: 'All Seasons' },
       { id: '1', name: 'Spring/Summer', label: 'Spring/Summer' },
       { id: '2', name: 'Fall/Winter', label: 'Fall/Winter' },
       { id: '3', name: 'All Season', label: 'All Season' },

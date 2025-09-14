@@ -51,7 +51,7 @@
         "headquarters": "Sede Central de DreaModa",
         "address": "Via Gherardacci 47/C, Iolo, Prato, Toscana, Italia",
         "inquiries": "Consultas Empresariales",
-        "phone": "+0039 3388508068\n+0039 3888518810\nLun - Vie, 10:00 - 21:00 CET",
+        "phone": "+39 3388508068\n+39 3888518810\nLun - Vie, 10:00 - 21:00 CET",
         "email": "Correo Electrónico",
         "email_address": "Hi@DreaModa.store"
       },
@@ -229,6 +229,7 @@
     "contact": {
       "submit_failed": "Falló el envío del mensaje. Inténtalo de nuevo o contáctanos directamente.",
       "submit_success": "¡Mensaje enviado con éxito! Te contactaremos pronto.",
+      "success_description": "Gracias por tu interés. Te contactaremos dentro de 48 horas.",
       "rate_limited": "Espera antes de enviar otro mensaje.",
       "invalid_data": "Verifica tu información e inténtalo de nuevo."
     },

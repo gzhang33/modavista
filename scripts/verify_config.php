@@ -10,15 +10,14 @@ ini_set('display_errors', 1);
 
 // 加载配置
 require_once __DIR__ . '/../backend/config/env_loader.php';
-require_once __DIR__ . '/../backend/config/environment.php';
+require_once __DIR__ . '/../backend/config/environment_adapter.php';
 
 echo "=== Dreamoda 配置验证脚本 ===\n\n";
 
 // 加载环境变量
 EnvLoader::load();
-$env = getEnvironment();
+$env = getEnvironmentAdapter();
 
-echo "当前环境: " . $env->getEnvironment() . "\n";
 echo "是否为开发环境: " . ($env->isDevelopment() ? '是' : '否') . "\n";
 echo "是否为生产环境: " . ($env->isProduction() ? '是' : '否') . "\n\n";
 
@@ -74,22 +73,19 @@ echo "允许的来源: " . implode(', ', $corsConfig['allowed_origins']) . "\n";
 echo "允许的方法: " . $corsConfig['allowed_methods'] . "\n";
 echo "允许的头部: " . $corsConfig['allowed_headers'] . "\n";
 
-// 验证缓存配置
-echo "\n=== 缓存配置 ===\n";
-$cacheConfig = $env->getCacheConfig();
-foreach ($cacheConfig as $key => $value) {
-    echo "$key: " . ($value ? '启用' : '禁用') . "\n";
-}
-
-// 验证日志配置
-echo "\n=== 日志配置 ===\n";
-$logConfig = $env->getLogConfig();
-foreach ($logConfig as $key => $value) {
-    echo "$key: $value\n";
+// 验证错误配置
+echo "\n=== 错误配置 ===\n";
+$errorConfig = $env->getErrorConfig();
+foreach ($errorConfig as $key => $value) {
+    if (is_bool($value)) {
+        echo "$key: " . ($value ? '启用' : '禁用') . "\n";
+    } else {
+        echo "$key: $value\n";
+    }
 }
 
 // 验证日志目录
-$logDir = dirname(dirname(__DIR__)) . '/storage/logs';
+$logDir = dirname(__DIR__) . '/storage/logs';
 echo "\n日志目录: $logDir\n";
 if (is_dir($logDir)) {
     echo "✅ 日志目录存在\n";

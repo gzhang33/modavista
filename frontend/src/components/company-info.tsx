@@ -26,7 +26,7 @@ export default function CompanyInfo() {
               </div>
               <div className="text-center">
                 <div className="text-3xl font-playfair font-bold text-accent-gold mb-2" data-testid="stat-global-partners">
-                  15+
+                  20+
                 </div>
                 <div className="text-text-grey">{t('home.about.experience')}</div>
               </div>

@@ -24,10 +24,14 @@
     },
     "about": {
       "title": "Crafting Dreams Into Fashion",
-      "description1": "DreaModa represents the perfect fusion of Italian fashion heritage and contemporary design. Our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments that embody elegance, quality, and modern sophistication.",
-      "description2": "Based in the heart of Prato, Tuscany, we specialize in creating unique pieces that reflect individual style and personality. Our commitment to excellence and attention to detail ensures that each creation meets the highest standards of Italian fashion tradition.",
+      "description1": "DreaModa represents the perfect fusion of Italian fashion heritage and contemporary design. Based in the heart of Prato, Tuscany, our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments. We are driven by a commitment to excellence and meticulous attention to detail, ensuring every piece embodies the elegance, quality, and modern sophistication synonymous with the highest standards of Italian fashion.",
+      "description2": "Since 2005, we have positioned ourselves as a strategic partner to our clients, not merely a supplier. By staying ahead of market trends, our expert team and modern facilities allow us to deliver apparel collections that are both fashionable and commercially viable. Our commitment is to foster your business's growth by providing a dependable supply chain and expert service, ensuring we succeed together.",
       "designs": "Fashion Designs",
       "experience": "Years Experience"
+    },
+    "partners": {
+      "title": "European Partners",
+      "subtitle": "We are proud to serve clients across Europe, bringing Italian fashion excellence to European markets"
     },
     "contact": {
       "title": "Connect With DreaModa",
@@ -36,8 +40,8 @@
         "title": "Request Information",
         "first_name": "First Name",
         "last_name": "Last Name",
-        "email": "Business Email",
-        "company": "Company Name",
+        "email": "Email",
+        "company": "Company Name (Optional)",
         "business_type": "Business Type",
         "requirements": "Tell us about your requirements...",
         "submit": "Send Inquiry"
@@ -47,7 +51,7 @@
         "headquarters": "DreaModa Headquarters",
         "address": "Via Gherardacci 47/C, Iolo, Prato, Tuscany, Italy",
         "inquiries": "Business Inquiries",
-        "phone": "+39 02 1234 5678\nMon - Fri, 9:00 AM - 6:00 PM CET",
+        "phone": "+39 3388508068 \n +39 3888518810 \n Mon - Fri, 10:00 AM - 9:00 PM CET",
         "email": "Email",
         "email_address": "Hi@DreaModa.store"
       },
@@ -58,6 +62,12 @@
         "previews": "Seasonal collection previews",
         "services": "Made-to-measure services"
       }
+    },
+    "business_types": {
+      "retailer": "Retailer",
+      "distributor": "Distributor", 
+      "fashion_brand": "Fashion Brand",
+      "other": "Other"
     }
   },
   "footer": {

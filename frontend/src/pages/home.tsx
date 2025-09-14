@@ -3,6 +3,7 @@ import HeroSection from "@/components/hero-section";
 import CategoryCarousel from "@/components/category-carousel";
 import FeaturedCollection from "@/components/featured-collection";
 import CompanyInfo from "@/components/company-info";
+import PartnersSection from "@/components/partners-section";
 import ContactSection from "@/components/contact-section";
 import Footer from "@/components/footer";
 import SEOHead from "@/components/seo-head";
@@ -87,6 +88,8 @@ export default function Home({}: HomeProps) {
       />
       
       <CompanyInfo />
+      
+      <PartnersSection />
       
       <ContactSection />
       

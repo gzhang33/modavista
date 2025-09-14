@@ -6,22 +6,19 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { insertInquirySchema } from "@shared/schemas/schema";
 import { apiPost } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { BUSINESS_TYPES } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const contactFormSchema = z.object({
   firstName: z.string().min(1, "名字不能为空"),
   lastName: z.string().min(1, "姓氏不能为空"),
   email: z.string().email("请输入有效的邮箱地址"),
-  company: z.string().min(1, "公司名称不能为空"),
-  businessType: z.string().min(1, "请选择业务类型"),
+  company: z.string().optional(),
   message: z.string().min(10, "消息内容至少需要10个字符"),
   inquiryType: z.literal('general').default('general'),
 });
@@ -47,7 +44,6 @@ export default function ContactSection() {
       lastName: '',
       email: '',
       company: '',
-      businessType: '',
       message: '',
       inquiryType: 'general',
     },
@@ -173,29 +169,6 @@ export default function ContactSection() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="businessType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent" data-testid="select-business-type">
-                              <SelectValue placeholder={t('home.contact.form.business_type')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {BUSINESS_TYPES.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
@@ -254,7 +227,7 @@ export default function ContactSection() {
                   <Phone className="text-accent-gold text-xl mt-1 flex-shrink-0" />
                   <div>
                     <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.inquiries')}</h5>
-                    <p className="text-text-grey">
+                    <p className="text-text-grey whitespace-pre-line">
                       {t('home.contact.info.phone')}
                     </p>
                   </div>

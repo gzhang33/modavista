@@ -72,10 +72,10 @@ export const SEASONS: FilterOption[] = [
 
 
 export const BUSINESS_TYPES = [
-  { id: 'retail', name: 'Retailer', label: 'Retailer' },
-  { id: 'distributor', name: 'Distributor', label: 'Distributor' },
-  { id: 'brand', name: 'Fashion Brand', label: 'Fashion Brand' },
-  { id: 'other', name: 'Other', label: 'Other' },
+  { id: 'retail', name: 'Retailer', labelKey: 'contact.business_types.retailer' },
+  { id: 'distributor', name: 'Distributor', labelKey: 'contact.business_types.distributor' },
+  { id: 'brand', name: 'Fashion Brand', labelKey: 'contact.business_types.fashion_brand' },
+  { id: 'other', name: 'Other', labelKey: 'contact.business_types.other' },
 ];
 
 export const INQUIRY_TYPES = [

@@ -23,12 +23,12 @@ try {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     if ($conn->connect_error) {
         error_log("Products API - Database connection failed: " . $conn->connect_error);
-        json_error_response(500, 'DATABASE_CONNECTION_FAILED', ['error' => $conn->connect_error]);
+        json_response(500, ['success' => false, 'error' => ['code' => 'DATABASE_CONNECTION_FAILED', 'message' => 'Database connection failed']]);
     }
     $conn->set_charset('utf8mb4');
 } catch (Exception $e) {
     error_log("Products API - Database connection exception: " . $e->getMessage());
-    json_error_response(500, 'DATABASE_CONNECTION_FAILED', ['error' => 'Database connection exception']);
+    json_response(500, ['success' => false, 'error' => ['code' => 'DATABASE_CONNECTION_FAILED', 'message' => 'Database connection exception']]);
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -43,7 +43,7 @@ switch ($method) {
         handle_delete($conn);
         break;
     default:
-        json_error_response(405, 'UNSUPPORTED_METHOD');
+        json_response(405, ['success' => false, 'error' => ['code' => 'UNSUPPORTED_METHOD', 'message' => 'Method not allowed']]);
 }
 
 $conn->close();
@@ -606,6 +606,7 @@ function handle_post($conn) {
     $upload_main = upload_media_for_field('media');
     $default_image_main = $upload_main['default'];
     $color_main = $_POST['color'] ?? ($_POST['variant_name'] ?? '');
+    
     if (empty($color_main)) {
         $conn->rollback();
         json_response(400, ['message' => '颜色名称不能为空']);

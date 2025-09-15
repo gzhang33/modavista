@@ -1,0 +1,2 @@
+# This file ensures the storage directory is tracked by Git
+# while ignoring its contents (except this file)

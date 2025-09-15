@@ -1,0 +1,534 @@
+/* dashboard.php page styles */
+
+/* Layout */
+.main-content {
+    padding: 2rem;
+}
+
+.product-list-section {
+    width: 100%;
+}
+
+/* Filter Bar - Modern Design */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.filter-group {
+    position: relative;
+}
+
+.filter-button {
+    background-color: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 2rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.filter-button:hover {
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.filter-button.is-open {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+}
+
+.filter-button.is-open:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.filter-count {
+    background-color: #3b82f6;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 1rem;
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+.filter-button.is-open .filter-count {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.filter-button .fa-chevron-down {
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
+}
+
+.filter-button.is-open .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem;
+    z-index: 50;
+    min-width: 280px;
+    max-width: 320px;
+    display: none;
+}
+
+.filter-dropdown.is-open {
+    display: block;
+}
+
+/* Multi-column layout for filter dropdowns with more than 10 options */
+.filter-dropdown-multicolumn {
+    min-width: 500px;
+    max-width: 800px;
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.filter-dropdown-multicolumn.is-open {
+    display: grid;
+}
+
+.filter-dropdown-multicolumn .filter-option {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    min-height: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.filter-dropdown-multicolumn .filter-option label {
+    font-size: 0.875rem;
+    line-height: 1.25;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: block;
+    width: 100%;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.filter-option:hover {
+    background-color: #f3f4f6;
+}
+
+.filter-option input[type="checkbox"] {
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+    accent-color: #3b82f6;
+}
+
+.filter-option label {
+    cursor: pointer;
+    flex-grow: 1;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.filter-bar-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* Search Bar in Filter */
+.filter-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.filter-search input {
+    background-color: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 2rem;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+    width: 200px;
+    transition: all 0.2s ease;
+}
+
+.filter-search input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background-color: #ffffff;
+}
+
+.filter-search .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    pointer-events: none;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Admin Navigation Bar */
+.admin-nav-bar {
+    background: #2c3e50;
+    color: white;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+}
+
+.nav-brand h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-link.active {
+    background: #3498db;
+    color: white;
+}
+
+.nav-link.logout {
+    background: #e74c3c;
+}
+
+.nav-link.logout:hover {
+    background: #c0392b;
+}
+
+/* Table */
+.table-container { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow-x: auto; }
+.products-table { background: #fff; border: 1px solid #e5e7eb; border-collapse: collapse; width: 100%; table-layout: fixed; }
+.products-table th, .products-table td { border-bottom: 1px solid #f3f4f6; padding: 0.75rem; text-align: left; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.products-table th { background-color: #f9fafb; color: #111827; font-weight: 600; }
+.products-table tr:hover { background-color: #fafafa; }
+.products-table .sticky-right { background: #fff; position: sticky; right: 0; z-index: 2; }
+.products-table thead th.sticky-right { background: #f8f9fa; box-shadow: -1px 0 0 #eee; }
+.products-table tbody td.sticky-right { box-shadow: -1px 0 0 #eee; }
+.product-thumbnail { border: 1px solid #ddd; border-radius: 4px; height: 50px; object-fit: cover; width: 50px; }
+.product-description-cell { max-width: 260px; white-space: normal; }
+.text-center { text-align: center; }
+
+/* Action Buttons - Enhanced Modern Design */
+.product-actions-cell {
+    position: relative;
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.125rem;
+    min-height: 2.75rem;
+    background: rgba(249, 250, 251, 0.6);
+    border-radius: 0.25rem;
+    margin: 0.125rem 0;
+}
+
+.product-actions-cell::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 60%;
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    border-radius: 1px;
+}
+
+/* Base button styles */
+.button, .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    user-select: none;
+    white-space: nowrap;
+    min-height: 2rem;
+}
+
+.button:focus, .action-btn:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.5);
+}
+
+.button:disabled, .action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Small button variant - Unified sizing */
+.button-small, .button.button-small {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+    min-height: 2rem;
+    width: 3.5rem;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    text-align: center;
+    justify-content: center;
+}
+
+/* Edit button - Primary action styling - Modern Green */
+.edit-btn, .button.edit-btn {
+    background-color: #059669;
+    color: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 1px 3px 0 rgba(5, 150, 105, 0.1), 0 1px 2px 0 rgba(5, 150, 105, 0.06);
+    width: 3.5rem !important;
+    min-width: 3.5rem !important;
+    max-width: 3.5rem !important;
+}
+
+.edit-btn:hover, .button.edit-btn:hover {
+    background-color: #047857;
+    border-color: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.1), 0 2px 4px -1px rgba(5, 150, 105, 0.06);
+}
+
+.edit-btn:active, .button.edit-btn:active {
+    background-color: #065f46;
+    transform: translateY(0);
+    box-shadow: 0 1px 2px 0 rgba(5, 150, 105, 0.05);
+}
+
+/* Delete button - Danger action styling */
+.delete-btn, .button.delete-btn {
+    background-color: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    box-shadow: 0 1px 3px 0 rgba(220, 38, 38, 0.1), 0 1px 2px 0 rgba(220, 38, 38, 0.06);
+    width: 3.5rem !important;
+    min-width: 3.5rem !important;
+    max-width: 3.5rem !important;
+}
+
+.delete-btn:hover, .button.delete-btn:hover {
+    background-color: #b91c1c;
+    border-color: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.1), 0 2px 4px -1px rgba(220, 38, 38, 0.06);
+}
+
+.delete-btn:active, .button.delete-btn:active {
+    background-color: #991b1b;
+    transform: translateY(0);
+    box-shadow: 0 1px 2px 0 rgba(220, 38, 38, 0.05);
+}
+
+/* Icon support in buttons */
+.button i, .action-btn i {
+    font-size: 0.875rem;
+    transition: transform 0.15s ease;
+}
+
+.button:hover i.fa-edit, .action-btn:hover i.fa-edit {
+    transform: rotate(15deg);
+}
+
+.button:hover i.fa-trash, .action-btn:hover i.fa-trash {
+    transform: scale(1.1);
+}
+
+/* Loading state for buttons */
+.button.loading, .action-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.button.loading::after, .action-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: 50%;
+    left: 50%;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Variants color badges in table */
+.variants-badges { align-items: center; display: flex; gap: 4px; }
+.variant-dot { background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 50%; display: inline-block; height: 12px; width: 12px; }
+
+/* Bulk actions */
+.bulk-actions-panel { align-items: center; background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 8px; display: flex; justify-content: space-between; margin-bottom: 1.5rem; padding: 1rem; }
+.bulk-actions-buttons { display: flex; gap: 0.5rem; }
+#selection-count { color: #495057; font-size: 0.9rem; font-weight: 500; }
+.products-table tr.selected { background-color: #d6eaff !important; }
+.products-table th:first-child, .products-table td:first-child { text-align: center; width: 36px; }
+
+/* Fixed column widths to keep header/body aligned and ensure Material column shows */
+.products-table th:nth-child(2), .products-table td:nth-child(2) { width: 64px; }
+.products-table th:nth-child(3), .products-table td:nth-child(3) { width: 18rem; }
+.products-table th:nth-child(4), .products-table td:nth-child(4) { width: 8rem; }
+.products-table th:nth-child(5), .products-table td:nth-child(5) { width: 10rem; }
+.products-table th:nth-child(6), .products-table td:nth-child(6) { width: 10rem; }
+.products-table th:nth-child(7), .products-table td:nth-child(7) { width: 18rem; }
+.products-table th:nth-child(8), .products-table td:nth-child(8) { width: 9rem; }
+.products-table th:nth-child(9), .products-table td:nth-child(9) { width: 8.5rem; }
+
+
+
+/* Animations */
+@keyframes products_fade_in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.products-list-animate { animation: products_fade_in 260ms ease-out both; }
+.products-table tbody tr.products-list-animate-soft { animation: products_fade_in 240ms ease-out both; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+	.products-table th:nth-child(3), .products-table td:nth-child(3) { width: 14rem; }
+	.products-table th:nth-child(7), .products-table td:nth-child(7) { width: 14rem; }
+}
+
+@media (max-width: 992px) {
+	.products-table th:nth-child(3), .products-table td:nth-child(3) { width: 12rem; }
+	.products-table th:nth-child(4), .products-table td:nth-child(4) { width: 6.5rem; }
+	.products-table th:nth-child(5), .products-table td:nth-child(5) { width: 8rem; }
+	.products-table th:nth-child(6), .products-table td:nth-child(6) { width: 8rem; }
+	.products-table th:nth-child(7), .products-table td:nth-child(7) { width: 12rem; }
+}
+
+@media (max-width: 768px) {
+	/* 在窄屏下允许内容换行，释放固定列宽，使用自动布局避免横向滚动条 */
+	.table-container { overflow-x: visible; }
+	.products-table { table-layout: auto; }
+	.products-table th, .products-table td { white-space: normal; word-break: break-word; }
+	.products-table th:nth-child(n), .products-table td:nth-child(n) { width: auto !important; }
+	.product-description-cell { max-width: none; }
+
+	/* 优化移动端的操作按钮样式 */
+	.product-actions-cell {
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.5rem 0;
+	}
+
+	.button, .action-btn {
+		width: 100%;
+		min-width: 80px;
+		justify-content: center;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.8125rem;
+	}
+
+	.button-small, .button.button-small {
+		padding: 0.5rem 0.625rem;
+		font-size: 0.875rem;
+		min-height: 2.25rem;
+		width: 3.75rem !important;
+		min-width: 3.75rem !important;
+		max-width: 3.75rem !important;
+		gap: 0.375rem;
+		flex-shrink: 0;
+		text-align: center;
+		justify-content: center;
+	}
+
+	/* 移动端减少按钮阴影以提高性能 */
+	.button, .action-btn {
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+	}
+
+	.button:hover, .action-btn:hover {
+		transform: none;
+		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12);
+	}
+
+	.button:active, .action-btn:active {
+		transform: scale(0.98);
+	}
+}
+
+

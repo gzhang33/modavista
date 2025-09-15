@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/add_product.css">
     <link rel="stylesheet" href="assets/css/translation.css">
+    <link rel="stylesheet" href="assets/css/contact_messages.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <meta name="robots" content="noindex, nofollow">
 </head>
@@ -14,7 +15,24 @@
     <script>
     fetch('../api/check_session.php').then(r=>r.json()).then(d=>{ if(!d.loggedIn){ location.href='login.html'; }}).catch(()=>location.href='login.html');
     </script>
-    <main class="main-content">
+    
+    <div class="dashboard-container">
+        <!-- 管理导航栏 -->
+        <nav class="admin-nav-bar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h3><i class="fas fa-cogs"></i> DreaModa 管理后台</h3>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="dashboard.php" class="nav-link"><i class="fas fa-box"></i> 产品管理</a></li>
+                    <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 主页表单查询</a></li>
+                    <li><a href="translations.php" class="nav-link"><i class="fas fa-language"></i> 多语言翻译</a></li>
+                    <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
         <header class="main-header">
             <h2><i class="fas fa-pen"></i> 编辑产品</h2>
             <div class="header-actions">
@@ -65,10 +83,10 @@
                         <!-- 占位符，保持布局平衡 -->
                     </div>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="description">产品描述</label>
                     <textarea id="description" name="description" rows="4" class="form-control" required placeholder="描述产品的特点、材质、设计理念等..."></textarea>
-                </div>
+                </div> -->
                 
                 <!-- 翻译组件占位符 -->
                 <div id="translation-component" class="translation-container"></div>
@@ -104,7 +122,8 @@
                 </div>
             </form>
         </section>
-    </main>
+        </main>
+    </div>
 
 
 

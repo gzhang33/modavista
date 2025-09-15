@@ -22,6 +22,7 @@
                 </div>
                 <ul class="nav-links">
                     <li><a href="dashboard.php" class="nav-link active"><i class="fas fa-box"></i> 产品管理</a></li>
+                    <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 主页表单查询</a></li>
                     <li><a href="translations.php" class="nav-link"><i class="fas fa-language"></i> 多语言翻译</a></li>
                     <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
                 </ul>
@@ -65,7 +66,7 @@
                                 <th>材质</th>
                                 <th>季节</th>
                                 <th>分类</th>
-                                <th>描述</th>
+                                <!-- <th>描述</th> -->
                                 <th>创建日期</th>
                                 <th class="sticky-right">操作</th>
                             </tr>

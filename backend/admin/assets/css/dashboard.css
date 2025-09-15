@@ -276,7 +276,7 @@
 .products-table thead th.sticky-right { background: #f8f9fa; box-shadow: -1px 0 0 #eee; }
 .products-table tbody td.sticky-right { box-shadow: -1px 0 0 #eee; }
 .product-thumbnail { border: 1px solid #ddd; border-radius: 4px; height: 50px; object-fit: cover; width: 50px; }
-.product-description-cell { max-width: 260px; white-space: normal; }
+/* .product-description-cell { max-width: 260px; white-space: normal; } */
 .text-center { text-align: center; }
 
 /* Action Buttons - Enhanced Modern Design */
@@ -486,7 +486,7 @@
 	.products-table { table-layout: auto; }
 	.products-table th, .products-table td { white-space: normal; word-break: break-word; }
 	.products-table th:nth-child(n), .products-table td:nth-child(n) { width: auto !important; }
-	.product-description-cell { max-width: none; }
+	/* .product-description-cell { max-width: none; } */
 
 	/* 优化移动端的操作按钮样式 */
 	.product-actions-cell {

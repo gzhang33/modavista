@@ -74,7 +74,7 @@ function handle_translation_request($conn) {
 
     // 根据操作类型进行不同的验证
     if ($action === 'translate_product') {
-        if (empty($content['name']) && empty($content['description'])) {
+        if (empty($content['name'])) {
             json_error_response(400, 'EMPTY_CONTENT');
         }
 
@@ -250,8 +250,8 @@ function handle_translation_request($conn) {
  */
 function process_translation($content, $source_language, $target_languages, $product_id, $conn, $is_new_product = false) {
     $translations = [
-        'name' => [],
-        'description' => []
+        'name' => []
+        // 'description' => []
     ];
 
     // 限制同时处理的语言数量，避免超时和内存问题
@@ -288,31 +288,31 @@ function process_translation($content, $source_language, $target_languages, $pro
             }
 
             // 翻译产品描述
-            if (!empty($content['description'])) {
-                $cached_description = get_cached_translation($content['description'], $source_language, $target_lang);
-                if ($cached_description) {
-                    $translations['description'][$target_lang] = $cached_description;
-                } else {
-                    $translated_description = call_openai_api($content['description'], $source_language, $target_lang, 'description');
-                    $translations['description'][$target_lang] = $translated_description;
-                    
-                    // 缓存翻译结果（忽略缓存错误）
-                    try {
-                        cache_translation($content['description'], $source_language, $target_lang, $translated_description);
-                    } catch (Exception $e) {
-                        error_log("Cache error: " . $e->getMessage());
-                    }
-                    
-                    // 记录翻译日志（仅对已存在的产品，忽略日志错误）
-                    if ($product_id && !$is_new_product) {
-                        try {
-                            log_translation($conn, $product_id, 'description', $source_language, $target_lang, $content['description'], $translated_description);
-                        } catch (Exception $e) {
-                            error_log("Log error: " . $e->getMessage());
-                        }
-                    }
-                }
-            }
+            // if (!empty($content['description'])) {
+            //     $cached_description = get_cached_translation($content['description'], $source_language, $target_lang);
+            //     if ($cached_description) {
+            //         $translations['description'][$target_lang] = $cached_description;
+            //     } else {
+            //         $translated_description = call_openai_api($content['description'], $source_language, $target_lang, 'description');
+            //         $translations['description'][$target_lang] = $translated_description;
+            //         
+            //         // 缓存翻译结果（忽略缓存错误）
+            //         try {
+            //             cache_translation($content['description'], $source_language, $target_lang, $translated_description);
+            //         } catch (Exception $e) {
+            //             error_log("Cache error: " . $e->getMessage());
+            //         }
+            //         
+            //         // 记录翻译日志（仅对已存在的产品，忽略日志错误）
+            //         if ($product_id && !$is_new_product) {
+            //             try {
+            //                 log_translation($conn, $product_id, 'description', $source_language, $target_lang, $content['description'], $translated_description);
+            //             } catch (Exception $e) {
+            //                 error_log("Log error: " . $e->getMessage());
+            //             }
+            //         }
+            //     }
+            // }
         } catch (Exception $e) {
             // 单个语言翻译失败不影响其他语言，但要详细记录错误
             $error_msg = "Translation failed for language $target_lang: " . $e->getMessage();
@@ -321,7 +321,7 @@ function process_translation($content, $source_language, $target_languages, $pro
             // 记录失败的翻译日志（仅对已存在的产品）
             if ($product_id && !$is_new_product) {
                 try {
-                    foreach (['name', 'description'] as $content_type) {
+                    foreach (['name'] as $content_type) {
                         if (!empty($content[$content_type])) {
                             log_translation($conn, $product_id, $content_type, $source_language, $target_lang, $content[$content_type], "[FAILED: " . $e->getMessage() . "]");
                         }
@@ -372,14 +372,22 @@ function call_openai_api($text, $source_lang, $target_lang, $content_type) {
     if ($content_type === 'name') {
         $prompt = (
             "你是一个专业的时尚产品翻译专家。\n"
-            . "请将以下产品名称从{$source_name}翻译成{$target_name}，保持品牌调性和专业性：\n\n"
+            . "请将以下产品名称从{$source_name}翻译成{$target_name}：\n\n"
             . "{$text}\n\n"
-            . "要求：\n"
-            . "1. 保持时尚行业的专业术语；\n"
-            . "2. 符合目标语言的文化习惯；\n"
-            . "3. 保持原文的营销效果；\n"
-            . "4. 简洁明了，适合电商展示。\n\n"
-            . "请直接输出翻译结果，不要添加任何解释、问候语或其他文字。"
+            . "重要限制：\n"
+            . "1. 只输出翻译内容本身，不要添加任何产品描述、功能说明或额外内容；\n"
+            . "2. 输出长度限制在50个字符以内；\n"
+            . "3. 保持时尚行业的专业术语和品牌调性；\n"
+            . "4. 符合目标语言的文化习惯；\n"
+            . "5. 适合作为电商产品标题使用。\n\n"
+            . "输出格式要求：\n"
+            . "- 只输出翻译后的产品名称\n"
+            . "- 不要包含任何解释、问候语、标点符号或其他文字\n"
+            . "- 不要添加产品描述或功能说明\n\n"
+            . "示例：\n"
+            . "输入：测试产品3\n"
+            . "输出：Test Product 3\n\n"
+            . "请严格按照以上要求执行翻译。"
         );
     } else {
         $prompt = (
@@ -403,8 +411,8 @@ function call_openai_api($text, $source_lang, $target_lang, $content_type) {
                 'content' => $prompt
             ]
         ],
-        'max_tokens' => 1000,
-        'temperature' => 0.3
+        'max_tokens' => 200,
+        'temperature' => 0.1
     ];
 
     $ch = curl_init();
@@ -442,9 +450,67 @@ function call_openai_api($text, $source_lang, $target_lang, $content_type) {
     }
 
     $translated_text = trim($result['choices'][0]['message']['content']);
+    
+    // 对产品名称翻译进行输出验证和清理
+    if ($content_type === 'name') {
+        // 移除可能的额外内容（如产品描述、功能说明等）
+        $translated_text = clean_product_name_output($translated_text);
+        
+        // 验证输出长度
+        if (strlen($translated_text) > 100) {
+            error_log("Translation output too long, truncating: " . substr($translated_text, 0, 100) . "...");
+            $translated_text = substr($translated_text, 0, 100);
+        }
+    }
+    
     error_log("Translation success: {$source_lang} -> {$target_lang} [{$content_type}]: " . substr($translated_text, 0, 50) . "...");
     
     return $translated_text;
+}
+
+/**
+ * 清理产品名称翻译输出
+ */
+function clean_product_name_output($text) {
+    // 移除常见的额外内容模式
+    $patterns = [
+        // 移除产品描述相关内容
+        '/Elevate your style.*$/is',
+        '/Discover.*$/is', 
+        '/Designed for.*$/is',
+        '/Perfect for.*$/is',
+        '/Ideal for.*$/is',
+        '/Featuring.*$/is',
+        '/Crafted with.*$/is',
+        '/Made from.*$/is',
+        '/Available in.*$/is',
+        
+        // 移除营销词汇后的内容
+        '/Elevate.*$/is',
+        '/Discover.*$/is',
+        '/Explore.*$/is',
+        '/Experience.*$/is',
+        '/Transform.*$/is',
+        
+        // 移除句子结构（保留第一句或短语）
+        '/\..*$/s',  // 移除第一个句号后的所有内容
+        '/!.*$/s',   // 移除第一个感叹号后的所有内容
+        '/\?.*$/s',  // 移除第一个问号后的所有内容
+        
+        // 移除换行后的内容
+        '/\n.*$/s',
+        '/\r.*$/s',
+    ];
+    
+    foreach ($patterns as $pattern) {
+        $text = preg_replace($pattern, '', $text);
+    }
+    
+    // 清理多余的空格和标点
+    $text = trim($text);
+    $text = preg_replace('/\s+/', ' ', $text);
+    
+    return $text;
 }
 
 /**
@@ -544,40 +610,40 @@ function save_translations_to_i18n($conn, $product_id, $translations) {
                     $stmt->close();
                 }
                 
-            } elseif ($content_type === 'description') {
-                // 先检查该product_id和locale是否已有记录
-                $check_stmt = $conn->prepare("SELECT name FROM product_i18n WHERE product_id = ? AND locale = ?");
-                $check_stmt->bind_param('is', $product_id, $normalized_locale);
-                $check_stmt->execute();
-                $existing = $check_stmt->get_result()->fetch_assoc();
-                $check_stmt->close();
-                
-                if ($existing) {
-                    // 如果记录存在，只更新description
-                    $stmt = $conn->prepare("
-                        UPDATE product_i18n 
-                        SET description = ?, translation_timestamp = CURRENT_TIMESTAMP 
-                        WHERE product_id = ? AND locale = ?
-                    ");
-                    $stmt->bind_param('sis', $text, $product_id, $normalized_locale);
-                } else {
-                    // 如果记录不存在，需要提供name字段的默认值
-                    $default_name = ''; // 空字符串作为默认值
-                    $default_slug = 'product-' . $product_id . '-' . strtolower(substr($normalized_locale, 0, 2));
-                    
-                    $stmt = $conn->prepare("
-                        INSERT INTO product_i18n (product_id, locale, name, description, slug, status, translation_timestamp) 
-                        VALUES (?, ?, ?, ?, ?, 'published', CURRENT_TIMESTAMP)
-                    ");
-                    $stmt->bind_param('issss', $product_id, $normalized_locale, $default_name, $text, $default_slug);
-                }
-                
-                if ($stmt) {
-                    if (!$stmt->execute()) {
-                        error_log("Failed to save description translation: " . $stmt->error);
-                    }
-                    $stmt->close();
-                }
+            // } elseif ($content_type === 'description') {
+            //     // 先检查该product_id和locale是否已有记录
+            //     $check_stmt = $conn->prepare("SELECT name FROM product_i18n WHERE product_id = ? AND locale = ?");
+            //     $check_stmt->bind_param('is', $product_id, $normalized_locale);
+            //     $check_stmt->execute();
+            //     $existing = $check_stmt->get_result()->fetch_assoc();
+            //     $check_stmt->close();
+            //     
+            //     if ($existing) {
+            //         // 如果记录存在，只更新description
+            //         $stmt = $conn->prepare("
+            //             UPDATE product_i18n 
+            //             SET description = ?, translation_timestamp = CURRENT_TIMESTAMP 
+            //             WHERE product_id = ? AND locale = ?
+            //         ");
+            //         $stmt->bind_param('sis', $text, $product_id, $normalized_locale);
+            //     } else {
+            //         // 如果记录不存在，需要提供name字段的默认值
+            //         $default_name = ''; // 空字符串作为默认值
+            //         $default_slug = 'product-' . $product_id . '-' . strtolower(substr($normalized_locale, 0, 2));
+            //         
+            //         $stmt = $conn->prepare("
+            //             INSERT INTO product_i18n (product_id, locale, name, description, slug, status, translation_timestamp) 
+            //             VALUES (?, ?, ?, ?, ?, 'published', CURRENT_TIMESTAMP)
+            //         ");
+            //         $stmt->bind_param('issss', $product_id, $normalized_locale, $default_name, $text, $default_slug);
+            //     }
+            //     
+            //     if ($stmt) {
+            //         if (!$stmt->execute()) {
+            //             error_log("Failed to save description translation: " . $stmt->error);
+            //         }
+            //         $stmt->close();
+            //     }
                 
             }
         }

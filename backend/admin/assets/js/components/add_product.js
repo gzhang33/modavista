@@ -186,10 +186,10 @@ export default class ProductFormComponent extends BaseComponent {
             }
             
             // 设置描述
-            const description_input = this.form.querySelector('#description');
-            if (description_input) {
-                description_input.value = product.description || '';
-            }
+            // const description_input = this.form.querySelector('#description');
+            // if (description_input) {
+            //     description_input.value = product.description || '';
+            // }
             
             // 显示媒体预览
             this.show_current_media_previews(product.media || [], product.defaultImage || null);
@@ -1206,15 +1206,15 @@ export default class ProductFormComponent extends BaseComponent {
         }
 
         // 应用产品描述翻译
-        if (translations.description && translations.description[target_language]) {
-            const descriptionInput = this.form.querySelector('#description');
-            if (descriptionInput) {
-                const currentValue = descriptionInput.value.trim();
-                if (!currentValue || confirm('是否要覆盖当前的产品描述？')) {
-                    descriptionInput.value = translations.description[target_language];
-                }
-            }
-        }
+        // if (translations.description && translations.description[target_language]) {
+        //     const descriptionInput = this.form.querySelector('#description');
+        //     if (descriptionInput) {
+        //         const currentValue = descriptionInput.value.trim();
+        //         if (!currentValue || confirm('是否要覆盖当前的产品描述？')) {
+        //             descriptionInput.value = translations.description[target_language];
+        //         }
+        //     }
+        // }
 
         // 显示成功消息
         this.eventBus.emit('toast:show', {

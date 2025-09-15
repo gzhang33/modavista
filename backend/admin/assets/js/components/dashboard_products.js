@@ -139,7 +139,7 @@ export default class ProductTableComponent extends BaseComponent {
         this.tableBody.innerHTML = '';
         const list = this.get_current_list();
         if (!list || list.length === 0) {
-            this.tableBody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的产品</td></tr>';
+            this.tableBody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的产品</td></tr>';
             this.selectAllCheckbox.checked = false;
             this.selectAllCheckbox.disabled = true;
             return;
@@ -181,7 +181,7 @@ export default class ProductTableComponent extends BaseComponent {
                 <td class="product-material-cell">${material_name}</td>
                 <td class="product-season-cell">${p.season || '—'}</td>
                 <td><span class="product-category-cell">${p.category || '未分类'}</span></td>
-                <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td>
+                <!-- <td class="product-description-cell">${p.description ? this.escape_html(p.description) : '—'}</td> -->
                 <td class="product-created-at-cell">${this.format_created_at(p.createdAt)}</td>
                 <td class="product-actions-cell sticky-right">
                     <a class="button button-small edit-btn" data-id="${p.id}" href="/admin/edit_product.php?id=${p.id}">
@@ -413,7 +413,7 @@ ProductTableComponent.prototype.apply_filters = function(filters) {
         let actual = null;
         switch (field) {
             case 'name': actual = p.name; break;
-            case 'description': actual = p.description; break;
+            // case 'description': actual = p.description; break;
             case 'category': actual = p.category; break;
             case 'color': actual = p.color; break;
             case 'material': actual = p.material; break;
@@ -423,7 +423,7 @@ ProductTableComponent.prototype.apply_filters = function(filters) {
         
 
         // Text/select comparisons
-        if (field === 'name' || field === 'description' || field === 'category' || field === 'color' || field === 'material') {
+        if (field === 'name' || field === 'category' || field === 'color' || field === 'material') {
             const a = normalize_text(actual);
             if (operator === 'in') {
                 // Handle array of values for 'in' operator

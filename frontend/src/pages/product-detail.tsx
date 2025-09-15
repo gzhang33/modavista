@@ -252,7 +252,7 @@ export default function ProductDetailPage() {
             <div className="text-center py-16">
               <h1 className="text-2xl font-semibold text-gray-900 mb-4">{t('product_detail.not_found.title', 'Product Not Found')}</h1>
               <p className="text-gray-600 mb-8">{t('product_detail.not_found.desc', 'Sorry, the product you are looking for does not exist or has been removed.')}</p>
-              <Link href={createLocalizedHref('/products')}> 
+              <Link href={createLocalizedHref('/collections')}> 
                 <Button className="bg-charcoal text-white hover:bg-gray-800">
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   {t('product_detail.actions.view_all_products', 'View all products')}
@@ -304,7 +304,7 @@ export default function ProductDetailPage() {
     }),
     generateBreadcrumbSchema([
       { name: t('nav.home', 'Home'), url: createLocalizedHref('/') },
-      { name: t('nav.collections', 'Collections'), url: createLocalizedHref('/products') },
+      { name: t('nav.collections', 'Collections'), url: createLocalizedHref('/collections') },
       { name: product.name, url: createLocalizedHref(`/product/${id}`) }
     ])
   ] : [];
@@ -331,9 +331,9 @@ export default function ProductDetailPage() {
               </Button>
             </Link>
             <span className="mx-2 text-gray-400">/</span>
-            <Link href={createLocalizedHref('/products')}>
+            <Link href={createLocalizedHref('/collections')}>
               <Button variant="ghost" className="text-gray-500 hover:text-gray-700 p-0">
-                {t('footer.all_products', 'All Products')}
+                {t('footer.all_products', 'All Collections')}
               </Button>
             </Link>
             <span className="mx-2 text-gray-400">/</span>
@@ -344,7 +344,7 @@ export default function ProductDetailPage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
             {/* Product Gallery */}
             <div className="flex flex-col">
-              {/* Mobile Product Name - Only visible on mobile */}
+cd              {/* Mobile Product Name - Only visible on mobile */}
               <h1 className="text-xl font-bold tracking-tight text-gray-900 mb-4 md:hidden">
                 {product.name}
               </h1>
@@ -443,7 +443,7 @@ export default function ProductDetailPage() {
                   {requestSampleMutation.isPending ? t('product_detail.actions.sending', 'Sending Request...') : t('product_detail.actions.add_to_inquiry', 'Request Sample')}
                 </Button>
                 
-                <Link href={createLocalizedHref('/products')}>
+                <Link href={createLocalizedHref('/collections')}>
                   <Button 
                     variant="outline" 
                     className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"

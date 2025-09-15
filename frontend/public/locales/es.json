@@ -73,7 +73,7 @@
   "footer": {
     "description": "Fabricante y diseñador de moda premium, creando prendas excepcionales para clientes exigentes en todo el mundo con artesanía italiana y estilo moderno.",
     "quick_links": "Enlaces Rápidos",
-    "all_products": "Todos los Productos",
+    "all_products": "Todas las Colecciones",
     "collections": "Colecciones",
     "categories": "Categorías",
     "about_us": "Sobre Nosotros",
@@ -94,7 +94,7 @@
   },
   "products": {
     "back_to_home": "Volver al inicio",
-    "title": "Todos los Productos",
+    "title": "Todas las Colecciones",
     "subtitle_plural": "",
     "filters_title": "Filtros",
     "clear_all": "Borrar todo",
@@ -128,7 +128,7 @@
     "no": "No",
     "error_loading": "Error al cargar los productos: ",
     "refresh_page": "Por favor, intente refrescar la página.",
-    "seo_title": "Productos DreaModa - Colección de Ropa al por Mayor Premium",
+    "seo_title": "Colecciones DreaModa - Colección de Ropa al por Mayor Premium",
     "seo_description": "Explore nuestra colección completa de prendas de moda italianas de primera calidad. Ropa al por mayor, vestidos, blusas, abrigos y accesorios para minoristas de moda exigentes."
   },
   "product_detail": {

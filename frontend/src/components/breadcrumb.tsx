@@ -25,17 +25,17 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
       return [{ label: t('nav.home', 'Home'), isActive: true }];
     }
     
-    if (path === '/products') {
+    if (path === '/collections') {
       return [
         { label: t('nav.home', 'Home'), href: '/' },
-        { label: t('nav.products', 'Products'), isActive: true }
+        { label: t('nav.collections', 'Collections'), isActive: true }
       ];
     }
     
     if (path.startsWith('/product/')) {
       return [
         { label: t('nav.home', 'Home'), href: '/' },
-        { label: t('nav.products', 'Products'), href: '/products' },
+        { label: t('nav.collections', 'Collections'), href: '/collections' },
         { label: t('product.detail', 'Product Detail'), isActive: true }
       ];
     }

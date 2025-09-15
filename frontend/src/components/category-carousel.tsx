@@ -158,7 +158,7 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
     if (onNavigateToCategory) {
       onNavigateToCategory(categoryId);
     } else {
-      setLocation(`/products?category=${categoryId}`);
+      setLocation(`/collections?category=${categoryId}`);
     }
   };
 

@@ -73,7 +73,7 @@
   "footer": {
     "description": "Premium-Modehersteller und -Designer, der außergewöhnliche Kleidungsstücke für anspruchsvolle Kunden weltweit mit italienischem Handwerk und modernem Stil kreiert.",
     "quick_links": "Schnellzugriff",
-    "all_products": "Alle Produkte",
+    "all_products": "Alle Kollektionen",
     "collections": "Kollektionen",
     "categories": "Kategorien",
     "about_us": "Über Uns",
@@ -94,7 +94,7 @@
   },
   "products": {
     "back_to_home": "Zur Startseite",
-    "title": "Alle Produkte",
+    "title": "Alle Kollektionen",
     "subtitle_plural": "",
     "filters_title": "Filter",
     "clear_all": "Alle zurücksetzen",
@@ -128,7 +128,7 @@
     "no": "Nein",
     "error_loading": "Fehler beim Laden der Produkte: ",
     "refresh_page": "Bitte versuchen Sie, die Seite zu aktualisieren.",
-    "seo_title": "DreaModa Produkte - Premium Großhandels-Kleidungskollektion",
+    "seo_title": "DreaModa Kollektionen - Premium Großhandels-Kleidungskollektion",
     "seo_description": "Entdecken Sie unsere vollständige Kollektion an hochwertiger italienischer Mode. Großhandelskleidung, Kleider, Oberteile, Oberbekleidung und Accessoires für anspruchsvolle Modehändler."
   },
   "product_detail": {

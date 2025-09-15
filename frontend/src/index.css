@@ -174,3 +174,97 @@
     display: none;
   }
 }
+
+/* Mobile-specific optimizations */
+@media (max-width: 767px) {
+  /* Category Carousel - Ensure at least 2 images visible */
+  .category-card {
+    width: 45% !important; /* Show 2 cards with gap */
+    min-width: 45% !important;
+  }
+  
+  /* Category carousel container adjustments */
+  #categories .max-w-7xl {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Category carousel scroll container */
+  #categories .flex.gap-6 {
+    gap: 1rem !important; /* Reduce gap for mobile */
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Featured Collection - 2 column layout */
+  #collections .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Featured Collection product images - smaller size */
+  #collections .h-96 {
+    height: 12rem !important; /* Reduce from 24rem to 12rem */
+  }
+  
+  /* Company Info section - hide image on mobile */
+  #about .lg\\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  #about .relative {
+    display: none !important; /* Hide company image */
+  }
+  
+  /* Company Info text adjustments */
+  #about h3 {
+    font-size: 2rem !important; /* Reduce from 2.5rem */
+    margin-bottom: 1rem !important;
+  }
+  
+  #about p {
+    font-size: 1rem !important; /* Reduce from 1.125rem */
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Company Info stats grid */
+  #about .grid.grid-cols-2 {
+    gap: 1rem !important;
+  }
+  
+  #about .text-3xl {
+    font-size: 1.5rem !important; /* Reduce stats font size */
+  }
+  
+  /* Partners section adjustments */
+  #partners h2 {
+    font-size: 1.5rem !important; /* Reduce from 1.875rem to 1.5rem */
+    margin-bottom: 0.75rem !important;
+  }
+  
+  #partners p {
+    font-size: 1rem !important; /* Reduce from 1.125rem */
+  }
+  
+  /* Partners section padding adjustments */
+  #partners {
+    padding-top: 1rem !important; /* Reduce top padding */
+    padding-bottom: 2rem !important; /* Reduce bottom padding */
+  }
+  
+  /* Partners section margin adjustments */
+  #partners .mb-12 {
+    margin-bottom: 1.5rem !important; /* Reduce margin */
+  }
+  
+  /* Company Info section padding adjustments */
+  #about {
+    padding-top: 2rem !important; /* Reduce top padding */
+    padding-bottom: 1rem !important; /* Reduce bottom padding */
+  }
+  
+  /* Ensure both sections fit in mobile viewport */
+  #about + #partners {
+    margin-top: 0 !important;
+  }
+}

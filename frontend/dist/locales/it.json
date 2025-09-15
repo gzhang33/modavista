@@ -73,7 +73,7 @@
   "footer": {
     "description": "Produttore e designer di moda premium, che crea capi eccezionali per clienti esigenti in tutto il mondo con l'artigianato italiano e lo stile moderno.",
     "quick_links": "Link Rapidi",
-    "all_products": "Tutti i Prodotti",
+    "all_products": "Tutte le Collezioni",
     "collections": "Collezioni",
     "categories": "Categorie",
     "about_us": "Chi Siamo",
@@ -94,8 +94,8 @@
   },
   "products": {
     "back_to_home": "Torna alla Home",
-    "title": "Tutti i Prodotti",
-    "subtitle_plural": "Esplora la nostra collezione completa di {count} capi premium all’ingrosso",
+    "title": "Tutte le Collezioni",
+    "subtitle_plural": "",
     "filters_title": "Filtri",
     "clear_all": "Reimposta tutto",
     "search_label": "Cerca",
@@ -110,6 +110,7 @@
     "sort_name_asc": "Nome A-Z",
     "sort_name_desc": "Nome Z-A",
     "sort_newest": "Più recenti",
+    "show_collections": "Mostra Collezioni",
     "empty": {
       "no_products": "Nessun prodotto disponibile. Aggiungi dei prodotti dal pannello admin.",
       "no_match": "Nessun prodotto corrisponde ai tuoi criteri.",
@@ -127,7 +128,7 @@
     "no": "No",
     "error_loading": "Errore durante il caricamento dei prodotti: ",
     "refresh_page": "Prova a ricaricare la pagina.",
-    "seo_title": "Prodotti DreaModa - Collezione di Abbigliamento all'Ingrosso Premium",
+    "seo_title": "Collezioni DreaModa - Collezione di Abbigliamento all'Ingrosso Premium",
     "seo_description": "Esplora la nostra collezione completa di capi di moda italiani di alta qualità. Abbigliamento all'ingrosso, vestiti, top, capispalla e accessori per rivenditori di moda esigenti."
   },
   "product_detail": {

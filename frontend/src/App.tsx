@@ -7,7 +7,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import ProductsPage from "@/pages/products";
+import CollectionsPage from "@/pages/collections";
 import ProductDetailPage from "@/pages/product-detail";
 import ProductModal from "@/components/product-modal";
 import PerformanceOptimizer from "@/components/performance-optimizer";
@@ -81,8 +81,8 @@ function MultilingualRoutes() {
               </Route>
 
               {/* 多语言产品页面路由 */}
-              <Route path={`/${lang}/products`}>
-                <ProductsPage onOpenProductModal={openProductModal} />
+              <Route path={`/${lang}/collections`}>
+                <CollectionsPage onOpenProductModal={openProductModal} />
               </Route>
 
               {/* 多语言主页路由 */}
@@ -100,8 +100,8 @@ function MultilingualRoutes() {
         <Route path="/product/:id">
           <ProductDetailPage />
         </Route>
-        <Route path="/products">
-          <ProductsPage onOpenProductModal={openProductModal} />
+        <Route path="/collections">
+          <CollectionsPage onOpenProductModal={openProductModal} />
         </Route>
         <Route path="/">
           <Home />

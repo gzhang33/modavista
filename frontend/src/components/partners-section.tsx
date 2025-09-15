@@ -20,7 +20,7 @@ export default function PartnersSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="bg-white pt-8 pb-16">
+    <section className="bg-white pt-8 pb-16" id="partners">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-playfair font-semibold text-charcoal mb-4">

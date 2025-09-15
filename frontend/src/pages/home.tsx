@@ -39,7 +39,7 @@ export default function Home({}: HomeProps) {
   }, []);
 
   const handleNavigateToCategory = (category: string) => {
-    setLocation(`/products?category=${category}`);
+    setLocation(`/collections?category=${category}`);
   };
 
   // 生成结构化数据

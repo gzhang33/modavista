@@ -119,11 +119,11 @@ export default function Header() {
                 {t('nav.contact', 'Contact')}
               </a>
               <a
-                href={createLocalizedHref('/products')}
+                href={createLocalizedHref('/collections')}
                 className="text-charcoal hover:text-accent-gold hover:bg-gray-50 transition-all duration-300 font-medium px-4 py-3 rounded-lg min-h-[44px] flex items-center"
-                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); window.location.href = createLocalizedHref('/products'); }}
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); window.location.href = createLocalizedHref('/collections'); }}
               >
-                {t('nav.products', 'Products')}
+                {t('nav.collections', 'Collections')}
               </a>
             </nav>
           </div>

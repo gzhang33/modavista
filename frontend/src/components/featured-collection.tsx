@@ -85,7 +85,7 @@ export default function FeaturedCollection({
   const [, setLocation] = useLocation();
 
   const loadMoreProducts = () => {
-    setLocation('/products');
+    setLocation('/collections');
   };
 
   if (isLoading) {

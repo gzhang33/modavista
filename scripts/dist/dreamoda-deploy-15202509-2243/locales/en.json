@@ -1,0 +1,251 @@
+{
+  "nav": {
+    "home": "Home",
+    "collections": "Collections",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "home": {
+    "title": "DreaModa - Italian Fashion Excellence",
+    "hero": {
+      "title": "Premium Wholesale Garment Collection",
+      "subtitle": "Discover our curated selection of high-quality garments crafted for discerning wholesale partners",
+      "explore": "Explore Collections",
+      "samples": "Request Samples"
+    },
+    "categories": {
+      "title": "Shop Garments by Category",
+      "subtitle": "Explore our diverse collection of premium fashion garments across different categories"
+    },
+    "featured": {
+      "title": "Featured Collection",
+      "subtitle": "Handpicked selections from our latest seasonal collection, showcasing exceptional craftsmanship and contemporary design",
+      "view_all": "View Complete Collection"
+    },
+    "about": {
+      "title": "Crafting Dreams Into Fashion",
+      "description1": "DreaModa represents the perfect fusion of Italian fashion heritage and contemporary design. Based in the heart of Prato, Tuscany, our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments. We are driven by a commitment to excellence and meticulous attention to detail, ensuring every piece embodies the elegance, quality, and modern sophistication synonymous with the highest standards of Italian fashion.",
+      "description2": "Since 2005, we have positioned ourselves as a strategic partner to our clients, not merely a supplier. By staying ahead of market trends, our expert team and modern facilities allow us to deliver apparel collections that are both fashionable and commercially viable. Our commitment is to foster your business's growth by providing a dependable supply chain and expert service, ensuring we succeed together.",
+      "designs": "Fashion Designs",
+      "experience": "Years Experience"
+    },
+    "partners": {
+      "title": "European Partners",
+      "subtitle": "We are proud to serve clients across Europe, bringing Italian fashion excellence to European markets"
+    },
+    "contact": {
+      "title": "Connect With DreaModa",
+      "subtitle": "Discover our exclusive fashion collections. Contact us for inquiries, appointments, or to learn more about our bespoke services.",
+      "form": {
+        "title": "Request Information",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "email": "Email",
+        "company": "Company Name (Optional)",
+        "business_type": "Business Type",
+        "requirements": "Tell us about your requirements...",
+        "submit": "Send Inquiry"
+      },
+      "info": {
+        "title": "Get In Touch",
+        "headquarters": "DreaModa Headquarters",
+        "address": "Via Gherardacci 47/C, Iolo, Prato, Tuscany, Italy",
+        "inquiries": "Business Inquiries",
+        "phone": "+39 3388508068 \n +39 3888518810 \n Mon - Fri, 10:00 AM - 9:00 PM CET",
+        "email": "Email",
+        "email_address": "Hi@DreaModa.store"
+      },
+      "visit": {
+        "title": "Visit Our Atelier",
+        "appointments": "Private appointments available",
+        "consultations": "Bespoke design consultations",
+        "previews": "Seasonal collection previews",
+        "services": "Made-to-measure services"
+      }
+    },
+    "business_types": {
+      "retailer": "Retailer",
+      "distributor": "Distributor", 
+      "fashion_brand": "Fashion Brand",
+      "other": "Other"
+    }
+  },
+  "footer": {
+    "description": "Premium fashion manufacturer and designer, creating exceptional garments for discerning customers worldwide with Italian craftsmanship and modern style.",
+    "quick_links": "Quick Links",
+    "all_products": "All Collections",
+    "collections": "Collections",
+    "categories": "Categories",
+    "about_us": "About Us",
+    "contact": "Contact",
+    "copyright": "© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Tuscany, Italy."
+  },
+  "filters": {
+    "all_categories": "All Categories",
+    "all_fabrics": "All Fabrics",
+    "all_seasons": "All Seasons",
+    "all_styles": "All Styles",
+    "apply": "Apply Filters",
+    "sort": {
+      "featured": "Featured",
+      "newest": "Newest"
+    },
+    "reset": "Reset"
+  },
+  "products": {
+    "back_to_home": "Back to Home",
+    "title": "All Collections",
+    "subtitle_plural": "",
+    "filters_title": "Filters",
+    "clear_all": "Clear All",
+    "search_label": "Search",
+    "search_placeholder": "Search products...",
+    "category": "Category",
+    "material": "Material",
+    "all_materials": "All Materials",
+    "season": "Season",
+    "results_count": "{count} products",
+    "sort_by": "Sort by",
+    "sort_most_popular": "Most Popular",
+    "sort_name_asc": "Name A-Z",
+    "sort_name_desc": "Name Z-A",
+    "sort_newest": "Newest First",
+    "show_collections": "Show Collections",
+    "empty": {
+      "no_products": "No products available. Please add some products from the admin panel.",
+      "no_match": "No products found matching your criteria.",
+      "visit_admin": "Visit the admin panel to add your first product.",
+      "try_adjust": "Try adjusting your filters or search terms."
+    },
+    "uncategorized": "Uncategorized",
+    "cotton": "Cotton",
+    "casual": "Casual",
+    "all_season": "All-Season",
+    "machine_wash": "Machine wash",
+    "made_in_italy": "Made in Italy",
+    "color": "Color",
+    "sku": "SKU",
+    "no": "No",
+    "error_loading": "Error loading products: ",
+    "refresh_page": "Please try refreshing the page.",
+    "seo_title": "DreaModa Collections - Premium Wholesale Garments Collection",
+    "seo_description": "Explore our complete collection of premium Italian fashion garments. Wholesale clothing, dresses, tops, outerwear and accessories for discerning fashion retailers."
+  },
+  "product_detail": {
+    "title": "Product Details",
+    "features": "Product Features",
+    "specifications": "Product Specifications",
+    "description_fallback": "This exquisite {name} showcases our commitment to quality and craftsmanship. Made with premium materials, paying attention to every detail, bringing you the perfect combination of comfort and fashion.",
+    "description_rich": "{name} is made with carefully selected materials, embodying our unwavering pursuit of quality and design. Each product undergoes strict quality control to ensure the best customer experience.",
+    "fields": {
+      "sku": "Product Code",
+      "fabric": "Fabric",
+      "category": "Category",
+      "season": "Season",
+      "care": "Care Instructions",
+      "origin": "Origin",
+      "specifications": "Specifications",
+      "description": "Description"
+    },
+    "actions": {
+      "add_to_inquiry": "Request Sample",
+      "sending": "Sending Request...",
+      "favorite": "Favorite",
+      "back_to_list": "Back to List",
+      "view_all_products": "View all products"
+    },
+    "not_found": {
+      "title": "Product Not Found",
+      "desc": "Sorry, the product you are looking for does not exist or has been removed."
+    },
+    "sample_request_name": "Sample Request",
+    "sample_request_company": "Sample Request Company",
+    "sample_request_message": "Sample Request - Product: {productName} (SKU: {productSku})\n\nCustomer wishes to request a sample of this product to evaluate quality and suitability. Please contact the customer to arrange sample shipping.\n\nProduct Details:\n- Product Name: {productName}\n- SKU: {productSku}\n- Category: {productCategory}\n- Material: {productMaterial}\n\nPlease process this sample request as soon as possible.",
+    "toast": {
+      "sample_request_sent_title": "Sample Request Sent",
+      "sample_request_sent_description": "We will process your sample request and contact you shortly. Redirecting to contact page...",
+      "request_failed_title": "Request Failed",
+      "request_failed_description": "Please try again or contact us directly. If the issue persists, please email info@dreamoda.com"
+    },
+    "features": {
+      "fabric": "Made with premium {fabric} fabric",
+      "season": "Suitable for {season} season wear",
+      "style": "{style} style design, suitable for various occasions",
+      "care": "Strict {care} care requirements",
+      "origin": "Origin: {origin}",
+      "sku": "SKU: {sku}"
+    },
+    "seo_title": "{productName} - DreaModa Premium Wholesale Garments",
+    "seo_title_fallback": "Product - DreaModa",
+    "seo_description": "{productName} - Premium Italian fashion garment. {productDescription} Material: {productMaterial}, Color: {productColor}. Wholesale pricing available.",
+    "seo_description_fallback": "Premium Italian fashion garment for wholesale",
+    "thumbnail_alt": "Thumbnail"
+  },
+  "common": {
+    "badges": {
+      "new": "New",
+      "featured": "Featured"
+    },
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try Again"
+  },
+  "errors": {
+    "general": {
+      "title": "Error",
+      "message": "An unexpected error occurred. Please try again.",
+      "network_error": "Network connection error. Please check your internet connection and try again.",
+      "server_error": "Server error. Please try again later.",
+      "not_found": "The requested resource was not found.",
+      "unauthorized": "You are not authorized to perform this action.",
+      "forbidden": "Access denied.",
+      "validation_error": "Please check your input and try again.",
+      "timeout": "Request timeout. Please try again.",
+      "unknown": "An unknown error occurred."
+    },
+    "api": {
+      "connection_failed": "Failed to connect to server. Please try again later.",
+      "invalid_response": "Invalid response from server.",
+      "request_failed": "API request failed",
+      "rate_limited": "Too many requests. Please wait a moment and try again."
+    },
+    "form": {
+      "required_field": "This field is required.",
+      "invalid_email": "Please enter a valid email address.",
+      "invalid_phone": "Please enter a valid phone number.",
+      "min_length": "This field must be at least {min} characters long.",
+      "max_length": "This field must not exceed {max} characters.",
+      "invalid_format": "Invalid format for this field.",
+      "password_mismatch": "Passwords do not match.",
+      "submit_error": "Failed to submit form. Please try again.",
+      "validation_error": "Please correct the errors below and try again."
+    },
+    "products": {
+      "load_failed": "Failed to load products. Please refresh the page.",
+      "not_found": "Product not found.",
+      "details_load_failed": "Failed to load product details.",
+      "search_failed": "Search failed. Please try again.",
+      "filter_failed": "Failed to apply filters. Please try again."
+    },
+    "contact": {
+      "submit_failed": "Failed to send message. Please try again or contact us directly.",
+      "submit_success": "Message sent successfully! We will contact you soon.",
+      "success_description": "Thank you for your interest. We'll contact you within 48 hours.",
+      "rate_limited": "Please wait before sending another message.",
+      "invalid_data": "Please check your information and try again."
+    },
+    "images": {
+      "load_failed": "Failed to load image.",
+      "upload_failed": "Failed to upload image.",
+      "invalid_format": "Invalid image format.",
+      "file_too_large": "Image file is too large.",
+      "category_load_failed": "Failed to load image for category: {categoryName}",
+      "product_load_failed": "Failed to load image for product: {productName}"
+    }
+  },
+  "seo": {
+    "title": "DreaModa - Italian Fashion Excellence | Wholesale Garment Manufacturer",
+    "description": "Premium Italian fashion manufacturer specializing in wholesale garments. Discover our curated collection of high-quality fashion pieces for discerning wholesale partners worldwide.",
+    "keywords": "Italian fashion, wholesale garments, fashion manufacturer, Prato fashion, premium clothing, wholesale fashion"
+  }
+}

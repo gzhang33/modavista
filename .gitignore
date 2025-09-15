@@ -60,3 +60,6 @@ lh-*.json
 *.7z
 *.rar
 
+
+frontend/dist/
+

@@ -205,6 +205,7 @@ export async function getCategoryImagePath(englishName: string): Promise<string>
   // 尝试预加载每个可能的图片路径
   for (const name of uniqueNames) {
     for (const ext of ['.jpg', '.png']) {
+      // 分类图片存储在 categories 目录中
       const imagePath = `/storage/uploads/categories/${name}${ext}`;
       try {
         const isAvailable = await preloadImage(imagePath);

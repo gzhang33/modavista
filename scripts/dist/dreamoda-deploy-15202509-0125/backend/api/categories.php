@@ -43,7 +43,26 @@ $conn->close();
 
 function get_categories($conn) {
     $raw = $_GET['lang'] ?? null;
-    $locale = normalize_language_code($raw);
+    
+    // 改进语言代码处理：支持简短格式和完整locale格式
+    if ($raw) {
+        // 如果已经是完整格式 (en-GB, it-IT)，直接使用
+        if (strpos($raw, '-') !== false) {
+            $locale = $raw;
+        } else {
+            // 如果是简短格式 (en, it)，转换为完整格式
+            $locale_map = [
+                'en' => 'en-GB',
+                'it' => 'it-IT', 
+                'fr' => 'fr-FR',
+                'de' => 'de-DE',
+                'es' => 'es-ES'
+            ];
+            $locale = $locale_map[$raw] ?? 'en-GB';
+        }
+    } else {
+        $locale = 'en-GB'; // 默认英文
+    }
     
     // 检查是否需要返回映射关系（Admin界面使用）
     $admin_mode = isset($_GET['admin']) && $_GET['admin'] === '1';
@@ -67,6 +86,9 @@ function get_categories($conn) {
     if (!$stmt->execute()) {
         json_response(500, ["message" => "查询执行失败: " . $stmt->error]);
     }
+    
+    // 添加调试日志（生产环境可关闭）
+    error_log("Categories API - Requested locale: " . $locale . ", Raw input: " . ($raw ?? 'null'));
 
     $result = $stmt->get_result();
     $categories = [];

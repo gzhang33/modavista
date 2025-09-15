@@ -28,16 +28,30 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/categories.php?lang=${currentLanguage}`);
+        // 将简短语言代码转换为完整的locale格式
+        const localeMap: Record<string, string> = {
+          'en': 'en-GB',
+          'it': 'it-IT',
+          'fr': 'fr-FR',
+          'de': 'de-DE',
+          'es': 'es-ES'
+        };
+        const locale = localeMap[currentLanguage] || 'en-GB';
+        const response = await fetch(`/api/categories.php?lang=${locale}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data: { id: string; name: string; english_name: string }[] = await response.json();
         
+        // 添加调试日志
+        console.log('Categories API response:', data);
+        console.log('Current language:', currentLanguage, 'Locale:', locale);
+        
         // 改进的图片路径构造逻辑
         const mappedCategories: Category[] = await Promise.all(
           data.map(async (item) => {
             const imagePath = await getCategoryImagePath(item.english_name);
+            console.log(`Category: ${item.name} (${item.english_name}) -> Image: ${imagePath}`);
             return {
               id: item.id,
               name: item.name.toUpperCase(),

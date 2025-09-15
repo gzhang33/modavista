@@ -77,10 +77,27 @@ export default class ProductFormComponent extends BaseComponent {
         }
 
         // Ensure categories and materials are loaded when the form page is standalone
-        this.update_categories([]);
-        this.update_materials([]);
-        this.update_seasons([]);
-        this.update_colors([]);
+        // Add error handling for API calls
+        this.loadFormData();
+    }
+
+    // 加载表单数据（分类、材质、颜色、季节）
+    async loadFormData() {
+        try {
+            await Promise.all([
+                this.update_categories([]),
+                this.update_materials([]),
+                this.update_seasons([]),
+                this.update_colors([])
+            ]);
+        } catch (error) {
+            console.error('Failed to load form data:', error);
+            // 显示错误提示
+            this.eventBus.emit('toast:show', {
+                message: '加载表单数据失败，请刷新页面重试',
+                type: 'error'
+            });
+        }
     }
 
     // 统一处理图片路径的工具函数
@@ -221,6 +238,12 @@ export default class ProductFormComponent extends BaseComponent {
             }
         } catch (error) {
             console.error('Failed to load categories:', error);
+            // 检查是否是认证错误
+            if (error.message && error.message.includes('SESSION_EXPIRED')) {
+                console.log('Session expired, redirecting to login');
+                window.location.href = 'login.html';
+                return;
+            }
             categoryData = Array.isArray(products)
                 ? [...new Set(products.map(p => p.category).filter(Boolean))].map(cat => ({ name: cat }))
                 : [];

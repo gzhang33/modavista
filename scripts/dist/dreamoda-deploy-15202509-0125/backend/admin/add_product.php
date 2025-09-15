@@ -11,7 +11,20 @@
 </head>
 <body>
     <script>
-    fetch('../api/check_session.php').then(r=>r.json()).then(d=>{ if(!d.loggedIn){ location.href='login.html'; }}).catch(()=>location.href='login.html');
+    fetch('../api/check_session.php')
+        .then(r=>r.json())
+        .then(d=>{ 
+            if(!d.loggedIn){ 
+                console.log('Session check failed, redirecting to login');
+                location.href='login.html'; 
+            } else {
+                console.log('Session valid, loading page');
+            }
+        })
+        .catch((error)=>{
+            console.error('Session check error:', error);
+            location.href='login.html';
+        });
     </script>
     <main class="main-content">
         <header class="main-header">

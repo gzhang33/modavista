@@ -48,13 +48,21 @@ export default class ProductFormComponent extends BaseComponent {
             this.cancel_btn.addEventListener('click', () => this.hide_form());
         }
 
-        // 动态创建“新选择图片预览”容器，显示在已保存预览的下方
+        // 动态创建"新选择图片预览"容器，显示在已保存预览的下方
         this.new_media_previews = this.element.querySelector('#new-media-previews');
         if (!this.new_media_previews) {
             this.new_media_previews = document.createElement('div');
             this.new_media_previews.id = 'new-media-previews';
             this.new_media_previews.className = 'media-previews new-media-previews';
-            this.current_media_previews.insertAdjacentElement('afterend', this.new_media_previews);
+            
+            // 确保current_media_previews存在后再插入
+            if (this.current_media_previews) {
+                this.current_media_previews.insertAdjacentElement('afterend', this.new_media_previews);
+            } else {
+                // 如果current_media_previews不存在，直接添加到form中
+                console.warn('current_media_previews not found, adding new_media_previews to form');
+                this.form.appendChild(this.new_media_previews);
+            }
         }
 
         // 监听文件选择变更与拖拽上传（统一绑定）
@@ -77,10 +85,27 @@ export default class ProductFormComponent extends BaseComponent {
         }
 
         // Ensure categories and materials are loaded when the form page is standalone
-        this.update_categories([]);
-        this.update_materials([]);
-        this.update_seasons([]);
-        this.update_colors([]);
+        // Add error handling for API calls
+        this.loadFormData();
+    }
+
+    // 加载表单数据（分类、材质、颜色、季节）
+    async loadFormData() {
+        try {
+            await Promise.all([
+                this.update_categories([]),
+                this.update_materials([]),
+                this.update_seasons([]),
+                this.update_colors([])
+            ]);
+        } catch (error) {
+            console.error('Failed to load form data:', error);
+            // 显示错误提示
+            this.eventBus.emit('toast:show', {
+                message: '加载表单数据失败，请刷新页面重试',
+                type: 'error'
+            });
+        }
     }
 
     // 统一处理图片路径的工具函数
@@ -221,6 +246,12 @@ export default class ProductFormComponent extends BaseComponent {
             }
         } catch (error) {
             console.error('Failed to load categories:', error);
+            // 检查是否是认证错误
+            if (error.message && error.message.includes('SESSION_EXPIRED')) {
+                console.log('Session expired, redirecting to login');
+                window.location.href = 'login.html';
+                return;
+            }
             categoryData = Array.isArray(products)
                 ? [...new Set(products.map(p => p.category).filter(Boolean))].map(cat => ({ name: cat }))
                 : [];
@@ -242,11 +273,24 @@ export default class ProductFormComponent extends BaseComponent {
     async update_materials(products) {
         let materialData = [];
         try {
-            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
-            const response = await apiClient.getMaterials('it', true);
-            if (response.materials && response.mapping) {
-                materialData = response.materials;
-                this.materialMapping = response.mapping;
+            // 直接使用fetch作为临时解决方案
+            const response = await fetch('../api/materials.php?lang=it&admin=1', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.log('Session expired, redirecting to login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.materials && data.mapping) {
+                materialData = data.materials;
+                this.materialMapping = data.mapping;
             }
         } catch (error) {
             console.error('Failed to load materials:', error);
@@ -270,11 +314,24 @@ export default class ProductFormComponent extends BaseComponent {
     async update_seasons(products) {
         let seasonData = [];
         try {
-            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
-            const response = await apiClient.getSeasons('it', true);
-            if (response.seasons && response.mapping) {
-                seasonData = response.seasons;
-                this.seasonMapping = response.mapping;
+            // 直接使用fetch作为临时解决方案
+            const response = await fetch('../api/seasons.php?lang=it&admin=1', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.log('Session expired, redirecting to login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.seasons && data.mapping) {
+                seasonData = data.seasons;
+                this.seasonMapping = data.mapping;
             }
         } catch (error) {
             console.error('Failed to load seasons:', error);
@@ -298,11 +355,24 @@ export default class ProductFormComponent extends BaseComponent {
     async update_colors(products) {
         let colorData = [];
         try {
-            // add_product 页面下拉统一显示意大利语，使用Admin模式获取映射关系
-            const response = await apiClient.getColors('it', true);
-            if (response.colors && response.mapping) {
-                colorData = response.colors;
-                this.colorMapping = response.mapping;
+            // 直接使用fetch作为临时解决方案
+            const response = await fetch('../api/colors.php?lang=it&admin=1', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.log('Session expired, redirecting to login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.colors && data.mapping) {
+                colorData = data.colors;
+                this.colorMapping = data.mapping;
             }
         } catch (error) {
             console.error('Failed to load colors:', error);
@@ -793,84 +863,123 @@ export default class ProductFormComponent extends BaseComponent {
     
     // 处理文件选择并展示即时预览
     handle_media_change(event) {
-        const files = Array.from(event.target.files || []);
-        
-        if (files.length > 0) {
-            // 显示所有选择的图片预览
-            this.render_selected_media_previews(files);
+        try {
+            const files = Array.from(event.target.files || []);
             
-            // 将主产品上传按钮与预览合并：用首图填充上传框，点击可替换
-            if (this.media_dropzone) {
-                // 释放旧 URL
-                if (this.main_dropzone_url) {
-                    try { URL.revokeObjectURL(this.main_dropzone_url); } catch (_) {}
-                    this.main_dropzone_url = null;
+            if (files.length > 0) {
+                // 显示所有选择的图片预览
+                this.render_selected_media_previews(files);
+                
+                // 将主产品上传按钮与预览合并：用首图填充上传框，点击可替换
+                if (this.media_dropzone) {
+                    // 释放旧 URL
+                    if (this.main_dropzone_url) {
+                        try { URL.revokeObjectURL(this.main_dropzone_url); } catch (_) {}
+                        this.main_dropzone_url = null;
+                    }
+                    const url = files[0] ? URL.createObjectURL(files[0]) : '';
+                    this.main_dropzone_url = url;
+                    this.media_dropzone.classList.add('has-preview');
+                    this.media_dropzone.style.backgroundImage = `url('${url}')`;
+                    this.media_dropzone.style.backgroundSize = 'cover';
+                    this.media_dropzone.style.backgroundPosition = 'center';
+                    const plus = this.media_dropzone.querySelector('.plus');
+                    if (plus) plus.style.visibility = 'hidden';
+                    // 预览模式下禁用覆盖全区域的 input，避免原生与自定义点击同时触发
+                    const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
+                    if (overlay_input) overlay_input.style.pointerEvents = 'none';
+                    const open_picker = () => this.media_input && this.media_input.click();
+                    this.media_dropzone.onclick = open_picker;
                 }
-                const url = files[0] ? URL.createObjectURL(files[0]) : '';
-                this.main_dropzone_url = url;
-                this.media_dropzone.classList.add('has-preview');
-                this.media_dropzone.style.backgroundImage = `url('${url}')`;
-                this.media_dropzone.style.backgroundSize = 'cover';
-                this.media_dropzone.style.backgroundPosition = 'center';
-                const plus = this.media_dropzone.querySelector('.plus');
-                if (plus) plus.style.visibility = 'hidden';
-                // 预览模式下禁用覆盖全区域的 input，避免原生与自定义点击同时触发
-                const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
-                if (overlay_input) overlay_input.style.pointerEvents = 'none';
-                const open_picker = () => this.media_input && this.media_input.click();
-                this.media_dropzone.onclick = open_picker;
+            } else {
+                // 清除预览
+                this.clear_new_media_previews();
+                if (this.media_dropzone) {
+                    this.media_dropzone.classList.remove('has-preview');
+                    this.media_dropzone.style.backgroundImage = '';
+                    const plus = this.media_dropzone.querySelector('.plus');
+                    if (plus) plus.style.visibility = '';
+                    const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
+                    if (overlay_input) overlay_input.style.pointerEvents = '';
+                    this.media_dropzone.onclick = null;
+                }
             }
-        } else {
-            // 清除预览
-            this.clear_new_media_previews();
-            if (this.media_dropzone) {
-                this.media_dropzone.classList.remove('has-preview');
-                this.media_dropzone.style.backgroundImage = '';
-                const plus = this.media_dropzone.querySelector('.plus');
-                if (plus) plus.style.visibility = '';
-                const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
-                if (overlay_input) overlay_input.style.pointerEvents = '';
-                this.media_dropzone.onclick = null;
-            }
+        } catch (error) {
+            console.error('Error handling media change:', error);
+            this.eventBus.emit('toast:show', {
+                message: '图片处理失败，请重试',
+                type: 'error'
+            });
         }
     }
 
     // 渲染新选择的图片预览（与已保存图片并列显示在其下方）
     render_selected_media_previews(files) {
-        this.clear_new_media_previews();
-        if (!files.length) return;
+        try {
+            this.clear_new_media_previews();
+            if (!files.length) return;
 
-        const { fragment, urls } = this.build_preview_fragment(files, 'new');
-        this.object_urls.push(...urls);
+            // 确保new_media_previews容器存在
+            if (!this.new_media_previews) {
+                console.error('new_media_previews container not found');
+                return;
+            }
 
-        // 添加一个轻微标题，帮助用户区分
-        const title = document.createElement('div');
-        title.className = 'media-previews-title';
-        title.textContent = '新选择的图片预览';
+            const { fragment, urls } = this.build_preview_fragment(files, 'new');
+            this.object_urls.push(...urls);
 
-        this.new_media_previews.appendChild(title);
-        this.new_media_previews.appendChild(fragment);
+            // 添加一个轻微标题，帮助用户区分
+            const title = document.createElement('div');
+            title.className = 'media-previews-title';
+            title.textContent = '新选择的图片预览';
+
+            this.new_media_previews.appendChild(title);
+            this.new_media_previews.appendChild(fragment);
+        } catch (error) {
+            console.error('Error rendering selected media previews:', error);
+            this.eventBus.emit('toast:show', {
+                message: '图片预览加载失败，请重试',
+                type: 'error'
+            });
+        }
     }
 
     // 构建通用预览片段（返回 { fragment, urls }）
     build_preview_fragment(files, extra_class = '') {
-        const fragment = document.createDocumentFragment();
-        const urls = [];
-        files.forEach((file) => {
-            const url = URL.createObjectURL(file);
-            urls.push(url);
+        try {
+            const fragment = document.createDocumentFragment();
+            const urls = [];
+            
+            files.forEach((file) => {
+                try {
+                    const url = URL.createObjectURL(file);
+                    urls.push(url);
 
-            const wrapper = document.createElement('div');
-            wrapper.className = `media-preview-item${extra_class ? ' ' + extra_class : ''}`;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `media-preview-item${extra_class ? ' ' + extra_class : ''}`;
 
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = file.name || 'media';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = file.name || 'media';
+                    
+                    // 添加错误处理
+                    img.onerror = () => {
+                        console.warn('Failed to load image preview:', file.name);
+                        wrapper.innerHTML = '<div class="preview-error">预览失败</div>';
+                    };
 
-            wrapper.appendChild(img);
-            fragment.appendChild(wrapper);
-        });
-        return { fragment, urls };
+                    wrapper.appendChild(img);
+                    fragment.appendChild(wrapper);
+                } catch (error) {
+                    console.error('Error creating preview for file:', file.name, error);
+                }
+            });
+            
+            return { fragment, urls };
+        } catch (error) {
+            console.error('Error building preview fragment:', error);
+            return { fragment: document.createDocumentFragment(), urls: [] };
+        }
     }
 
     async render_siblings(product) {
@@ -943,20 +1052,36 @@ export default class ProductFormComponent extends BaseComponent {
 
     // 清理新预览并释放 URL 资源
     clear_new_media_previews() {
-        if (this.object_urls && this.object_urls.length) {
-            this.object_urls.forEach((u) => URL.revokeObjectURL(u));
-        }
-        this.object_urls = [];
-        if (this.new_media_previews) {
-            this.new_media_previews.innerHTML = '';
-        }
-        // 恢复主上传框外观
-        if (this.media_dropzone) {
-            this.media_dropzone.classList.remove('has-preview');
-            this.media_dropzone.style.backgroundImage = '';
-            this.media_dropzone.onclick = null;
-            const plus = this.media_dropzone.querySelector('.plus');
-            if (plus) plus.style.visibility = '';
+        try {
+            // 释放URL资源
+            if (this.object_urls && this.object_urls.length) {
+                this.object_urls.forEach((u) => {
+                    try {
+                        URL.revokeObjectURL(u);
+                    } catch (e) {
+                        console.warn('Failed to revoke URL:', u, e);
+                    }
+                });
+            }
+            this.object_urls = [];
+            
+            // 清空预览容器
+            if (this.new_media_previews) {
+                this.new_media_previews.innerHTML = '';
+            }
+            
+            // 恢复主上传框外观
+            if (this.media_dropzone) {
+                this.media_dropzone.classList.remove('has-preview');
+                this.media_dropzone.style.backgroundImage = '';
+                this.media_dropzone.onclick = null;
+                const plus = this.media_dropzone.querySelector('.plus');
+                if (plus) plus.style.visibility = '';
+                const overlay_input = this.media_dropzone.querySelector('.dropzone-input') || this.media_input;
+                if (overlay_input) overlay_input.style.pointerEvents = '';
+            }
+        } catch (error) {
+            console.error('Error clearing new media previews:', error);
         }
     }
     

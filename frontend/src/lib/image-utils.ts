@@ -4,6 +4,9 @@
 export interface ImageProcessingOptions {
   enableFallback?: boolean;
   debug?: boolean;
+  quality?: number;
+  priority?: boolean;
+  sizes?: string;
 }
 
 export interface ImageErrorHandlerOptions {

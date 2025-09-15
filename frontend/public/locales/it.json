@@ -95,7 +95,7 @@
   "products": {
     "back_to_home": "Torna alla Home",
     "title": "Tutti i Prodotti",
-    "subtitle_plural": "Esplora la nostra collezione completa di {count} capi premium all’ingrosso",
+    "subtitle_plural": "",
     "filters_title": "Filtri",
     "clear_all": "Reimposta tutto",
     "search_label": "Cerca",
@@ -110,6 +110,7 @@
     "sort_name_asc": "Nome A-Z",
     "sort_name_desc": "Nome Z-A",
     "sort_newest": "Più recenti",
+    "show_collections": "Mostra Collezioni",
     "empty": {
       "no_products": "Nessun prodotto disponibile. Aggiungi dei prodotti dal pannello admin.",
       "no_match": "Nessun prodotto corrisponde ai tuoi criteri.",

@@ -95,7 +95,7 @@
   "products": {
     "back_to_home": "Volver al inicio",
     "title": "Todos los Productos",
-    "subtitle_plural": "Explora nuestra colección completa de {count} prendas premium al por mayor",
+    "subtitle_plural": "",
     "filters_title": "Filtros",
     "clear_all": "Borrar todo",
     "search_label": "Buscar",
@@ -110,6 +110,7 @@
     "sort_name_asc": "Nombre A-Z",
     "sort_name_desc": "Nombre Z-A",
     "sort_newest": "Más recientes",
+    "show_collections": "Mostrar Colecciones",
     "empty": {
       "no_products": "No hay productos disponibles. Agrega productos desde el panel de administración.",
       "no_match": "No se encontraron productos que coincidan con tus criterios.",

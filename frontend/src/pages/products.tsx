@@ -39,6 +39,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('most-popular');
+  const [showFilters, setShowFilters] = useState(false);
   
   const [languageState, setLanguageState] = useState<LanguageState>({
     currentLanguage: 'en',
@@ -338,17 +339,157 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
           <h1 className="text-4xl font-playfair font-semibold text-charcoal mb-4">
             {t('products.title', 'All Products')}
           </h1>
-          <p className="text-xl text-text-grey">
-            {(
-              t('products.subtitle_plural', 'Browse our complete collection of {count} premium wholesale garments')
-            ).replace('{count}', String(filteredProducts.length))}
-          </p>
         </div>
 
-        <div className="flex gap-8">
-          {/* Sidebar Filters */}
-          <div className="w-80 flex-shrink-0">
-            <div className="bg-soft-white rounded-lg p-6 sticky top-8">
+        {/* Mobile Search and Filter Bar - Only visible on mobile */}
+        <div className="mb-6 md:hidden">
+          <div className="flex gap-4 items-center">
+            {/* Search Input */}
+            <div className="flex-1 relative">
+              <Input
+                type="text"
+                placeholder={t('products.search_placeholder', 'Search products...')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
+                data-testid="input-product-search"
+              />
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            {/* Filter Button */}
+            <Button
+              onClick={() => setShowFilters(!showFilters)}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex-shrink-0"
+              data-testid="button-filter-toggle"
+            >
+              {t('products.filters_title', 'Filter')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Collapsible Filters - Only visible on mobile */}
+        {showFilters && (
+          <div className="mb-6 bg-soft-white rounded-lg p-6 md:hidden">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-charcoal">{t('products.filters_title', 'Filters')}</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-text-grey hover:text-charcoal"
+                data-testid="button-clear-filters"
+              >
+                {t('products.clear_all', 'Clear All')}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              {/* Categories */}
+              <div>
+                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.category', 'Category')}</label>
+                <div className="space-y-2">
+                  {filterOptions.categories.map((category) => (
+                    <div key={category.id} className="flex items-center space-x-3">
+                      <Checkbox
+                        id={category.id}
+                        checked={filters.category === category.id}
+                        onCheckedChange={() => updateFilters({ category: category.id })}
+                        data-testid={`checkbox-category-${category.id}`}
+                      />
+                      <label
+                        htmlFor={category.id}
+                        className="text-sm text-text-grey cursor-pointer"
+                      >
+                        {category.id === 'all' ? t('filters.all_categories', 'All Categories') : category.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fabric/Material */}
+              <div>
+                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.material', 'Material')}</label>
+                <div className="space-y-2">
+                  {filterOptions.materials.map((material) => (
+                    <div key={material.id} className="flex items-center space-x-3">
+                      <Checkbox
+                        id={material.id}
+                        checked={filters.fabric === material.id}
+                        onCheckedChange={() => updateFilters({ fabric: material.id })}
+                        data-testid={`checkbox-fabric-${material.id}`}
+                      />
+                      <label
+                        htmlFor={material.id}
+                        className="text-sm text-text-grey cursor-pointer"
+                      >
+                        {material.id === 'all' ? t('products.all_materials', 'All Materials') : material.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Season */}
+              <div>
+                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
+                <div className="space-y-2">
+                  {filterOptions.seasons.map((season) => (
+                    <div key={season.id} className="flex items-center space-x-3">
+                      <Checkbox
+                        id={season.id}
+                        checked={filters.season === season.id}
+                        onCheckedChange={() => updateFilters({ season: season.id })}
+                        data-testid={`checkbox-season-${season.id}`}
+                      />
+                      <label
+                        htmlFor={season.id}
+                        className="text-sm text-text-grey cursor-pointer"
+                      >
+                        {season.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+            
+            {/* Show Collections Button */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <Button
+                onClick={() => {
+                  setShowFilters(false); // Hide the filters panel
+                  // Filters are already applied in real-time, no additional action needed
+                }}
+                className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300"
+                data-testid="button-show-collections-mobile"
+              >
+                {t('products.show_collections', 'Show Collections')}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Desktop Sidebar Filters - Only visible on desktop */}
+          <div className="hidden md:block w-full lg:w-80 flex-shrink-0">
+            <div className="bg-soft-white rounded-lg p-4 lg:p-6 sticky top-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-charcoal">{t('products.filters_title', 'Filters')}</h3>
                 <Button
@@ -449,7 +590,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
           {/* Main Content */}
           <div className="flex-1">
             {/* Toolbar */}
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b border-gray-200 gap-4">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-text-grey">
                   {(
@@ -458,10 +599,10 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                 </span>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                 {/* Sort */}
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48" data-testid="select-sort">
+                  <SelectTrigger className="w-full sm:w-48" data-testid="select-sort">
                     <SelectValue placeholder={t('products.sort_by', 'Sort by')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -511,9 +652,9 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                 )}
               </div>
             ) : (
-              <div className={`grid gap-6 ${
+              <div className={`grid gap-4 sm:gap-6 ${
                 viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+                  ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3' 
                   : 'grid-cols-1'
               }`}>
                 {filteredProducts.map((product) => (
@@ -542,10 +683,10 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
                         onError={createImageErrorHandler({ debug: true, t })} // Enable debug mode with translation
                       />
 
-                      {/* 网格视图的产品名称覆盖层 */}
+                      {/* 网格视图的产品名称 - 无背景渐变 */}
                       {viewMode !== 'list' && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                          <h4 className="text-lg font-playfair font-semibold text-white text-center">
+                        <div className="mt-4">
+                          <h4 className="text-lg font-playfair font-semibold text-charcoal text-center">
                             {product.name}
                           </h4>
                         </div>
@@ -570,6 +711,7 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
             )}
           </div>
         </div>
+
       </div>
       <Footer />
     </div>

@@ -273,7 +273,6 @@ export default function ProductDetailPage() {
 
   // Convert specifications to table format
   const specificationRows = [
-    { name: "Product Code", value: product.sku },
     { name: "Category", value: product.category },
     { name: "Season", value: product.season.replace('-', '/') },
     { name: "Origin", value: product.origin },
@@ -345,6 +344,11 @@ export default function ProductDetailPage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
             {/* Product Gallery */}
             <div className="flex flex-col">
+              {/* Mobile Product Name - Only visible on mobile */}
+              <h1 className="text-xl font-bold tracking-tight text-gray-900 mb-4 md:hidden">
+                {product.name}
+              </h1>
+              
               <div 
                 className="relative w-full bg-white rounded-lg shadow-lg overflow-hidden flex items-center justify-center p-4 mb-4"
                 onTouchStart={onTouchStart}
@@ -354,7 +358,7 @@ export default function ProductDetailPage() {
                 <img
                   src={displayImages[selectedImageIndex]}
                   alt="Main product view"
-                  className="w-full h-auto object-contain max-h-[500px] transition-opacity duration-300"
+                  className="w-full h-auto object-contain max-h-[400px] md:max-h-[500px] transition-opacity duration-300"
                   onError={createImageErrorHandler({ debug: false, t })}
                 />
                 
@@ -421,21 +425,12 @@ export default function ProductDetailPage() {
 
             {/* Product Info */}
             <div className="mt-8 lg:mt-0">
-              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+              {/* Desktop Product Name - Only visible on desktop */}
+              <h1 className="hidden md:block text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                 {product.name}
               </h1>
-                <p className="text-sm text-gray-500 mt-4">
-                {t('product_detail.fields.sku', 'Product Code')}: {product.sku}
-              </p>
 
-              <div className="mt-8 border-t pt-8">
-                <div className="h-10 w-auto mb-4 flex items-center">
-                  <span className="text-2xl font-bold text-accent-gold">DreaModa</span>
-                </div>
-                <p className="mt-4 text-gray-600 leading-relaxed">
-                  {product.description || t('product_detail.description_fallback', `This exquisite ${product.name} showcases our commitment to quality and craftsmanship. Made with premium materials, paying attention to every detail, bringing you the perfect combination of comfort and fashion.`)}
-                </p>
-              </div>
+              {/* Product Description - Removed completely */}
 
               {/* Action Buttons */}
               <div className="mt-8 space-y-4">

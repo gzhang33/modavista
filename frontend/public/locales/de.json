@@ -95,7 +95,7 @@
   "products": {
     "back_to_home": "Zur Startseite",
     "title": "Alle Produkte",
-    "subtitle_plural": "Durchsuchen Sie unsere vollständige Kollektion von {count} Premium-Großhandelskleidungsstücken",
+    "subtitle_plural": "",
     "filters_title": "Filter",
     "clear_all": "Alle zurücksetzen",
     "search_label": "Suche",
@@ -110,6 +110,7 @@
     "sort_name_asc": "Name A-Z",
     "sort_name_desc": "Name Z-A",
     "sort_newest": "Neueste zuerst",
+    "show_collections": "Sammlungen anzeigen",
     "empty": {
       "no_products": "Keine Produkte verfügbar. Bitte fügen Sie welche im Admin-Bereich hinzu.",
       "no_match": "Keine Produkte entsprechen Ihren Kriterien.",

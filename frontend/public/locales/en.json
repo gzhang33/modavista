@@ -95,7 +95,7 @@
   "products": {
     "back_to_home": "Back to Home",
     "title": "All Products",
-    "subtitle_plural": "Browse our complete collection of {count} premium wholesale garments",
+    "subtitle_plural": "",
     "filters_title": "Filters",
     "clear_all": "Clear All",
     "search_label": "Search",
@@ -110,6 +110,7 @@
     "sort_name_asc": "Name A-Z",
     "sort_name_desc": "Name Z-A",
     "sort_newest": "Newest First",
+    "show_collections": "Show Collections",
     "empty": {
       "no_products": "No products available. Please add some products from the admin panel.",
       "no_match": "No products found matching your criteria.",

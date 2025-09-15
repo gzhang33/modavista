@@ -87,15 +87,15 @@ export default function ProductsPage({ onOpenProductModal }: ProductsPageProps) 
     console.log('Available filter options:', filterOptions.categories);
     
     if (categoryParam && categoryParam !== 'all') {
-      // Check if the category exists in filter options
-      const categoryExists = filterOptions.categories.some(cat => {
-        console.log(`Checking category: id=${cat.id}, name=${cat.name}, english_name=${cat.english_name} against param=${categoryParam}`);
-        return cat.id === categoryParam || cat.name === categoryParam || cat.english_name === categoryParam;
-      });
+      const foundCategory = filterOptions.categories.find(cat =>
+        (cat.id && cat.id.toLowerCase() === categoryParam.toLowerCase()) ||
+        (cat.name && cat.name.toLowerCase() === categoryParam.toLowerCase()) ||
+        (cat.english_name && cat.english_name.toLowerCase() === categoryParam.toLowerCase())
+      );
       
-      if (categoryExists) {
-        console.log('Setting category filter to:', categoryParam);
-        setFilters(prev => ({ ...prev, category: categoryParam }));
+      if (foundCategory) {
+        console.log('Setting category filter to:', foundCategory.id);
+        setFilters(prev => ({ ...prev, category: foundCategory.id }));
       } else {
         console.log('Category not found in filter options:', categoryParam);
       }

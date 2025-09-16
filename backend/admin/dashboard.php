@@ -51,6 +51,22 @@
                             <input type="text" id="search-products" placeholder="搜索产品..." />
                         </div>
                         <button id="clear-filters-btn" class="btn btn-secondary btn-sm">清除筛选</button>
+                        <a href="filters_mobile.php" class="btn btn-primary btn-sm mobile-only">
+                            <i class="fas fa-filter"></i> 筛选
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Filter Status Display -->
+                <div id="filter-status-panel" class="filter-status-panel hidden">
+                    <div class="filter-status-header">
+                        <span class="filter-status-title">
+                            <i class="fas fa-filter"></i> 当前筛选条件
+                        </span>
+                        <span class="filter-status-count">0 项</span>
+                    </div>
+                    <div class="filter-status-content">
+                        <!-- Active filter tags will be inserted here -->
                     </div>
                 </div>
 
@@ -82,6 +98,11 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Mobile product cards container -->
+                <div id="products-cards" class="products-cards">
+                    <!-- Product cards will be injected by JS for mobile -->
+                </div>
             </section>
         </main>
     </div>
@@ -91,6 +112,6 @@
 <!-- Toast Notification -->
 <div id="toast-notification" class="toast"></div>
 
-    <script type="module" src="assets/js/main.js?v=3"></script>
+    <script type="module" src="assets/js/main.js?v=6"></script>
 </body>
 </html>

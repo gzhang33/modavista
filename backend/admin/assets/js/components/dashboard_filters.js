@@ -9,16 +9,20 @@ export default class FilterComponent extends BaseComponent {
             color: [],
             material: [],
             category: [],
+            createdAt: [],
             search: ''
         };
+        this.mobileStorageKey = 'admin_mobile_filters';
         this.filter_keys = {
             '颜色': 'color',
             '材质': 'material',
-            '分类': 'category'
+            '分类': 'category',
+            '时间': 'createdAt'
         };
         this.init_elements();
         this.init_listeners();
         this.load_filter_options();
+        this.apply_mobile_saved_filters();
     }
 
     init_elements() {
@@ -27,6 +31,11 @@ export default class FilterComponent extends BaseComponent {
         this.actions_container = this.filter_bar.querySelector('.filter-bar-actions');
         this.clear_filters_btn = this.actions_container.querySelector('#clear-filters-btn');
         this.search_input = this.filter_bar.querySelector('#search-products');
+        
+        // Filter status display elements
+        this.filter_status_panel = document.querySelector('#filter-status-panel');
+        this.filter_status_content = document.querySelector('.filter-status-content');
+        this.filter_status_count = document.querySelector('.filter-status-count');
     }
 
     init_listeners() {
@@ -61,6 +70,9 @@ export default class FilterComponent extends BaseComponent {
             }
         });
 
+        // Ensure dropdowns are closed by default on mobile
+        this.close_all_dropdowns();
+
         // Add mouse leave event listener for auto-hide dropdowns
         this.filter_bar.addEventListener('mouseleave', (e) => {
             // Only close dropdowns if mouse is leaving the entire filter bar area
@@ -68,6 +80,52 @@ export default class FilterComponent extends BaseComponent {
                 this.close_all_dropdowns();
             }
         });
+
+        // Re-apply filters after products have loaded to avoid race conditions
+        if (this.eventBus && typeof this.eventBus.on === 'function') {
+            this.eventBus.on('products:loaded', () => {
+                this.apply_filters();
+            });
+        }
+    }
+
+    apply_mobile_saved_filters() {
+        // Read saved filters from localStorage (set in filters_mobile.php)
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem(this.mobileStorageKey) || '{}'); } catch (_) { saved = null; }
+        if (!saved || typeof saved !== 'object') return;
+        // Merge to state
+        ['color','material','category','createdAt'].forEach(k => {
+            if (Array.isArray(saved[k])) this.state[k] = saved[k].slice(0);
+        });
+        this.apply_filters();
+        // 通知产品组件刷新（如果首载未触发 products:loaded）
+        this.eventBus && this.eventBus.emit && this.eventBus.emit('products:filter-changed', this.build_current_filters());
+    }
+
+    build_current_filters() {
+        const filters = { logic: 'AND', conditions: [] };
+        if (this.state.search) {
+            filters.conditions.push({ field: 'name', operator: 'contains', value: this.state.search });
+        }
+        if (Array.isArray(this.state.createdAt) && this.state.createdAt.length > 0) {
+            const preset = this.state.createdAt[0];
+            const now = new Date();
+            let from = new Date(now);
+            const mapCnToPreset = { '今天': 'today', '本周': 'week', '本月': 'month', '今年': 'year' };
+            const token = mapCnToPreset[preset] || preset;
+            if (token === 'today') from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            else if (token === 'week') from.setDate(now.getDate() - 7);
+            else if (token === 'month') from.setMonth(now.getMonth() - 1);
+            else if (token === 'year') from.setFullYear(now.getFullYear() - 1);
+            filters.conditions.push({ field: 'createdAt', operator: 'after', value: from.toISOString() });
+        }
+        ['color','material','category'].forEach(key => {
+            if (this.state[key] && this.state[key].length > 0) {
+                filters.conditions.push({ field: key, operator: 'in', value: this.state[key] });
+            }
+        });
+        return filters;
     }
 
     async load_filter_options() {
@@ -92,7 +150,8 @@ export default class FilterComponent extends BaseComponent {
             this.available_options = {
                 color: Array.isArray(colors) ? colors.filter(name => name && typeof name === 'string') : [],
                 material: Array.isArray(materials) ? materials.filter(name => name && typeof name === 'string') : [],
-                category: Array.isArray(categories) ? categories.map(c => c && c.name ? c.name : '').filter(name => name) : []
+                category: Array.isArray(categories) ? categories.map(c => c && c.name ? c.name : '').filter(name => name) : [],
+                createdAt: ['今天', '本周', '本月', '今年']
             };
 
             console.log('Processed filter options:', this.available_options);
@@ -183,25 +242,48 @@ export default class FilterComponent extends BaseComponent {
             filters.conditions.push({ field: 'name', operator: 'contains', value: this.state.search });
         }
         
-        // Add category filters
-        for (const key in this.state) {
-            if (key !== 'search' && this.state[key].length > 0) {
+        // Time filter (createdAt) – use preset to compute threshold
+        if (Array.isArray(this.state.createdAt) && this.state.createdAt.length > 0) {
+            const preset = this.state.createdAt[0];
+            const now = new Date();
+            let from = new Date(now);
+            const mapCnToPreset = { '今天': 'today', '本周': 'week', '本月': 'month', '今年': 'year' };
+            const token = mapCnToPreset[preset] || preset;
+            if (token === 'today') {
+                from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            } else if (token === 'week') {
+                from.setDate(now.getDate() - 7);
+            } else if (token === 'month') {
+                from.setMonth(now.getMonth() - 1);
+            } else if (token === 'year') {
+                from.setFullYear(now.getFullYear() - 1);
+            }
+            filters.conditions.push({ field: 'createdAt', operator: 'after', value: from.toISOString() });
+        }
+
+        // Other multi-select filters
+        ['color','material','category'].forEach(key => {
+            if (this.state[key] && this.state[key].length > 0) {
                 filters.conditions.push({ field: key, operator: 'in', value: this.state[key] });
             }
-        }
+        });
         
         console.log('Applying filters:', filters);
         this.eventBus.emit('products:filter-changed', filters);
+        
+        // Update filter status display
+        this.update_filter_status_display();
     }
     
     clear_all_filters() {
-        this.state = { color: [], material: [], category: [], search: '' };
+        this.state = { color: [], material: [], category: [], createdAt: [], search: '' };
         this.filter_bar.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
         if (this.search_input) {
             this.search_input.value = '';
         }
         Object.values(this.filter_keys).forEach(key => this.update_filter_count(key));
         this.apply_filters();
+        this.update_filter_status_display(); // Ensure status display is updated
         this.eventBus.emit('toast:show', { message: '筛选已清除', type: 'info' });
     }
 
@@ -225,5 +307,84 @@ export default class FilterComponent extends BaseComponent {
         this.filter_bar.querySelectorAll('.filter-button.is-open').forEach(btn => {
             btn.classList.remove('is-open');
         });
+    }
+
+    update_filter_status_display() {
+        if (!this.filter_status_panel || !this.filter_status_content || !this.filter_status_count) {
+            return;
+        }
+
+        const active_filters = [];
+        
+        // Collect all active filters
+        if (this.state.search && this.state.search.trim()) {
+            active_filters.push({
+                category: '搜索',
+                value: this.state.search.trim(),
+                icon: 'fas fa-search',
+                type: 'search'
+            });
+        }
+
+        if (Array.isArray(this.state.color) && this.state.color.length > 0) {
+            this.state.color.forEach(color => {
+                active_filters.push({
+                    category: '颜色',
+                    value: color,
+                    icon: 'fas fa-palette',
+                    type: 'color'
+                });
+            });
+        }
+
+        if (Array.isArray(this.state.material) && this.state.material.length > 0) {
+            this.state.material.forEach(material => {
+                active_filters.push({
+                    category: '材质',
+                    value: material,
+                    icon: 'fas fa-layer-group',
+                    type: 'material'
+                });
+            });
+        }
+
+        if (Array.isArray(this.state.category) && this.state.category.length > 0) {
+            this.state.category.forEach(category => {
+                active_filters.push({
+                    category: '分类',
+                    value: category,
+                    icon: 'fas fa-tags',
+                    type: 'category'
+                });
+            });
+        }
+
+        if (Array.isArray(this.state.createdAt) && this.state.createdAt.length > 0) {
+            this.state.createdAt.forEach(time => {
+                active_filters.push({
+                    category: '时间',
+                    value: time,
+                    icon: 'fas fa-clock',
+                    type: 'time'
+                });
+            });
+        }
+
+        // Update display
+        if (active_filters.length === 0) {
+            this.filter_status_panel.classList.add('hidden');
+        } else {
+            this.filter_status_panel.classList.remove('hidden');
+            this.filter_status_count.textContent = `${active_filters.length} 项`;
+            
+            // Generate filter tags
+            this.filter_status_content.innerHTML = active_filters.map(filter => `
+                <div class="filter-status-tag" data-filter-type="${filter.type}" data-filter-value="${filter.value}">
+                    <i class="${filter.icon} tag-icon"></i>
+                    <span class="tag-category">${filter.category}:</span>
+                    <span class="tag-value">${filter.value}</span>
+                </div>
+            `).join('');
+        }
     }
 }

@@ -23,7 +23,7 @@ Header always set Content-Security-Policy "default-src 'self'; style-src 'self' 
 
 ### 修改后
 ```apache
-Header always set Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self';"
+Header always set Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self';"
 ```
 
 ## 具体变更
@@ -33,6 +33,9 @@ Header always set Content-Security-Policy "default-src 'self'; style-src 'self' 
 
 2. **style-src指令**: 从 `'self' 'unsafe-inline' https://fonts.googleapis.com` 改为 `'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com`
    - 允许从cdnjs.cloudflare.com加载Font Awesome CSS
+
+3. **font-src指令**: 从 `'self' https://fonts.gstatic.com` 改为 `'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com`
+   - 允许从cdnjs.cloudflare.com加载Font Awesome字体文件
 
 ## 安全考虑
 
@@ -60,3 +63,4 @@ Header always set Content-Security-Policy "default-src 'self'; style-src 'self' 
 - 此修复同时解决了图片预览和Font Awesome图标加载问题
 - 修改后需要清除浏览器缓存才能生效
 - 本地开发环境和生产环境使用相同的CSP配置
+- Font Awesome字体文件现在可以正常从 cdnjs.cloudflare.com 加载，解决了控制台中的CSP错误

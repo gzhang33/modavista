@@ -1,10 +1,8 @@
-<?php
+<?php require_once '_auth_guard.php';
 // admin/translations.php - 翻译管理界面
 
-require_once '../config/app.php';
 require_once '../api/utils.php';
 require_once '../api/language.php';
-require_auth();
 
 // 获取当前语言参数
 $current_lang = $_GET['lang'] ?? 'en';
@@ -521,15 +519,26 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <header class="admin-header">
-            <h1>Translation Management</h1>
-            <nav class="admin-nav">
-                <a href="dashboard.php">← Back to Dashboard</a>
-            </nav>
-        </header>
+    <div class="dashboard-container">
+        <!-- 管理导航栏 -->
+        <nav class="admin-nav-bar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h3><i class="fas fa-cogs"></i> DreaModa 管理后台</h3>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="dashboard.php" class="nav-link"><i class="fas fa-box"></i> 产品管理</a></li>
+                    <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 主页表单查询</a></li>
+                    <li><a href="translations.php" class="nav-link active"><i class="fas fa-language"></i> 多语言翻译</a></li>
+                    <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                </ul>
+            </div>
+        </nav>
 
-        <main class="admin-main">
+        <main class="main-content">
+            <header class="main-header">
+                <h2><i class="fas fa-language"></i> 多语言翻译管理</h2>
+            </header>
             <?php if (isset($message)): ?>
                 <div class="status-message status-success">
                     <?php echo htmlspecialchars($message); ?>

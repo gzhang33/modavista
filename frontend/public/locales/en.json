@@ -73,7 +73,7 @@
   "footer": {
     "description": "Premium fashion manufacturer and designer, creating exceptional garments for discerning customers worldwide with Italian craftsmanship and modern style.",
     "quick_links": "Quick Links",
-    "all_products": "All Products",
+    "all_products": "All Collections",
     "collections": "Collections",
     "categories": "Categories",
     "about_us": "About Us",
@@ -94,8 +94,8 @@
   },
   "products": {
     "back_to_home": "Back to Home",
-    "title": "All Products",
-    "subtitle_plural": "Browse our complete collection of {count} premium wholesale garments",
+    "title": "All Collections",
+    "subtitle_plural": "",
     "filters_title": "Filters",
     "clear_all": "Clear All",
     "search_label": "Search",
@@ -110,6 +110,7 @@
     "sort_name_asc": "Name A-Z",
     "sort_name_desc": "Name Z-A",
     "sort_newest": "Newest First",
+    "show_collections": "Show Collections",
     "empty": {
       "no_products": "No products available. Please add some products from the admin panel.",
       "no_match": "No products found matching your criteria.",
@@ -127,7 +128,7 @@
     "no": "No",
     "error_loading": "Error loading products: ",
     "refresh_page": "Please try refreshing the page.",
-    "seo_title": "DreaModa Products - Premium Wholesale Garments Collection",
+    "seo_title": "DreaModa Collections - Premium Wholesale Garments Collection",
     "seo_description": "Explore our complete collection of premium Italian fashion garments. Wholesale clothing, dresses, tops, outerwear and accessories for discerning fashion retailers."
   },
   "product_detail": {

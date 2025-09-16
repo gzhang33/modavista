@@ -252,7 +252,7 @@ export default function ProductDetailPage() {
             <div className="text-center py-16">
               <h1 className="text-2xl font-semibold text-gray-900 mb-4">{t('product_detail.not_found.title', 'Product Not Found')}</h1>
               <p className="text-gray-600 mb-8">{t('product_detail.not_found.desc', 'Sorry, the product you are looking for does not exist or has been removed.')}</p>
-              <Link href={createLocalizedHref('/products')}> 
+              <Link href={createLocalizedHref('/collections')}> 
                 <Button className="bg-charcoal text-white hover:bg-gray-800">
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   {t('product_detail.actions.view_all_products', 'View all products')}
@@ -273,7 +273,6 @@ export default function ProductDetailPage() {
 
   // Convert specifications to table format
   const specificationRows = [
-    { name: "Product Code", value: product.sku },
     { name: "Category", value: product.category },
     { name: "Season", value: product.season.replace('-', '/') },
     { name: "Origin", value: product.origin },
@@ -305,7 +304,7 @@ export default function ProductDetailPage() {
     }),
     generateBreadcrumbSchema([
       { name: t('nav.home', 'Home'), url: createLocalizedHref('/') },
-      { name: t('nav.collections', 'Collections'), url: createLocalizedHref('/products') },
+      { name: t('nav.collections', 'Collections'), url: createLocalizedHref('/collections') },
       { name: product.name, url: createLocalizedHref(`/product/${id}`) }
     ])
   ] : [];
@@ -332,9 +331,9 @@ export default function ProductDetailPage() {
               </Button>
             </Link>
             <span className="mx-2 text-gray-400">/</span>
-            <Link href={createLocalizedHref('/products')}>
+            <Link href={createLocalizedHref('/collections')}>
               <Button variant="ghost" className="text-gray-500 hover:text-gray-700 p-0">
-                {t('footer.all_products', 'All Products')}
+                {t('footer.all_products', 'All Collections')}
               </Button>
             </Link>
             <span className="mx-2 text-gray-400">/</span>
@@ -345,6 +344,11 @@ export default function ProductDetailPage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
             {/* Product Gallery */}
             <div className="flex flex-col">
+cd              {/* Mobile Product Name - Only visible on mobile */}
+              <h1 className="text-xl font-bold tracking-tight text-gray-900 mb-4 md:hidden">
+                {product.name}
+              </h1>
+              
               <div 
                 className="relative w-full bg-white rounded-lg shadow-lg overflow-hidden flex items-center justify-center p-4 mb-4"
                 onTouchStart={onTouchStart}
@@ -354,7 +358,7 @@ export default function ProductDetailPage() {
                 <img
                   src={displayImages[selectedImageIndex]}
                   alt="Main product view"
-                  className="w-full h-auto object-contain max-h-[500px] transition-opacity duration-300"
+                  className="w-full h-auto object-contain max-h-[400px] md:max-h-[500px] transition-opacity duration-300"
                   onError={createImageErrorHandler({ debug: false, t })}
                 />
                 
@@ -421,21 +425,12 @@ export default function ProductDetailPage() {
 
             {/* Product Info */}
             <div className="mt-8 lg:mt-0">
-              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+              {/* Desktop Product Name - Only visible on desktop */}
+              <h1 className="hidden md:block text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                 {product.name}
               </h1>
-                <p className="text-sm text-gray-500 mt-4">
-                {t('product_detail.fields.sku', 'Product Code')}: {product.sku}
-              </p>
 
-              <div className="mt-8 border-t pt-8">
-                <div className="h-10 w-auto mb-4 flex items-center">
-                  <span className="text-2xl font-bold text-accent-gold">DreaModa</span>
-                </div>
-                <p className="mt-4 text-gray-600 leading-relaxed">
-                  {product.description || t('product_detail.description_fallback', `This exquisite ${product.name} showcases our commitment to quality and craftsmanship. Made with premium materials, paying attention to every detail, bringing you the perfect combination of comfort and fashion.`)}
-                </p>
-              </div>
+              {/* Product Description - Removed completely */}
 
               {/* Action Buttons */}
               <div className="mt-8 space-y-4">
@@ -448,7 +443,7 @@ export default function ProductDetailPage() {
                   {requestSampleMutation.isPending ? t('product_detail.actions.sending', 'Sending Request...') : t('product_detail.actions.add_to_inquiry', 'Request Sample')}
                 </Button>
                 
-                <Link href={createLocalizedHref('/products')}>
+                <Link href={createLocalizedHref('/collections')}>
                   <Button 
                     variant="outline" 
                     className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"

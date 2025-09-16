@@ -6,7 +6,7 @@ require_once 'utils.php';
 
 // 只对写操作需要认证，读操作允许公开访问
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    require_auth();
+    require_auth_enhanced();
 }
 
 // 数据库连接

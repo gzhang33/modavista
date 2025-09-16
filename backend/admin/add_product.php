@@ -1,3 +1,4 @@
+<?php require_once '_auth_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,26 +8,16 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/add_product.css">
     <link rel="stylesheet" href="assets/css/translation.css">
+    <link rel="stylesheet" href="assets/css/contact_messages.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <script>
-    fetch('../api/check_session.php')
-        .then(r=>r.json())
-        .then(d=>{ 
-            if(!d.loggedIn){ 
-                console.log('Session check failed, redirecting to login');
-                location.href='login.html'; 
-            } else {
-                console.log('Session valid, loading page');
-            }
-        })
-        .catch((error)=>{
-            console.error('Session check error:', error);
-            location.href='login.html';
-        });
+    // 服务器侧已做门禁
     </script>
-    <main class="main-content">
+    
+    <div class="dashboard-container">
+        <main class="main-content">
         <header class="main-header">
             <h2><i class="fas fa-plus"></i> 添加新产品</h2>
             <div class="header-actions">
@@ -77,10 +68,10 @@
                         <!-- 占位符，保持布局平衡 -->
                     </div>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="description">产品描述</label>
                     <textarea id="description" name="description" rows="4" class="form-control" required placeholder="描述产品的特点、材质、设计理念等..."></textarea>
-                </div>
+                </div> -->
                 
                 <!-- 翻译组件占位符 -->
                 <div id="translation-component" class="translation-container"></div>
@@ -116,7 +107,8 @@
                 </div>
             </form>
         </section>
-    </main>
+        </main>
+    </div>
 
 
 

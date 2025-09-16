@@ -12,7 +12,7 @@ export default function Footer() {
   };
 
   // 生成多语言产品页面链接
-  const productsHref = createLocalizedHref('/products');
+  const collectionsHref = createLocalizedHref('/collections');
 
   return (
     <footer className="bg-charcoal text-white py-12">
@@ -29,10 +29,10 @@ export default function Footer() {
             <h6 className="font-semibold mb-4">{t('footer.quick_links', 'Quick Links')}</h6>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <Link href={productsHref}>
+                <Link href={collectionsHref}>
                   <span className="hover:text-accent-gold transition-colors cursor-pointer"
-                        data-testid="footer-products">
-                    {t('footer.all_products', 'All Products')}
+                        data-testid="footer-collections">
+                    {t('footer.all_products', 'All Collections')}
                   </span>
                 </Link>
               </li>

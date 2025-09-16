@@ -81,28 +81,40 @@ define('CORS_ALLOWED_HEADERS', $corsConfig['allowed_headers']);
  * 配置会话参数以支持长期登录
  */
 function configure_long_term_session() {
-    // 设置会话cookie生命周期为30天（秒）
-    $lifetime = 30 * 24 * 60 * 60; // 30天
-    
-    // 设置会话垃圾回收最大生命周期为30天
-    ini_set('session.gc_maxlifetime', $lifetime);
-    
-    // 设置会话cookie参数
-    session_set_cookie_params(
-        $lifetime,
-        '/',
-        '',
-        $is_production, // 生产环境使用HTTPS
-        true   // httponly
-    );
-    
+    // 显式引入环境标志
+    global $is_production;
+
+    // 会话生命周期：30天
+    $lifetime = 30 * 24 * 60 * 60;
+
+    // 垃圾回收与 cookie 生命周期
+    ini_set('session.gc_maxlifetime', (string)$lifetime);
+
+    // 统一设置安全的 Cookie 参数（PHP >= 7.3 数组形式）
+    $cookieParams = [
+        'lifetime' => $lifetime,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $is_production ? true : false,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ];
+    if (function_exists('session_set_cookie_params')) {
+        session_set_cookie_params($cookieParams);
+    }
+
     // 启动会话（避免重复启动）
-    if (session_status() == PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    
-    // 更新会话的最后活动时间
-    if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+
+    // 为 CSRF 提供一次性 token（如不存在则生成）
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    // 更新管理员最后活动时间
+    if (!empty($_SESSION['admin_logged_in'])) {
         $_SESSION['last_activity'] = time();
     }
 }

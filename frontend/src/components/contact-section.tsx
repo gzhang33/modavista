@@ -15,11 +15,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const contactFormSchema = z.object({
-  firstName: z.string().min(1, "名字不能为空"),
-  lastName: z.string().min(1, "姓氏不能为空"),
-  email: z.string().email("请输入有效的邮箱地址"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Please enter a valid email address"),
   company: z.string().optional(),
-  message: z.string().min(10, "消息内容至少需要10个字符"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
   inquiryType: z.literal('general').default('general'),
 });
 
@@ -40,6 +40,7 @@ export default function ContactSection() {
 
   const form = useForm({
     resolver: zodResolver(contactFormSchema),
+    mode: 'onChange', // Enable real-time validation
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -91,10 +92,10 @@ export default function ContactSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Contact Form */}
           <Card className="bg-soft-white border-none shadow-sm">
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
               <h4 className="text-2xl font-playfair font-semibold text-charcoal mb-6">
                 {t('home.contact.form.title')}
               </h4>
@@ -116,7 +117,7 @@ export default function ContactSection() {
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="firstName"
@@ -126,7 +127,7 @@ export default function ContactSection() {
                             <Input
                               placeholder={t('home.contact.form.first_name')}
                               {...field}
-                              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
+                              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent min-h-[44px] text-base"
                               data-testid="input-first-name"
                             />
                           </FormControl>
@@ -144,7 +145,7 @@ export default function ContactSection() {
                             <Input
                               placeholder={t('home.contact.form.last_name')}
                               {...field}
-                              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
+                              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent min-h-[44px] text-base"
                               data-testid="input-last-name"
                             />
                           </FormControl>
@@ -164,7 +165,7 @@ export default function ContactSection() {
                             type="email"
                             placeholder={t('home.contact.form.email')}
                             {...field}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent min-h-[44px] text-base"
                             data-testid="input-email"
                           />
                         </FormControl>
@@ -182,7 +183,7 @@ export default function ContactSection() {
                           <Input
                             placeholder={t('home.contact.form.company')}
                             {...field}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent min-h-[44px] text-base"
                             data-testid="input-company"
                           />
                         </FormControl>
@@ -202,7 +203,7 @@ export default function ContactSection() {
                             placeholder={t('home.contact.form.requirements')}
                             rows={4}
                             {...field}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent resize-none"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent resize-none text-base"
                             data-testid="textarea-message"
                           />
                         </FormControl>
@@ -214,7 +215,7 @@ export default function ContactSection() {
                   <Button
                     type="submit"
                     disabled={submitInquiryMutation.isPending}
-                    className="w-full bg-accent-gold text-charcoal py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300"
+                    className="w-full bg-accent-gold text-charcoal py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 transition-colors duration-300 min-h-[44px]"
                     data-testid="button-send-inquiry"
                   >
                     {submitInquiryMutation.isPending ? t('common.loading') : t('home.contact.form.submit')}

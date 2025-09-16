@@ -14,9 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// 非 GET 操作需要认证
+// 非 GET 操作需要认证（增强版）
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    require_auth();
+    require_auth_enhanced();
 }
 
 try {

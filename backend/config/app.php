@@ -58,7 +58,7 @@ define('IMAGES_CATEGORIES_URL', IMAGES_BASE_URL . 'categories/');
 define('IMAGES_UPLOADS_URL', IMAGES_BASE_URL . 'uploads/');
 
 // 网站基础配置 - 从环境变量读取
-define('SITE_NAME', EnvLoader::get('SITE_NAME', 'DreaModa Fashion Collection'));
+define('SITE_NAME', EnvLoader::get('SITE_NAME', 'DreamModa Fashion Collection'));
 define('SITE_URL', EnvLoader::get('SITE_URL', 'http://localhost'));
 define('FRONTEND_URL', EnvLoader::get('FRONTEND_URL', 'http://localhost'));
 define('API_BASE_URL', EnvLoader::get('API_BASE_URL', 'http://localhost/api'));
@@ -218,6 +218,8 @@ function generate_random_string($length = 32) {
  * 处理CORS请求
  */
 function handle_cors() {
+    global $is_production;
+    
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
     $allowed_origins = CORS_ALLOWED_ORIGINS;
     

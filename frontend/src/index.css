@@ -175,6 +175,46 @@
   }
 }
 
+/* WhatsApp悬浮按钮样式 */
+.whatsapp-floating-button {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 999;
+  background-color: #25D366;
+  color: white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.whatsapp-floating-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 隐藏WhatsApp按钮在某些情况下 */
+body.header--menu-open .whatsapp-floating-button {
+  display: none !important;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .whatsapp-floating-button {
+    width: 45px;
+    height: 45px;
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
 /* Mobile-specific optimizations */
 @media (max-width: 767px) {
   /* Category Carousel - Ensure at least 2 images visible */

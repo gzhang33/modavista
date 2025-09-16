@@ -6,7 +6,7 @@
     "contact": "Contact"
   },
   "home": {
-    "title": "DreaModa - Excellence Italienne de la Mode",
+    "title": "DreamModa - Excellence Italienne de la Mode",
     "hero": {
       "title": "Collection de Vêtements de Gros Premium",
       "subtitle": "Découvrez notre sélection exclusive de vêtements de haute qualité, conçus pour les partenaires grossistes exigeants",
@@ -24,7 +24,7 @@
     },
     "about": {
       "title": "Créer des Rêves dans la Mode",
-      "description1": "DreaModa représente la parfaite fusion de l'héritage de la mode italienne et du design contemporain. Basé au cœur de Prato, Toscane, notre atelier combine un artisanat traditionnel avec des techniques innovantes pour créer des vêtements exceptionnels. Nous sommes animés par un engagement envers l'excellence et une attention méticuleuse aux détails, garantissant que chaque pièce incarne l'élégance, la qualité et la sophistication moderne synonymes des plus hauts standards de la mode italienne.",
+      "description1": "DreamModa représente la parfaite fusion de l'héritage de la mode italienne et du design contemporain. Basé au cœur de Prato, Toscane, notre atelier combine un artisanat traditionnel avec des techniques innovantes pour créer des vêtements exceptionnels. Nous sommes animés par un engagement envers l'excellence et une attention méticuleuse aux détails, garantissant que chaque pièce incarne l'élégance, la qualité et la sophistication moderne synonymes des plus hauts standards de la mode italienne.",
       "description2": "Depuis 2005, nous nous sommes positionnés comme un partenaire stratégique de nos clients, pas seulement comme un fournisseur. En restant en avance sur les tendances du marché, notre équipe d'experts et nos installations modernes nous permettent de livrer des collections de vêtements qui sont à la fois à la mode et commercialement viables. Notre engagement est de favoriser la croissance de votre entreprise en fournissant une chaîne d'approvisionnement fiable et un service d'expert, garantissant que nous réussissons ensemble.",
       "designs": "Conceptions de Mode",
       "experience": "Années d'Expérience"
@@ -34,7 +34,7 @@
       "subtitle": "Nous sommes fiers de servir des clients à travers l'Europe, apportant l'excellence de la mode italienne aux marchés européens"
     },
     "contact": {
-      "title": "Connectez-vous avec DreaModa",
+      "title": "Connectez-vous avec DreamModa",
       "subtitle": "Découvrez nos collections exclusives de mode. Contactez-nous pour des demandes, rendez-vous, ou pour en savoir plus sur nos services sur mesure.",
       "form": {
         "title": "Demander des Informations",
@@ -48,12 +48,12 @@
       },
       "info": {
         "title": "Nous Contacter",
-        "headquarters": "Siège de DreaModa",
+        "headquarters": "Siège de DreamModa",
         "address": "Via Gherardacci 47/C, Iolo, Prato, Toscane, Italie",
         "inquiries": "Demandes Commerciales",
-        "phone": "+39 3388508068\n+39 3888518810\nLun - Ven, 10h00 - 21h00 CET",
+        "phone_hours": "Lun - Ven, 10h00 - 21h00 CET",
         "email": "Email",
-        "email_address": "Hi@DreaModa.store"
+        "email_address": "Hi@DreamModa.store"
       },
       "visit": {
         "title": "Visitez Notre Atelier",
@@ -78,7 +78,7 @@
     "categories": "Catégories",
     "about_us": "À Propos de Nous",
     "contact": "Contact",
-    "copyright": "© 2025 DREAMODA. Tous droits réservés. | Fabriqué avec passion pour la mode à Toscane, Italie."
+    "copyright": "© 2025 DREAMMODA. Tous droits réservés. | Fabriqué avec passion pour la mode à Toscane, Italie."
   },
   "filters": {
     "all_categories": "Toutes les Catégories",
@@ -128,7 +128,7 @@
     "no": "Non",
     "error_loading": "Erreur de chargement des produits: ",
     "refresh_page": "Veuillez essayer de rafraîchir la page.",
-    "seo_title": "Collections DreaModa - Collection de Vêtements de Gros Premium",
+    "seo_title": "Collections DreamModa - Collection de Vêtements de Gros Premium",
     "seo_description": "Découvrez notre collection complète de vêtements de mode italiens haut de gamme. Vêtements en gros, robes, hauts, vêtements d'extérieur et accessoires pour les détaillants de mode exigeants."
   },
   "product_detail": {
@@ -175,8 +175,8 @@
       "origin": "Origine: {origin}",
       "sku": "SKU: {sku}"
     },
-    "seo_title": "{productName} - Vêtements de gros premium DreaModa",
-    "seo_title_fallback": "Produit - DreaModa",
+    "seo_title": "{productName} - Vêtements de gros premium DreamModa",
+    "seo_title_fallback": "Produit - DreamModa",
     "seo_description": "{productName} - Vêtement de mode italien haut de gamme. {productDescription} Matériau: {productMaterial}, Couleur: {productColor}. Prix de gros disponibles.",
     "seo_description_fallback": "Vêtement de mode italien haut de gamme pour la vente en gros",
     "thumbnail_alt": "Vignette"
@@ -244,7 +244,7 @@
     }
   },
   "seo": {
-    "title": "DreaModa - Excellence Italienne de la Mode | Fabricant de Vêtements en Gros",
+    "title": "DreamModa - Excellence Italienne de la Mode | Fabricant de Vêtements en Gros",
     "description": "Fabricant italien de mode premium spécialisé dans les vêtements de gros. Découvrez notre collection exclusive de pièces de mode de haute qualité pour les partenaires grossistes exigeants du monde entier.",
     "keywords": "mode italienne, vêtements de gros, fabricant de mode, mode Prato, vêtements premium, mode de gros"
   }

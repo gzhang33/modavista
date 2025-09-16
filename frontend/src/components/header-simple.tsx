@@ -31,7 +31,7 @@ export default function Header() {
               onClick={(e) => { e.preventDefault(); goTo('hero'); }}
               className="text-2xl font-playfair font-bold text-charcoal hover:text-accent-gold transition-colors duration-300 cursor-pointer"
             >
-              DreaModa
+              DreamModa
             </a>
           </div>
 

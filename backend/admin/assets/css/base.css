@@ -15,6 +15,9 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+/* Prevent horizontal scroll on mobile */
+html, body { max-width: 100%; overflow-x: hidden; }
+
 .dashboard-container {
 	display: block;
 	min-height: 100vh;
@@ -49,6 +52,9 @@ body {
 
 /* Utilities */
 .hidden { display: none !important; }
+
+/* Utility: only show on mobile */
+.mobile-only { display: none; }
 
 /* Forms */
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -149,6 +155,11 @@ body {
 	.form-control, .form-control-file { font-size: 16px; padding: 0.75rem; }
 	.form-actions { flex-direction: column; gap: 0.5rem; }
 	.form-actions .btn { width: 100%; justify-content: center; }
+
+	/* Header stack for mobile */
+	.main-header { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+	.header-actions { width: 100%; }
+	.header-actions .btn { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 480px) {

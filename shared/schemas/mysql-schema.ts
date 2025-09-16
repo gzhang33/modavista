@@ -1,5 +1,5 @@
 // shared/mysql-schema.ts - MySQL兼容的数据库Schema
-// 适配DreaModa主项目的MySQL数据库结构
+// 适配DreamModa主项目的MySQL数据库结构
 
 import { sql } from "drizzle-orm";
 import { 
@@ -15,7 +15,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // =============================================
-// 核心产品表（对应DreaModa的product_variant）
+// 核心产品表（对应DreamModa的product_variant）
 // =============================================
 export const products = mysqlTable("product_variant", {
   id: int("id").primaryKey().autoincrement(),

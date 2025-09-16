@@ -19,7 +19,7 @@
         <nav class="admin-nav-bar">
             <div class="nav-container">
                 <div class="nav-brand">
-                    <h3><i class="fas fa-cogs"></i> DreaModa 管理后台</h3>
+                    <h3><i class="fas fa-cogs"></i> DreamModa 管理后台</h3>
                 </div>
                 <ul class="nav-links">
                     <li><a href="dashboard.php" class="nav-link active"><i class="fas fa-box"></i> 产品管理</a></li>

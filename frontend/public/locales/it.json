@@ -6,7 +6,7 @@
     "contact": "Contatti"
   },
   "home": {
-    "title": "DreaModa - Eccellenza Italiana della Moda",
+    "title": "DreamModa - Eccellenza Italiana della Moda",
     "hero": {
       "title": "Collezione di Abbigliamento all'Ingrosso Premium",
       "subtitle": "Scopri la nostra selezione curata di capi di alta qualità, realizzati per partner grossisti esigenti",
@@ -24,7 +24,7 @@
     },
     "about": {
       "title": "Creare Sogni nella Moda",
-      "description1": "DreaModa rappresenta la perfetta fusione dell'eredità della moda italiana e del design contemporaneo. Con sede nel cuore di Prato, Toscana, il nostro atelier combina l'artigianato tradizionale con tecniche innovative per creare capi eccezionali. Siamo guidati da un impegno per l'eccellenza e un'attenzione meticolosa ai dettagli, garantendo che ogni pezzo incarni l'eleganza, la qualità e la sofisticazione moderna sinonimi dei più alti standard della moda italiana.",
+      "description1": "DreamModa rappresenta la perfetta fusione dell'eredità della moda italiana e del design contemporaneo. Con sede nel cuore di Prato, Toscana, il nostro atelier combina l'artigianato tradizionale con tecniche innovative per creare capi eccezionali. Siamo guidati da un impegno per l'eccellenza e un'attenzione meticolosa ai dettagli, garantendo che ogni pezzo incarni l'eleganza, la qualità e la sofisticazione moderna sinonimi dei più alti standard della moda italiana.",
       "description2": "Dal 2005, ci siamo posizionati come partner strategico dei nostri clienti, non semplicemente come fornitori. Rimanendo all'avanguardia delle tendenze del mercato, il nostro team di esperti e le nostre strutture moderne ci permettono di fornire collezioni di abbigliamento che sono sia alla moda che commercialmente valide. Il nostro impegno è favorire la crescita del vostro business fornendo una catena di approvvigionamento affidabile e un servizio esperto, garantendo che riusciamo insieme.",
       "designs": "Design di Moda",
       "experience": "Anni di Esperienza"
@@ -34,7 +34,7 @@
       "subtitle": "Siamo orgogliosi di servire clienti in tutta Europa, portando l'eccellenza della moda italiana sui mercati europei"
     },
     "contact": {
-      "title": "Connettiti con DreaModa",
+      "title": "Connettiti con DreamModa",
       "subtitle": "Scopri le nostre collezioni esclusive di moda. Contattaci per richieste, appuntamenti o per saperne di più sui nostri servizi su misura.",
       "form": {
         "title": "Richiedi Informazioni",
@@ -48,12 +48,12 @@
       },
       "info": {
         "title": "Mettiti in Contatto",
-        "headquarters": "Sede Centrale DreaModa",
+        "headquarters": "Sede Centrale DreamModa",
         "address": "Via Gherardacci 47/C, Iolo, Prato, Toscana, Italia",
         "inquiries": "Richieste Commerciali",
-        "phone": "+39 3388508068\n+39 3888518810\nLun - Ven, 10:00 - 21:00 CET",
+        "phone_hours": "Lun - Ven, 10:00 - 21:00 CET",
         "email": "Email",
-        "email_address": "Hi@DreaModa.store"
+        "email_address": "Hi@DreamModa.store"
       },
       "visit": {
         "title": "Visita il Nostro Atelier",
@@ -61,7 +61,8 @@
         "consultations": "Consulenze di design su misura",
         "previews": "Anteprime collezione stagionale",
         "services": "Servizi su misura"
-      }
+      },
+      "auto_message": "Sono interessato al vostro business di abbigliamento all'ingrosso. Posso avere ulteriori dettagli?"
     },
     "business_types": {
       "retailer": "Rivenditore",
@@ -78,7 +79,7 @@
     "categories": "Categorie",
     "about_us": "Chi Siamo",
     "contact": "Contatti",
-    "copyright": "© 2025 DREAMODA. Tutti i diritti riservati. | Realizzato con passione per la moda a Toscana, Italia."
+    "copyright": "© 2025 DREAMMODA. Tutti i diritti riservati. | Realizzato con passione per la moda a Toscana, Italia."
   },
   "filters": {
     "all_categories": "Tutte le Categorie",
@@ -104,6 +105,8 @@
     "material": "Materiale",
     "all_materials": "Tutti i materiali",
     "season": "Stagione",
+    "color": "Colore",
+    "all_colors": "Tutti i colori",
     "results_count": "{count} prodotti",
     "sort_by": "Ordina per",
     "sort_most_popular": "Più popolari",
@@ -123,12 +126,11 @@
     "all_season": "Tutte le stagioni",
     "machine_wash": "Lavare in lavatrice",
     "made_in_italy": "Fatto in Italia",
-    "color": "Colore",
     "sku": "SKU",
     "no": "No",
     "error_loading": "Errore durante il caricamento dei prodotti: ",
     "refresh_page": "Prova a ricaricare la pagina.",
-    "seo_title": "Collezioni DreaModa - Collezione di Abbigliamento all'Ingrosso Premium",
+    "seo_title": "Collezioni DreamModa - Collezione di Abbigliamento all'Ingrosso Premium",
     "seo_description": "Esplora la nostra collezione completa di capi di moda italiani di alta qualità. Abbigliamento all'ingrosso, vestiti, top, capispalla e accessori per rivenditori di moda esigenti."
   },
   "product_detail": {
@@ -175,8 +177,8 @@
       "origin": "Origine: {origin}",
       "sku": "SKU: {sku}"
     },
-    "seo_title": "{productName} - Abbigliamento all'Ingrosso Premium DreaModa",
-    "seo_title_fallback": "Prodotto - DreaModa",
+    "seo_title": "{productName} - Abbigliamento all'Ingrosso Premium DreamModa",
+    "seo_title_fallback": "Prodotto - DreamModa",
     "seo_description": "{productName} - Capo di moda italiano premium. {productDescription} Materiale: {productMaterial}, Colore: {productColor}. Prezzi all'ingrosso disponibili.",
     "seo_description_fallback": "Capo di moda italiano premium per l'ingrosso",
     "thumbnail_alt": "Miniatura"
@@ -244,7 +246,7 @@
     }
   },
   "seo": {
-    "title": "DreaModa - Eccellenza Italiana della Moda | Produttore di Abbigliamento all'Ingrosso",
+    "title": "DreamModa - Eccellenza Italiana della Moda | Produttore di Abbigliamento all'Ingrosso",
     "description": "Produttore italiano di moda premium specializzato in abbigliamento all'ingrosso. Scopri la nostra collezione curata di capi di moda di alta qualità per partner grossisti esigenti in tutto il mondo.",
     "keywords": "moda italiana, abbigliamento all'ingrosso, produttore di moda, moda Prato, abbigliamento premium, moda all'ingrosso"
   }

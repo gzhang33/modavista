@@ -17,6 +17,7 @@ export default class ProductTableComponent extends BaseComponent {
         super(selector, eventBus);
         this.table = this.element.querySelector('#products-table');
         this.tableBody = this.element.querySelector('#products-table-body');
+        this.cardsContainer = document.getElementById('products-cards');
         this.selectAllCheckbox = this.element.querySelector('#select-all-checkbox');
         
         // Bulk actions
@@ -61,6 +62,10 @@ export default class ProductTableComponent extends BaseComponent {
             this.load_products(e.detail);
         });
 
+        // Re-render on viewport resize to switch between table/cards
+        window.addEventListener('resize', () => {
+            this.render();
+        });
     }
 
     async load_colors_map() {
@@ -136,8 +141,73 @@ export default class ProductTableComponent extends BaseComponent {
     }
 
     render() {
-        this.tableBody.innerHTML = '';
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
         const list = this.get_current_list();
+        
+        console.log('Render function called - isMobile:', isMobile, 'list length:', list ? list.length : 0);
+
+        if (isMobile) {
+            console.log('Rendering mobile view');
+            if (this.cardsContainer) this.cardsContainer.innerHTML = '';
+            // Hide table body content for mobile (CSS also hides container)
+            if (this.tableBody) this.tableBody.innerHTML = '';
+            if (!list || list.length === 0) {
+                console.log('No products to render in mobile view');
+                if (this.cardsContainer) this.cardsContainer.innerHTML = '<div class="text-center" style="padding: 1rem;">暂无产品</div>';
+                return;
+            }
+            console.log('Rendering', list.length, 'products in mobile cards');
+            list.forEach(p => {
+                const raw = p.defaultImage || '';
+                let image_src = PLACEHOLDER_IMAGE;
+                if (raw) {
+                    if (raw.startsWith('http')) image_src = raw;
+                    else if (raw.startsWith('products/')) image_src = '/storage/uploads/product_images/' + raw.substring(9);
+                    else if (raw.startsWith('/')) image_src = raw;
+                    else image_src = '/' + raw;
+                }
+                const color_raw = p.color || this.extract_color_label(p.name) || '—';
+                const color_name = this.translate_color_to_it(color_raw);
+                const material_name = p.material || '—';
+                const name = p.base_name;
+                const category = p.category || '未分类';
+                const created = this.format_created_at(p.createdAt);
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img class="product-card__thumb" src="${image_src}" alt="${name}">
+                    <div class="product-card__body">
+                        <div class="product-card__title" title="${name}">${name}</div>
+                        <div class="product-card__meta">
+                            <span class="product-card__badge">${color_name}</span>
+                            <span class="product-card__badge">${material_name}</span>
+                            <span class="product-card__badge">${category}</span>
+                            <span class="product-card__badge">${created}</span>
+                        </div>
+                    </div>
+                    <div class="product-card__actions">
+                        <a class="product-card__btn product-card__btn--primary" href="/admin/edit_product.php?id=${p.id}"><i class="fas fa-edit"></i> 编辑</a>
+                        <button class="product-card__btn" data-id="${p.id}" data-action="delete"><i class="fas fa-trash"></i> 删除</button>
+                    </div>
+                `;
+                this.cardsContainer && this.cardsContainer.appendChild(card);
+            });
+            if (this.cardsContainer) {
+                this.cardsContainer.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.getAttribute('data-id'));
+                        const product = this.all_products.find(p => p.id === id);
+                        if (product && confirm(`确定要删除产品 "${product.name}" 吗？`)) {
+                            this.delete_product(id).then(() => this.load_products());
+                        }
+                    });
+                });
+            }
+            return;
+        }
+
+        // Desktop table rendering
+        this.tableBody.innerHTML = '';
         if (!list || list.length === 0) {
             this.tableBody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的产品</td></tr>';
             this.selectAllCheckbox.checked = false;
@@ -321,7 +391,7 @@ export default class ProductTableComponent extends BaseComponent {
     }
 
     get_current_list() {
-        return Array.isArray(this.filtered_products) && this.filtered_products.length >= 0
+        return Array.isArray(this.filtered_products) && this.filtered_products !== null
             ? this.filtered_products
             : this.all_products;
     }

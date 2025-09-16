@@ -58,7 +58,7 @@ export default class TranslationComponent extends BaseComponent {
                         </div>
                     </div>
 
-                    <button class="translation__generate-btn btn btn--primary">
+                    <button type="button" class="translation__generate-btn btn btn--primary">
                         <span class="translation__btn-text">生成多语言版本</span>
                         <div class="translation__loading hidden">
                             <span class="translation__loading-text">翻译中...</span>
@@ -87,7 +87,12 @@ export default class TranslationComponent extends BaseComponent {
         const generateBtn = this.element.querySelector('.translation__generate-btn');
         const sourceSelect = this.element.querySelector('.translation__source-select');
 
-        generateBtn?.addEventListener('click', () => this.handleGenerateTranslation());
+        generateBtn?.addEventListener('click', (e) => {
+            // 防止位于 <form> 内部时触发表单提交
+            e.preventDefault();
+            e.stopPropagation();
+            this.handleGenerateTranslation();
+        });
         sourceSelect?.addEventListener('change', (e) => this.handleSourceLanguageChange(e));
     }
 
@@ -281,7 +286,7 @@ export default class TranslationComponent extends BaseComponent {
                     <div class="translation__result-item">
                         <div class="translation__result-header">
                             <span class="translation__result-lang">${langName}</span>
-                            <button class="translation__edit-btn" data-content="${contentType}" data-lang="${lang}">
+                            <button type="button" class="translation__edit-btn" data-content="${contentType}" data-lang="${lang}">
                                 编辑
                             </button>
                         </div>
@@ -308,6 +313,11 @@ export default class TranslationComponent extends BaseComponent {
     }
 
     handleEditTranslation(event) {
+        // 防止位于 <form> 内部时触发表单提交
+        if (event) {
+            try { event.preventDefault(); } catch (_) {}
+            try { event.stopPropagation(); } catch (_) {}
+        }
         const btn = event.target;
         const contentType = btn.dataset.content;
         const lang = btn.dataset.lang;

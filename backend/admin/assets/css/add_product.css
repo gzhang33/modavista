@@ -214,6 +214,14 @@
 	.media-previews { justify-content: center; }
 	.media-previews img { height: 60px; width: 60px; }
 	.toast { left: 1rem; max-width: none; right: 1rem; transform: none; }
+
+	/* Tighten variants/media tiles on phones */
+	:root { --variants-size: 120px; --image-size: 100px; }
+	.upload-dropzone, .variants__dropzone, .variants__dropzone--add, .variant-dropzone { width: var(--variants-size); height: var(--variants-size); }
+	.variants__media img, .variant-media-previews .media-preview-item img { width: var(--image-size) !important; height: var(--image-size) !important; }
+	.form-row { grid-template-columns: 1fr; }
+	.form-actions { flex-direction: column; }
+	.form-actions .btn { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 480px) {

@@ -119,7 +119,7 @@ export function generateWebSiteSchema(siteUrl: string, searchUrl?: string) {
   const schema: any = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "DreaModa",
+    "name": "DreamModa",
     "url": siteUrl,
     "description": "Premium Italian fashion manufacturer specializing in wholesale garments"
   };

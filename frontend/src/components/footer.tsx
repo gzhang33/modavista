@@ -19,7 +19,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
-            <h5 className="text-2xl font-playfair font-semibold mb-4">DREAMODA</h5>
+            <h5 className="text-2xl font-playfair font-semibold mb-4">DREAMMODA</h5>
             <p className="text-gray-300 mb-4 max-w-md">
               {t('footer.description', 'Premium fashion manufacturer and designer, creating exceptional garments for discerning customers worldwide with Italian craftsmanship and modern style.')}
             </p>
@@ -77,7 +77,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-          <p>{t('footer.copyright', '© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Tuscany, Italy.')}</p>
+          <p>{t('footer.copyright', '© 2025 DREAMMODA. All rights reserved. | Made with passion for fashion in Tuscany, Italy.')}</p>
         </div>
       </div>
     </footer>

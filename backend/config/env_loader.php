@@ -94,7 +94,7 @@ class EnvLoader {
             'DB_CHARSET' => 'utf8mb4',
             'ADMIN_USERNAME' => 'admin',
             'ADMIN_PASSWORD_HASH' => '$2y$10$bqXiQg5/wn0zYQ3z/ToAhuBAMXhXK/7Iqmp9PkjXSBBOMeBZevYEy',
-            'SITE_NAME' => 'DreaModa Fashion Collection',
+            'SITE_NAME' => 'DreamModa Fashion Collection',
             'SITE_URL' => 'https://dreamoda.store',
             'FRONTEND_URL' => 'https://dreamoda.store',
             'API_BASE_URL' => 'https://dreamoda.store/backend/api',

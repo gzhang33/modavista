@@ -6,7 +6,7 @@
     "contact": "Contact"
   },
   "home": {
-    "title": "DreaModa - Italian Fashion Excellence",
+    "title": "DreamModa - Italian Fashion Excellence",
     "hero": {
       "title": "Premium Wholesale Garment Collection",
       "subtitle": "Discover our curated selection of high-quality garments crafted for discerning wholesale partners",
@@ -24,7 +24,7 @@
     },
     "about": {
       "title": "Crafting Dreams Into Fashion",
-      "description1": "DreaModa represents the perfect fusion of Italian fashion heritage and contemporary design. Based in the heart of Prato, Tuscany, our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments. We are driven by a commitment to excellence and meticulous attention to detail, ensuring every piece embodies the elegance, quality, and modern sophistication synonymous with the highest standards of Italian fashion.",
+      "description1": "DreamModa represents the perfect fusion of Italian fashion heritage and contemporary design. Based in the heart of Prato, Tuscany, our atelier combines traditional craftsmanship with innovative techniques to create exceptional garments. We are driven by a commitment to excellence and meticulous attention to detail, ensuring every piece embodies the elegance, quality, and modern sophistication synonymous with the highest standards of Italian fashion.",
       "description2": "Since 2005, we have positioned ourselves as a strategic partner to our clients, not merely a supplier. By staying ahead of market trends, our expert team and modern facilities allow us to deliver apparel collections that are both fashionable and commercially viable. Our commitment is to foster your business's growth by providing a dependable supply chain and expert service, ensuring we succeed together.",
       "designs": "Fashion Designs",
       "experience": "Years Experience"
@@ -34,7 +34,7 @@
       "subtitle": "We are proud to serve clients across Europe, bringing Italian fashion excellence to European markets"
     },
     "contact": {
-      "title": "Connect With DreaModa",
+      "title": "Connect With DreamModa",
       "subtitle": "Discover our exclusive fashion collections. Contact us for inquiries, appointments, or to learn more about our bespoke services.",
       "form": {
         "title": "Request Information",
@@ -48,12 +48,12 @@
       },
       "info": {
         "title": "Get In Touch",
-        "headquarters": "DreaModa Headquarters",
+        "headquarters": "DreamModa Headquarters",
         "address": "Via Gherardacci 47/C, Iolo, Prato, Tuscany, Italy",
         "inquiries": "Business Inquiries",
-        "phone": "+39 3388508068 \n +39 3888518810 \n Mon - Fri, 10:00 AM - 9:00 PM CET",
+        "phone_hours": "Mon - Fri, 10:00 AM - 9:00 PM CET",
         "email": "Email",
-        "email_address": "Hi@DreaModa.store"
+        "email_address": "Hi@DreamModa.store"
       },
       "visit": {
         "title": "Visit Our Atelier",
@@ -61,7 +61,8 @@
         "consultations": "Bespoke design consultations",
         "previews": "Seasonal collection previews",
         "services": "Made-to-measure services"
-      }
+      },
+      "auto_message": "I'm interested in your wholesale clothing business. May I have further details?"
     },
     "business_types": {
       "retailer": "Retailer",
@@ -78,7 +79,7 @@
     "categories": "Categories",
     "about_us": "About Us",
     "contact": "Contact",
-    "copyright": "© 2025 DREAMODA. All rights reserved. | Made with passion for fashion in Tuscany, Italy."
+    "copyright": "© 2025 DREAMMODA. All rights reserved. | Made with passion for fashion in Tuscany, Italy."
   },
   "filters": {
     "all_categories": "All Categories",
@@ -104,6 +105,8 @@
     "material": "Material",
     "all_materials": "All Materials",
     "season": "Season",
+    "color": "Color",
+    "all_colors": "All Colors",
     "results_count": "{count} products",
     "sort_by": "Sort by",
     "sort_most_popular": "Most Popular",
@@ -123,12 +126,11 @@
     "all_season": "All-Season",
     "machine_wash": "Machine wash",
     "made_in_italy": "Made in Italy",
-    "color": "Color",
     "sku": "SKU",
     "no": "No",
     "error_loading": "Error loading products: ",
     "refresh_page": "Please try refreshing the page.",
-    "seo_title": "DreaModa Collections - Premium Wholesale Garments Collection",
+    "seo_title": "DreamModa Collections - Premium Wholesale Garments Collection",
     "seo_description": "Explore our complete collection of premium Italian fashion garments. Wholesale clothing, dresses, tops, outerwear and accessories for discerning fashion retailers."
   },
   "product_detail": {
@@ -175,8 +177,8 @@
       "origin": "Origin: {origin}",
       "sku": "SKU: {sku}"
     },
-    "seo_title": "{productName} - DreaModa Premium Wholesale Garments",
-    "seo_title_fallback": "Product - DreaModa",
+    "seo_title": "{productName} - DreamModa Premium Wholesale Garments",
+    "seo_title_fallback": "Product - DreamModa",
     "seo_description": "{productName} - Premium Italian fashion garment. {productDescription} Material: {productMaterial}, Color: {productColor}. Wholesale pricing available.",
     "seo_description_fallback": "Premium Italian fashion garment for wholesale",
     "thumbnail_alt": "Thumbnail"
@@ -244,7 +246,7 @@
     }
   },
   "seo": {
-    "title": "DreaModa - Italian Fashion Excellence | Wholesale Garment Manufacturer",
+    "title": "DreamModa - Italian Fashion Excellence | Wholesale Garment Manufacturer",
     "description": "Premium Italian fashion manufacturer specializing in wholesale garments. Discover our curated collection of high-quality fashion pieces for discerning wholesale partners worldwide.",
     "keywords": "Italian fashion, wholesale garments, fashion manufacturer, Prato fashion, premium clothing, wholesale fashion"
   }

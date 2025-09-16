@@ -13,6 +13,7 @@ import ProductModal from "@/components/product-modal";
 import PerformanceOptimizer from "@/components/performance-optimizer";
 import { ProductModalState } from "@/types";
 import { SUPPORTED_LANGUAGES, getLanguageFromURL } from "@/utils/translationUtils";
+import { MessageCircle } from "lucide-react";
 
 // Global scroll to top component
 function ScrollToTop() {
@@ -28,6 +29,65 @@ function ScrollToTop() {
   }, [location]);
 
   return null;
+}
+
+// WhatsApp悬浮按钮组件
+function WhatsAppFloatingButton() {
+  const { t, currentLanguage } = useLanguage();
+  const [lastClickTime, setLastClickTime] = useState<number>(0);
+  const [clickCount, setClickCount] = useState<number>(0);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const now = Date.now();
+    const timeDiff = now - lastClickTime;
+    
+    // 检查点击频率（防止短时间内重复点击）
+    if (timeDiff < 5000) { // 5秒内不能重复点击
+      e.preventDefault();
+      alert(t('errors.contact.rate_limited') || 'Please wait before sending another message.');
+      return;
+    }
+    
+    // 检查点击次数（防止批量滥发）
+    if (clickCount >= 5) { // 每小时最多5次
+      const oneHourAgo = now - 60 * 60 * 1000;
+      if (lastClickTime > oneHourAgo) {
+        e.preventDefault();
+        alert(t('errors.contact.rate_limited') || 'Too many requests. Please try again later.');
+        return;
+      } else {
+        // 重置计数器
+        setClickCount(0);
+      }
+    }
+    
+    // 更新点击时间和计数
+    setLastClickTime(now);
+    setClickCount(prev => prev + 1);
+    
+    // 构造自动发送的消息（根据当前语言）
+    const defaultMessage = currentLanguage === 'it' 
+      ? "Sono interessato al vostro business di abbigliamento all'ingrosso. Posso avere ulteriori dettagli?"
+      : "I'm interested in your wholesale clothing business. May I have further details?";
+    const message = encodeURIComponent(t('home.contact.auto_message') || defaultMessage);
+    const whatsappUrl = `https://wa.me/393888518810?text=${message}`;
+    
+    // 设置链接
+    e.currentTarget.href = whatsappUrl;
+  };
+
+  return (
+    <a 
+      href="https://wa.me/393888518810" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="whatsapp-floating-button"
+      aria-label="Contact us on WhatsApp"
+      onClick={handleClick}
+    >
+      <MessageCircle size={24} />
+    </a>
+  );
 }
 
 // 多语言路由组件
@@ -62,6 +122,9 @@ function MultilingualRoutes() {
     <>
       <ScrollToTop />
       <PerformanceOptimizer />
+      
+      {/* WhatsApp悬浮按钮 */}
+      <WhatsAppFloatingButton />
 
       {/* 产品模态框 */}
       <ProductModal

@@ -1,6 +1,6 @@
 <?php
-// API适配器 - 桥接DreaModa现有API与React前端
-// 将DreaModa API响应转换为React前端期望的格式
+// API适配器 - 桥接DreamModa现有API与React前端
+// 将DreamModa API响应转换为React前端期望的格式
 
 require_once '../config/app.php';
 require_once 'utils.php';

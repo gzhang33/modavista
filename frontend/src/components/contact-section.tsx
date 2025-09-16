@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Phone, Mail, CheckCircle } from "lucide-react";
+import { MapPin, MessageCircle, Mail, CheckCircle } from "lucide-react";
 import { insertInquirySchema } from "@shared/schemas/schema";
 import { apiPost } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +28,7 @@ type ContactFormData = z.infer<typeof contactFormSchema>;
 export default function ContactSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const [isSubmitted, setIsSubmitted] = useState(false);
   
   // 生成谷歌地图链接的函数
@@ -247,12 +247,31 @@ export default function ContactSection() {
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <Phone className="text-accent-gold text-xl mt-1 flex-shrink-0" />
+                  <MessageCircle className="text-accent-gold text-xl mt-1 flex-shrink-0" />
                   <div>
                     <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.inquiries')}</h5>
-                    <p className="text-text-grey whitespace-pre-line">
-                      {t('home.contact.info.phone')}
-                    </p>
+                    <div className="text-text-grey">
+                      <a 
+                        href="https://wa.me/393888518810" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-text-grey hover:text-accent-gold transition-colors duration-300 underline block mb-2"
+                        onClick={(e) => {
+                          // 构造自动发送的消息（根据当前语言）
+                          const defaultMessage = currentLanguage === 'it' 
+                            ? "Sono interessato al vostro business di abbigliamento all'ingrosso. Posso avere ulteriori dettagli?"
+                            : "I'm interested in your wholesale clothing business. May I have further details?";
+                          const message = encodeURIComponent(t('home.contact.auto_message') || defaultMessage);
+                          const whatsappUrl = `https://wa.me/393388508068?text=${message}`;
+                          e.currentTarget.href = whatsappUrl;
+                        }}
+                      >
+                        WhatsApp: +39 3388508068
+                      </a>
+                      <span className="whitespace-pre-line">
+                        {t('home.contact.info.phone_hours')}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
@@ -261,7 +280,13 @@ export default function ContactSection() {
                   <div>
                     <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.email')}</h5>
                     <p className="text-text-grey">
-                      {t('home.contact.info.email_address')}<br />
+                      <a 
+                        href="mailto:Hi@DreamModa.store" 
+                        className="text-text-grey hover:text-accent-gold transition-colors duration-300 underline"
+                      >
+                        {t('home.contact.info.email_address')}
+                      </a>
+                      <br />
                     </p>
                   </div>
                 </div>

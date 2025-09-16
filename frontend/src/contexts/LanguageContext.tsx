@@ -84,7 +84,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
           contact: 'Contact'
         },
         home: {
-          title: 'DreaModa - Italian Fashion Excellence',
+          title: 'DreamModa - Italian Fashion Excellence',
           hero: {
             title: 'Premium Wholesale Garment Collection',
             subtitle: 'Discover our curated selection of high-quality garments crafted for discerning wholesale partners',

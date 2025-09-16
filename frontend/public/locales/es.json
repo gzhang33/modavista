@@ -6,7 +6,7 @@
     "contact": "Contacto"
   },
   "home": {
-    "title": "DreaModa - Excelencia Italiana en Moda",
+    "title": "DreamModa - Excelencia Italiana en Moda",
     "hero": {
       "title": "Colección de Ropa al por Mayor Premium",
       "subtitle": "Descubre nuestra selección curada de prendas de alta calidad, diseñadas para socios mayoristas exigentes",
@@ -24,7 +24,7 @@
     },
     "about": {
       "title": "Crear Sueños en la Moda",
-      "description1": "DreaModa representa la perfecta fusión del legado de la moda italiana y el diseño contemporáneo. Con sede en el corazón de Prato, Toscana, nuestro taller combina el artesanado tradicional con técnicas innovadoras para crear prendas excepcionales. Estamos impulsados por un compromiso con la excelencia y una atención meticulosa al detalle, garantizando que cada pieza encarne la elegancia, calidad y sofisticación moderna sinónimas de los más altos estándares de la moda italiana.",
+      "description1": "DreamModa representa la perfecta fusión del legado de la moda italiana y el diseño contemporáneo. Con sede en el corazón de Prato, Toscana, nuestro taller combina el artesanado tradicional con técnicas innovadoras para crear prendas excepcionales. Estamos impulsados por un compromiso con la excelencia y una atención meticulosa al detalle, garantizando que cada pieza encarne la elegancia, calidad y sofisticación moderna sinónimas de los más altos estándares de la moda italiana.",
       "description2": "Desde 2005, nos hemos posicionado como un socio estratégico de nuestros clientes, no meramente como un proveedor. Al mantenernos a la vanguardia de las tendencias del mercado, nuestro equipo experto e instalaciones modernas nos permiten entregar colecciones de ropa que son tanto de moda como comercialmente viables. Nuestro compromiso es fomentar el crecimiento de su negocio proporcionando una cadena de suministro confiable y un servicio experto, asegurando que tengamos éxito juntos.",
       "designs": "Diseños de Moda",
       "experience": "Años de Experiencia"
@@ -34,7 +34,7 @@
       "subtitle": "Estamos orgullosos de servir clientes en toda Europa, llevando la excelencia de la moda italiana a los mercados europeos"
     },
     "contact": {
-      "title": "Conectar con DreaModa",
+      "title": "Conectar con DreamModa",
       "subtitle": "Descubre nuestras colecciones exclusivas de moda. Contáctanos para consultas, citas o para obtener más información sobre nuestros servicios a medida.",
       "form": {
         "title": "Solicitar Información",
@@ -48,12 +48,12 @@
       },
       "info": {
         "title": "Ponerse en Contacto",
-        "headquarters": "Sede Central de DreaModa",
+        "headquarters": "Sede Central de DreamModa",
         "address": "Via Gherardacci 47/C, Iolo, Prato, Toscana, Italia",
         "inquiries": "Consultas Empresariales",
-        "phone": "+39 3388508068\n+39 3888518810\nLun - Vie, 10:00 - 21:00 CET",
+        "phone_hours": "Lun - Vie, 10:00 - 21:00 CET",
         "email": "Correo Electrónico",
-        "email_address": "Hi@DreaModa.store"
+        "email_address": "Hi@DreamModa.store"
       },
       "visit": {
         "title": "Visita Nuestro Taller",
@@ -78,7 +78,7 @@
     "categories": "Categorías",
     "about_us": "Sobre Nosotros",
     "contact": "Contacto",
-    "copyright": "© 2025 DREAMODA. Todos los derechos reservados. | Hecho con pasión para la moda en Toscana, Italia."
+    "copyright": "© 2025 DREAMMODA. Todos los derechos reservados. | Hecho con pasión para la moda en Toscana, Italia."
   },
   "filters": {
     "all_categories": "Todas las Categorías",
@@ -128,7 +128,7 @@
     "no": "No",
     "error_loading": "Error al cargar los productos: ",
     "refresh_page": "Por favor, intente refrescar la página.",
-    "seo_title": "Colecciones DreaModa - Colección de Ropa al por Mayor Premium",
+    "seo_title": "Colecciones DreamModa - Colección de Ropa al por Mayor Premium",
     "seo_description": "Explore nuestra colección completa de prendas de moda italianas de primera calidad. Ropa al por mayor, vestidos, blusas, abrigos y accesorios para minoristas de moda exigentes."
   },
   "product_detail": {
@@ -175,8 +175,8 @@
       "origin": "Origen: {origin}",
       "sku": "SKU: {sku}"
     },
-    "seo_title": "{productName} - Prendas al por mayor premium de DreaModa",
-    "seo_title_fallback": "Producto - DreaModa",
+    "seo_title": "{productName} - Prendas al por mayor premium de DreamModa",
+    "seo_title_fallback": "Producto - DreamModa",
     "seo_description": "{productName} - Prenda de moda italiana premium. {productDescription} Material: {productMaterial}, Color: {productColor}. Precios al por mayor disponibles.",
     "seo_description_fallback": "Prenda de moda italiana premium para venta al por mayor",
     "thumbnail_alt": "Miniatura"
@@ -244,7 +244,7 @@
     }
   },
   "seo": {
-    "title": "DreaModa - Excelencia Italiana en Moda | Fabricante de Ropa al por Mayor",
+    "title": "DreamModa - Excelencia Italiana en Moda | Fabricante de Ropa al por Mayor",
     "description": "Fabricante italiano de moda premium especializado en ropa al por mayor. Descubre nuestra colección curada de prendas de moda de alta calidad para socios mayoristas exigentes de todo el mundo.",
     "keywords": "moda italiana, ropa al por mayor, fabricante de moda, moda Prato, ropa premium, moda al por mayor"
   }

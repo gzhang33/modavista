@@ -44,7 +44,7 @@ export default function Home({}: HomeProps) {
 
   // 生成结构化数据
   const organizationData = {
-    name: "DreaModa",
+    name: "DreamModa",
     url: typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store',
     logo: `${typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'}${IMAGE_PATHS.DREAMODA_LOGO}`,
     description: t('seo.description'),
@@ -58,7 +58,7 @@ export default function Home({}: HomeProps) {
     contactPoint: {
       telephone: "+39 02 1234 5678",
       contactType: "Business Inquiries",
-      email: "Hi@DreaModa.store"
+      email: "Hi@DreamModa.store"
     },
     sameAs: [
       "https://www.instagram.com/dreamoda",

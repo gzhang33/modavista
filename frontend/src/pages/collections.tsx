@@ -414,7 +414,7 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-6">
               <div>
                 {/* Categories */}
                 <div className="mb-6">

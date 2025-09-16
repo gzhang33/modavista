@@ -6,6 +6,7 @@ export interface FilterState {
   fabric: string;
   season: string;
   style: string;
+  color: string;
 }
 
 export interface LanguageState {
@@ -40,7 +41,7 @@ export interface FilterOption {
   english_name?: string;
 }
 
-// 从DreaModa API动态获取的静态数据，这里保留作为后备
+// 从DreamModa API动态获取的静态数据，这里保留作为后备
 // 注意：实际应用中应优先使用 fetchAllFilterOptions() 获取最新数据
 export const CATEGORIES: FilterOption[] = [
   { id: 'all', name: 'All', label: 'All Categories' },

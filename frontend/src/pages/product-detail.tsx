@@ -159,7 +159,17 @@ export default function ProductDetailPage() {
         email: `customer${randomSuffix}@example.com`,
         phone: '',
         company: t('product_detail.sample_request_company', 'Sample Request Company'),
-        message: t('product_detail.sample_request_message', `Sample Request - Product: ${product?.name} (SKU: ${product?.sku})\n\nCustomer wishes to request a sample of this product to evaluate quality and suitability. Please contact the customer to arrange sample shipping.\n\nProduct Details:\n- Product Name: ${product?.name}\n- SKU: ${product?.sku}\n- Category: ${product?.category}\n- Material: ${product?.fabric || product?.material}\n\nPlease process this sample request as soon as possible.`) 
+        message: t('product_detail.sample_request_message', `Sample Request - Product: ${product?.name} (SKU: ${product?.sku})
+
+Customer wishes to request a sample of this product to evaluate quality and suitability. Please contact the customer to arrange sample shipping.
+
+Product Details:
+- Product Name: ${product?.name}
+- SKU: ${product?.sku}
+- Category: ${product?.category}
+- Material: ${product?.fabric || product?.material}
+
+Please process this sample request as soon as possible.`) 
       };
       
       console.log('Request data:', requestData);
@@ -288,7 +298,7 @@ export default function ProductDetailPage() {
       name: product.name,
       description: product.description,
       image: product.images || [],
-      brand: "DreaModa",
+      brand: "DreamModa",
       category: product.category,
       material: product.material,
       color: product.color,
@@ -297,7 +307,7 @@ export default function ProductDetailPage() {
         availability: "https://schema.org/InStock",
         itemCondition: "https://schema.org/NewCondition",
         seller: {
-          name: "DreaModa",
+          name: "DreamModa",
           url: typeof window !== 'undefined' ? window.location.origin : 'https://dreamoda.store'
         }
       }
@@ -312,7 +322,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       <SEOHead
-        title={product ? `${product.name} - DreaModa Premium Wholesale Garments` : "Product - DreaModa"}
+        title={product ? `${product.name} - DreamModa Premium Wholesale Garments` : "Product - DreamModa"}
         description={product ? `${product.name} - Premium Italian fashion garment. ${product.description} Material: ${product.material}, Color: ${product.color}. Wholesale pricing available.` : "Premium Italian fashion garment for wholesale"}
         canonicalPath={`/product/${id}`}
         image={product?.images?.[0]}

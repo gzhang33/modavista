@@ -328,7 +328,7 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Translation Management - DreaModa Admin Panel</title>
+    <title>Translation Management - DreamModa Admin Panel</title>
     <link href="assets/css/base.css" rel="stylesheet">
     <link href="assets/css/dashboard.css" rel="stylesheet">
     <style>
@@ -516,6 +516,97 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+
+        /* Mobile-only optimizations for this page */
+        @media (max-width: 768px) {
+            /* Make language tabs horizontally scrollable to avoid wrap/overflow */
+            .language-tabs { display: none; }
+            .language-tab {
+                display: inline-flex;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            /* Search row stacks and inputs become full-width for easier tap */
+            #search-section .search-controls-row {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px !important;
+            }
+            #search-section input[type="text"] {
+                width: 100%;
+                max-width: 100%;
+                font-size: 16px; /* prevent iOS zoom */
+            }
+            #search-section label {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            #search-section .page-size-selector {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            #search-section .page-size-option {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+            #search-section .btn {
+                width: 100%;
+            }
+
+            /* Grid already collapses; ensure items have enough internal spacing */
+            .translation-item {
+                padding: 12px;
+                min-width: 0; /* allow children to shrink within grid */
+            }
+            .translation-text {
+                min-height: 72px;
+                font-size: 16px; /* better readability + avoid zoom */
+                line-height: 1.4;
+                box-sizing: border-box;
+                max-width: 100%;
+                width: 100%;
+                max-height: 200px; /* prevent a single field from overgrowing */
+                overflow: auto;
+            }
+            .translation-key { word-break: break-all; overflow-wrap: anywhere; }
+
+            /* Action buttons stack for easier tapping */
+            .action-buttons {
+                flex-direction: column;
+            }
+            .action-buttons .btn {
+                width: 100%;
+            }
+
+            /* Pagination: larger tap targets and wrap-safe */
+            .pagination {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .pagination-btn, .pagination-page {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            /* Two-column edit grid on small screens */
+            .translations-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                max-height: calc(100vh - 300px); /* keep within viewport */
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Visibility helpers */
+        .mobile-only { display: none; }
+        .desktop-only { display: block; }
+        @media (max-width: 768px) {
+            .mobile-only { display: block; }
+            .desktop-only { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -524,11 +615,11 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
         <nav class="admin-nav-bar">
             <div class="nav-container">
                 <div class="nav-brand">
-                    <h3><i class="fas fa-cogs"></i> DreaModa 管理后台</h3>
+                    <h3><i class="fas fa-cogs"></i> DreamModa 管理后台</h3>
                 </div>
                 <ul class="nav-links">
                     <li><a href="dashboard.php" class="nav-link"><i class="fas fa-box"></i> 产品管理</a></li>
-                    <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 主页表单查询</a></li>
+                    <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 表单查询</a></li>
                     <li><a href="translations.php" class="nav-link active"><i class="fas fa-language"></i> 多语言翻译</a></li>
                     <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
                 </ul>
@@ -556,6 +647,18 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
                 <?php endforeach; ?>
             </div>
 
+            <!-- Mobile language selector -->
+            <div class="mobile-only" style="margin: 10px 0 20px 0;">
+                <label for="mobile-lang-select" style="display:block; margin-bottom:6px; color:#666;">选择语言：</label>
+                <select id="mobile-lang-select" style="width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:4px; font-size:16px;" onchange="onMobileLangChange(this.value)">
+                    <?php foreach ($available_languages as $lang): ?>
+                        <option value="<?php echo htmlspecialchars($lang['language_code']); ?>" <?php echo ($current_lang === $lang['language_code']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($lang['language_name_native']); ?> (<?php echo htmlspecialchars($lang['language_code']); ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
 
 
             <!-- 搜索与筛选 -->
@@ -564,22 +667,26 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
                 <form method="get" id="search-form">
                     <input type="hidden" name="lang" value="<?php echo htmlspecialchars($current_lang); ?>">
                     <input type="hidden" name="page" value="1">
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="search-controls-row" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                         <label>搜索：</label>
                         <input type="text" name="q" value="<?php echo htmlspecialchars($query_q); ?>" placeholder="content_key 或 文本关键词">
                         <label style="margin-left:8px;">
                             <input type="checkbox" name="only_empty" value="1" <?php echo ($only_empty ? 'checked' : ''); ?> onchange="submitSearchForm()"> 仅显示未翻译
                         </label>
-                        <button type="submit" class="btn btn-secondary" onclick="submitSearchForm(event)">搜索</button>
+                        <button type="submit" class="btn btn-secondary desktop-only" onclick="submitSearchForm(event)">搜索</button>
                         
-                        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                        <div id="desktop-page-controls" class="desktop-only" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
                             <span>每页条数：</span>
                             <div class="page-size-selector">
                                 <?php foreach ([10,25,50,100] as $ps): ?>
                                     <a href="?lang=<?php echo urlencode($current_lang); ?>&page=1&page_size=<?php echo $ps; ?>&q=<?php echo urlencode($query_q); ?>&only_empty=<?php echo ($only_empty ? '1' : '0'); ?>" class="page-size-option <?php echo ($ps === $page_size ? 'active' : ''); ?>" onclick="submitPageSizeChange(event, this)"><?php echo $ps; ?></a>
                                 <?php endforeach; ?>
                             </div>
-                            <span style="margin-left:8px;">总数：<?php echo (int)$total_count; ?>，当前第 <?php echo (int)$page; ?> / <?php echo max(1, (int)ceil($total_count / $page_size)); ?> 页</span>
+                            <span class="desktop-only" style="margin-left:8px;">总数：<?php echo (int)$total_count; ?>，当前第 <?php echo (int)$page; ?> / <?php echo max(1, (int)ceil($total_count / $page_size)); ?> 页</span>
+                        </div>
+                        <!-- Mobile search button only -->
+                        <div class="mobile-only" style="width:100%; display:flex;">
+                            <button type="submit" class="btn btn-secondary" style="flex:1;">搜索</button>
                         </div>
                     </div>
                 </form>
@@ -736,6 +843,30 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
             document.getElementById('search-form').submit();
         }
 
+        // Mobile: language change handler
+        function onMobileLangChange(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        // Force page_size=10 on mobile by normalizing URL before submit/load
+        function ensureMobilePageSize() {
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (!isMobile) return;
+            // Hide any desktop-only controls that might still render
+            const pcControls = document.getElementById('desktop-page-controls');
+            if (pcControls) { pcControls.style.display = 'none'; }
+            const url = new URL(window.location.href);
+            if (url.searchParams.get('page_size') !== '10') {
+                url.searchParams.set('page_size', '10');
+                // keep current page but clamp to 1 for safety
+                url.searchParams.set('page', '1');
+                window.location.replace(url.toString());
+            }
+        }
+
         // 页条数切换时保持滚动位置
         function submitPageSizeChange(event, element) {
             event.preventDefault();
@@ -748,8 +879,9 @@ foreach ($content_keys as $k) { $current_translations[$k] = $all_translations[$k
             window.location.href = element.href;
         }
 
-        // 页面加载后恢复滚动位置
+        // 页面加载后恢复滚动位置 + 规范化移动端页条数
         window.addEventListener('load', function() {
+            ensureMobilePageSize();
             const savedScrollPosition = sessionStorage.getItem('scrollPosition');
             if (savedScrollPosition !== null) {
                 // 延迟恢复滚动位置，确保页面内容已加载

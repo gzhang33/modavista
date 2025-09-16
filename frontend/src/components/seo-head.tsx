@@ -81,7 +81,7 @@ export default function SEOHead({
     updateMetaTag('og:type', finalType, 'property');
     updateMetaTag('og:image', finalImage, 'property');
     updateMetaTag('og:url', `${typeof window !== 'undefined' ? window.location.origin : ''}${canonicalPath || (typeof window !== 'undefined' ? window.location.pathname : '')}`, 'property');
-    updateMetaTag('og:site_name', 'DreaModa', 'property');
+    updateMetaTag('og:site_name', 'DreamModa', 'property');
     updateMetaTag('og:locale', LANGUAGE_TO_LOCALE[currentLanguage] || 'en-GB', 'property');
 
     // 添加Twitter Card标签
@@ -92,7 +92,7 @@ export default function SEOHead({
 
     // 添加其他SEO标签
     updateMetaTag('robots', 'index, follow', 'name');
-    updateMetaTag('author', 'DreaModa', 'name');
+    updateMetaTag('author', 'DreamModa', 'name');
     updateMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1', 'name');
 
     // 添加多语言hreflang标签

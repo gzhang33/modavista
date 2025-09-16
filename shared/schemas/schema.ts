@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 适配DreaModa PHP API的类型定义
+// 适配DreamModa PHP API的类型定义
 // 严格遵循TypeScript类型规范
 
 export interface Product {
@@ -12,7 +12,7 @@ export interface Product {
   category: string;
   color?: string; // 颜色名称
   material?: string; // 材质名称
-  fabric: string; // 对应DreaModa的material字段
+  fabric: string; // 对应DreamModa的material字段
   style: string;
   season: string;
   care: string;

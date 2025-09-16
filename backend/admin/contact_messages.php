@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>主页表单查询 - DreaModa 管理后台</title>
+    <title>表单查询 - DreamModa 管理后台</title>
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -14,7 +14,8 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             border: 1px solid #e5e7eb;
         }
         
@@ -834,26 +835,51 @@
             font-size: 14px;
         }
         
+        /* Mobile cards for messages */
+        .messages-cards { display: none; }
+        .message-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; }
+        .message-card + .message-card { margin-top:12px; }
+        .message-card__row { display:flex; align-items:center; gap:8px; color:#374151; font-size:14px; }
+        .message-card__title { font-weight:600; color:#111827; font-size:15px; }
+        .message-card__meta { display:flex; flex-wrap:wrap; gap:6px; color:#6b7280; font-size:12px; }
+        .message-card__badge { background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:2px 8px; }
+        .message-card__actions { display:flex; gap:8px; }
+        .message-card__btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:6px 10px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; color:#111827; text-decoration:none; font-size:13px; }
+        .message-card__btn--primary { background:#059669; color:#fff; border-color:#059669; }
+
+        /* 当前筛选提示样式 */
+        .filter-current { color:#6b7280; font-weight:500; margin-left:4px; }
+        .label-dropdown { position: relative; display: inline-block; }
+        .label-dropdown-menu { position:absolute; top:100%; left:0; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); z-index:1000; min-width:140px; display:none; }
+        .label-dropdown-item { padding:8px 12px; font-size:13px; cursor:pointer; }
+        .label-dropdown-item:hover { background:#f9fafb; }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
+            .messages-table { min-width: auto; table-layout: auto; }
             .messages-table th,
             .messages-table td {
-                padding: 12px 16px;
+                padding: 12px 12px;
+                white-space: normal;
+                word-break: break-word;
             }
-            
             .messages-table th:first-child,
-            .messages-table td:first-child {
-                padding-left: 16px;
-            }
-            
+            .messages-table td:first-child { padding-left: 12px; }
             .messages-table th:last-child,
-            .messages-table td:last-child {
-                padding-right: 16px;
-            }
-            
-            .message-content-cell {
-                max-width: 250px;
-            }
+            .messages-table td:last-child { padding-right: 12px; }
+            .message-content-cell { max-width: none; }
+
+            /* 统一移动端搜索+筛选布局 */
+            .filter-bar-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; width: 100%; }
+            .filter-search { position: relative; background:#f8fafc; border:1px solid #e5e7eb; border-radius:999px; padding:4px 8px; }
+            .filter-search input { width: 100%; background: transparent; border-radius:999px; }
+            .mobile-only { display: inline-flex; align-items: center; gap: 6px; }
+            /* 隐藏页面内的按钮组（改为独立页） */
+            #status-filters, #time-filters { display: none; }
+
+            /* Switch to cards on mobile */
+            .table-container { display:none; }
+            .messages-cards { display:block; }
         }
     </style>
 </head>
@@ -868,11 +894,11 @@
         <nav class="admin-nav-bar">
             <div class="nav-container">
                 <div class="nav-brand">
-                    <h3><i class="fas fa-cogs"></i> DreaModa 管理后台</h3>
+                    <h3><i class="fas fa-cogs"></i> DreamModa 管理后台</h3>
                 </div>
                 <ul class="nav-links">
                     <li><a href="dashboard.php" class="nav-link"><i class="fas fa-box"></i> 产品管理</a></li>
-                    <li><a href="contact_messages.php" class="nav-link active"><i class="fas fa-envelope"></i> 主页表单查询</a></li>
+                    <li><a href="contact_messages.php" class="nav-link active"><i class="fas fa-envelope"></i> 表单查询</a></li>
                     <li><a href="translations.php" class="nav-link"><i class="fas fa-language"></i> 多语言翻译</a></li>
                     <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
                 </ul>
@@ -881,7 +907,7 @@
 
         <main class="main-content">
             <header class="main-header">
-                <h2><i class="fas fa-envelope"></i> 主页表单查询</h2>
+                <h2><i class="fas fa-envelope"></i> 表单查询</h2>
                 <div class="header-actions">
                     <button id="reset-table-btn" class="btn btn-secondary" onclick="resetTableSettings()" title="重置表格布局">
                         <i class="fas fa-undo"></i> 重置布局
@@ -900,26 +926,7 @@
                             <input type="text" id="search-messages" placeholder="搜索姓名、邮箱或留言内容..." />
                         </div>
                         <div class="filter-controls">
-                            <div class="filter-group">
-                                <label>状态筛选:</label>
-                                <div class="filter-buttons" id="status-filters">
-                                    <button class="filter-btn active" data-status="">全部</button>
-                                    <button class="filter-btn" data-status="待定">待处理</button>
-                                    <button class="filter-btn" data-status="进行中">处理中</button>
-                                    <button class="filter-btn" data-status="完成">已完成</button>
-                                    <button class="filter-btn" data-status="未完成">未完成</button>
-                                </div>
-                            </div>
-                            <div class="filter-group">
-                                <label>时间筛选:</label>
-                                <div class="filter-buttons" id="time-filters">
-                                    <button class="filter-btn active" data-time="">全部</button>
-                                    <button class="filter-btn" data-time="today">今天</button>
-                                    <button class="filter-btn" data-time="week">本周</button>
-                                    <button class="filter-btn" data-time="month">本月</button>
-                                    <button class="filter-btn" data-time="year">今年</button>
-                                </div>
-                            </div>
+                            
                         </div>
                         <button id="clear-filters-btn" class="btn btn-secondary btn-sm">清除筛选</button>
                     </div>
@@ -967,6 +974,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="messages-cards" class="messages-cards"></div>
                 
                 <div id="loading-indicator" class="loading-indicator" style="display: none;">
                     <div class="loading-spinner"></div>
@@ -1016,6 +1024,72 @@
             status: '',
             time: ''
         };
+        const MOBILE_FILTERS_STORAGE_KEY = 'admin_mobile_filters_messages';
+
+        function applyMobileSavedFilters() {
+            try {
+                // 兼容可能存在的旧/通用存储键
+                let raw = localStorage.getItem(MOBILE_FILTERS_STORAGE_KEY);
+                if (!raw) raw = localStorage.getItem('admin_mobile_filters');
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (typeof saved !== 'object' || !saved) return;
+
+                // 规范化工具
+                const normalizeString = (val) => {
+                    if (val == null) return '';
+                    if (Array.isArray(val)) {
+                        const first = val.find(v => typeof v === 'string') || '';
+                        return String(first).trim();
+                    }
+                    return typeof val === 'string' ? val.trim() : '';
+                };
+                const mapStatus = (s) => {
+                    const v = s.toLowerCase();
+                    if (v === 'unfinished' || s === '未完成') return '未完成';
+                    if (v === 'pending' || s === '待定' || s === '待处理') return '待定';
+                    if (v === 'in_progress' || s === '进行中' || s === '处理中') return '进行中';
+                    if (v === 'done' || s === '完成' || s === '已完成') return '完成';
+                    return '';
+                };
+                const mapTime = (t) => {
+                    const v = t.toLowerCase();
+                    if (v === 'today' || t === '今天') return 'today';
+                    if (v === 'week' || t === '本周') return 'week';
+                    if (v === 'month' || t === '本月') return 'month';
+                    if (v === 'year' || t === '今年') return 'year';
+                    return '';
+                };
+
+                // Map saved filters into currentFilters（支持数组与中英文）
+                const rawStatus = normalizeString(saved.status);
+                const rawTime = normalizeString(saved.time);
+                const rawSearch = normalizeString(saved.search);
+                currentFilters.status = mapStatus(rawStatus);
+                currentFilters.time = mapTime(rawTime);
+                currentFilters.search = rawSearch;
+
+                // Reflect search box
+                const searchInput = document.getElementById('search-messages');
+                if (searchInput && currentFilters.search) {
+                    searchInput.value = currentFilters.search;
+                }
+
+                // Reflect inline buttons if visible (desktop)
+                document.querySelectorAll('#status-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#time-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                const statusBtn = document.querySelector(`#status-filters .filter-btn[data-status="${currentFilters.status}"]`);
+                const timeBtn = document.querySelector(`#time-filters .filter-btn[data-time="${currentFilters.time}"]`);
+                const allStatusBtn = document.querySelector('#status-filters .filter-btn[data-status=""]');
+                const allTimeBtn = document.querySelector('#time-filters .filter-btn[data-time=""]');
+                (statusBtn || allStatusBtn)?.classList.add('active');
+                (timeBtn || allTimeBtn)?.classList.add('active');
+
+                applyFilters();
+            } catch (e) {
+                console.warn('Failed to apply saved mobile filters:', e);
+            }
+        }
         
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast-notification');
@@ -1063,7 +1137,10 @@
                 if (data.success) {
                     contactMessages = data.data || [];
                     console.log('Loaded messages:', contactMessages);
-                    applyFilters(); // 应用当前筛选条件
+                    // 先尝试应用移动端保存的筛选
+                    applyMobileSavedFilters();
+                    // 如果未设置或无效，按当前筛选渲染
+                    applyFilters();
                     showToast('数据加载成功', 'success');
                 } else {
                     throw new Error(data.message || 'Failed to load messages');
@@ -1083,68 +1160,117 @@
         
         function renderMessages() {
             const tableBody = document.getElementById('messages-table-body');
-            if (!tableBody) return;
+            const cardsContainer = document.getElementById('messages-cards');
+            if (!tableBody && !cardsContainer) return;
             
-            if (filteredMessages.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的表单数据</td></tr>';
-                return;
-            }
-            
-            tableBody.innerHTML = filteredMessages.map(message => `
-                <tr class="message-row resizable-row" data-id="${message.id}" style="height: 60px;">
-                    <td class="message-name-cell">${escapeHtml(message.name)}</td>
-                    <td class="message-email-cell">
-                        <a href="mailto:${escapeHtml(message.email)}" class="email-link">
-                            ${escapeHtml(message.email)}
-                        </a>
-                    </td>
-                    <td class="message-content-cell clickable-content" onclick="viewMessage(${message.id})" title="点击查看详情">
-                        <div class="message-preview">
-                            ${truncateText(escapeHtml(message.message), 100)}
-                        </div>
-                        <div class="view-hint">
-                            <i class="fas fa-eye"></i> 点击查看详情
-                        </div>
-                    </td>
-                    <td class="message-status-cell">
-                        <div class="status-container">
-                            <div class="status-dropdown" data-message-id="${message.id}">
-                                <div class="status-badge status-${message.todo.status} clickable-status" onclick="toggleStatusDropdown(${message.id})">
-                                    <i class="fas ${getStatusIcon(message.todo.status)}"></i>
-                                    ${getStatusText(message.todo.status)}
-                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+            // Render table (desktop)
+            if (tableBody) {
+                if (filteredMessages.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 2rem; color: #666;">没有找到符合条件的表单数据</td></tr>';
+                } else {
+                    tableBody.innerHTML = filteredMessages.map(message => `
+                        <tr class="message-row resizable-row" data-id="${message.id}" style="height: 60px;">
+                            <td class="message-name-cell">${escapeHtml(message.name)}</td>
+                            <td class="message-email-cell">
+                                <a href="mailto:${escapeHtml(message.email)}" class="email-link">
+                                    ${escapeHtml(message.email)}
+                                </a>
+                            </td>
+                            <td class="message-content-cell clickable-content" onclick="viewMessage(${message.id})" title="点击查看详情">
+                                <div class="message-preview">
+                                    ${truncateText(escapeHtml(message.message), 100)}
                                 </div>
-                                <div class="status-dropdown-menu" id="dropdown-${message.id}" style="display: none;">
-                                    <div class="dropdown-item" onclick="updateStatus(${message.id}, '待定')">
-                                        <i class="fas fa-clock"></i>
-                                        <span>待处理</span>
+                                <div class="view-hint">
+                                    <i class="fas fa-eye"></i> 点击查看详情
+                                </div>
+                            </td>
+                            <td class="message-status-cell">
+                                <div class="status-container">
+                                    <div class="status-dropdown" data-message-id="${message.id}">
+                                        <div class="status-badge status-${message.todo.status} clickable-status" onclick="toggleStatusDropdown(${message.id}, this)">
+                                            <i class="fas ${getStatusIcon(message.todo.status)}"></i>
+                                            ${getStatusText(message.todo.status)}
+                                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                        </div>
+                                        <div class="status-dropdown-menu" id="dropdown-${message.id}" style="display: none;">
+                                            <div class="dropdown-item" onclick="updateStatus(${message.id}, '待定')">
+                                                <i class="fas fa-clock"></i>
+                                                <span>待处理</span>
+                                            </div>
+                                            <div class="dropdown-item" onclick="updateStatus(${message.id}, '进行中')">
+                                                <i class="fas fa-spinner"></i>
+                                                <span>处理中</span>
+                                            </div>
+                                            <div class="dropdown-item" onclick="updateStatus(${message.id}, '完成')">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span>已完成</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="dropdown-item" onclick="updateStatus(${message.id}, '进行中')">
-                                        <i class="fas fa-spinner"></i>
-                                        <span>处理中</span>
+                                </div>
+                            </td>
+                            <td class="notes-cell" ondblclick="startEditNotes(${message.id})" title="双击编辑备注">
+                                <div class="notes-content" data-message-id="${message.id}">
+                                    ${message.todo.notes ? escapeHtml(message.todo.notes) : ''}
+                                </div>
+                            </td>
+                            <td class="message-date-cell">${formatDateTime(message.created_at)}</td>
+                            <div class="row-resize-handle"></div>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Render cards (mobile)
+            if (cardsContainer) {
+                if (filteredMessages.length === 0) {
+                    cardsContainer.innerHTML = '<div class="text-center">没有找到符合条件的表单数据</div>';
+                } else {
+                    cardsContainer.innerHTML = filteredMessages.map(message => `
+                        <div class="message-card" data-id="${message.id}">
+                            <div class="message-card__title">${escapeHtml(message.name)}</div>
+                            <div class="message-card__row"><a href="mailto:${escapeHtml(message.email)}">${escapeHtml(message.email)}</a></div>
+                            <div class="message-card__row">${truncateText(escapeHtml(message.message), 120)}</div>
+                            <div class="message-card__meta">
+                                <span class="message-card__badge">${formatDateTime(message.created_at)}</span>
+                                <span class="message-card__badge">${escapeHtml(message.ip_address || '—')}</span>
+                                
+                            </div>
+                            <div class="message-card__actions">
+                                <a class="message-card__btn message-card__btn--primary" href="javascript:void(0)" onclick="viewMessage(${message.id})"><i class="fas fa-eye"></i> 查看</a>
+                                <div class="status-dropdown" data-message-id="${message.id}" style="position:relative;">
+                                    <div class="status-badge status-${message.todo.status} clickable-status" onclick="toggleStatusDropdown(${message.id}, this)">
+                                        <i class="fas ${getStatusIcon(message.todo.status)}"></i>
+                                        ${getStatusText(message.todo.status)}
+                                        <i class="fas fa-chevron-down dropdown-arrow"></i>
                                     </div>
-                                    <div class="dropdown-item" onclick="updateStatus(${message.id}, '完成')">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>已完成</span>
+                                    <div class="status-dropdown-menu" id="dropdown-${message.id}" style="display:none; left:0; transform:none;">
+                                        <div class="dropdown-item" onclick="updateStatus(${message.id}, '待定')">
+                                            <i class="fas fa-clock"></i>
+                                            <span>待处理</span>
+                                        </div>
+                                        <div class="dropdown-item" onclick="updateStatus(${message.id}, '进行中')">
+                                            <i class="fas fa-spinner"></i>
+                                            <span>处理中</span>
+                                        </div>
+                                        <div class="dropdown-item" onclick="updateStatus(${message.id}, '完成')">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>已完成</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </td>
-                    <td class="notes-cell" ondblclick="startEditNotes(${message.id})" title="双击编辑备注">
-                        <div class="notes-content" data-message-id="${message.id}">
-                            ${message.todo.notes ? escapeHtml(message.todo.notes) : ''}
-                        </div>
-                    </td>
-                    <td class="message-date-cell">${formatDateTime(message.created_at)}</td>
-                    <div class="row-resize-handle"></div>
-                </tr>
-            `).join('');
+                    `).join('');
+                }
+            }
             
             // 重新初始化行调整功能
-            setTimeout(() => {
-                initializeRowResize();
-            }, 50);
+            if (tableBody) {
+                setTimeout(() => {
+                    initializeRowResize();
+                }, 50);
+            }
         }
         
         function escapeHtml(text) {
@@ -1252,6 +1378,28 @@
             });
             
             renderMessages();
+
+            // 更新状态/时间当前筛选显示
+            try {
+                const statusEl = document.getElementById('current-status-filter');
+                const timeEl = document.getElementById('current-time-filter');
+                if (statusEl) {
+                    let txt = '全部';
+                    if (currentFilters.status === '待定') txt = '待处理';
+                    else if (currentFilters.status === '进行中') txt = '处理中';
+                    else if (currentFilters.status === '完成') txt = '已完成';
+                    else if (currentFilters.status === '未完成') txt = '未完成';
+                    statusEl.textContent = txt;
+                }
+                if (timeEl) {
+                    let t = '全部';
+                    if (currentFilters.time === 'today') t = '今天';
+                    else if (currentFilters.time === 'week') t = '本周';
+                    else if (currentFilters.time === 'month') t = '本月';
+                    else if (currentFilters.time === 'year') t = '今年';
+                    timeEl.textContent = t;
+                }
+            } catch (e) {}
         }
         
         // 设置筛选器
@@ -1267,6 +1415,9 @@
                 status: '',
                 time: ''
             };
+
+            // 清除移动端保存的筛选
+            try { localStorage.removeItem(MOBILE_FILTERS_STORAGE_KEY); } catch (e) {}
             
             // 重置搜索框
             const searchInput = document.getElementById('search-messages');
@@ -1287,30 +1438,20 @@
             applyFilters();
         }
         
-        function toggleStatusDropdown(messageId) {
-            // 关闭所有其他下拉菜单
-            document.querySelectorAll('.status-dropdown-menu').forEach(menu => {
-                if (menu.id !== `dropdown-${messageId}`) {
-                    menu.style.display = 'none';
-                }
-            });
+        function toggleStatusDropdown(messageId, el) {
+            // 关闭所有打开的菜单并移除激活态
+            document.querySelectorAll('.status-dropdown-menu').forEach(menu => { menu.style.display = 'none'; });
+            document.querySelectorAll('.clickable-status').forEach(status => { status.classList.remove('active'); });
             
-            // 移除所有active类
-            document.querySelectorAll('.clickable-status').forEach(status => {
-                status.classList.remove('active');
-            });
-            
-            // 切换当前下拉菜单
-            const dropdown = document.getElementById(`dropdown-${messageId}`);
-            const statusBadge = document.querySelector(`[data-message-id="${messageId}"] .clickable-status`);
-            
-            if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-                dropdown.style.display = 'block';
-                statusBadge.classList.add('active');
-            } else {
-                dropdown.style.display = 'none';
-                statusBadge.classList.remove('active');
-            }
+            // 仅在当前卡片/表格行内切换
+            const container = el ? el.closest('.status-dropdown') : document.querySelector(`[data-message-id="${messageId}"] .status-dropdown`);
+            if (!container) return;
+            const dropdown = container.querySelector('.status-dropdown-menu');
+            const statusBadge = container.querySelector('.clickable-status');
+            if (!dropdown || !statusBadge) return;
+            const isHidden = dropdown.style.display === 'none' || dropdown.style.display === '';
+            dropdown.style.display = isHidden ? 'block' : 'none';
+            statusBadge.classList.toggle('active', isHidden);
         }
         
         // 点击页面其他地方关闭下拉菜单
@@ -1459,8 +1600,8 @@
                         updateModalDisplay();
                     }
                     
-                    // 重新渲染表格
-                    renderMessages();
+                    // 根据当前筛选条件重新过滤并渲染（移动端与桌面端同步）
+                    applyFilters();
                 } else {
                     throw new Error(result.message || 'Failed to save todo');
                 }
@@ -1957,6 +2098,58 @@
             setTimeout(() => {
                 initializeTableResize();
             }, 100);
+
+            // 移动端：点击当前筛选文字，展开轻量下拉
+            const statusCurrent = document.getElementById('current-status-filter');
+            const timeCurrent = document.getElementById('current-time-filter');
+            const statusMenu = document.getElementById('status-label-menu');
+            const timeMenu = document.getElementById('time-label-menu');
+            if (statusCurrent && statusMenu) {
+                statusCurrent.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    statusMenu.style.display = (statusMenu.style.display === 'block') ? 'none' : 'block';
+                    timeMenu && (timeMenu.style.display = 'none');
+                });
+                statusMenu.addEventListener('click', function(e) {
+                    const target = e.target.closest('.label-dropdown-item');
+                    if (!target) return;
+                    const val = target.getAttribute('data-status') || '';
+                    setFilter('status', val);
+                    // 保存到移动端存储，保持一致
+                    try {
+                        const raw = localStorage.getItem(MOBILE_FILTERS_STORAGE_KEY);
+                        const saved = raw ? JSON.parse(raw) : {};
+                        saved.status = val;
+                        localStorage.setItem(MOBILE_FILTERS_STORAGE_KEY, JSON.stringify(saved));
+                    } catch (err) {}
+                    statusMenu.style.display = 'none';
+                });
+            }
+            if (timeCurrent && timeMenu) {
+                timeCurrent.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    timeMenu.style.display = (timeMenu.style.display === 'block') ? 'none' : 'block';
+                    statusMenu && (statusMenu.style.display = 'none');
+                });
+                timeMenu.addEventListener('click', function(e) {
+                    const target = e.target.closest('.label-dropdown-item');
+                    if (!target) return;
+                    const val = target.getAttribute('data-time') || '';
+                    setFilter('time', val);
+                    try {
+                        const raw = localStorage.getItem(MOBILE_FILTERS_STORAGE_KEY);
+                        const saved = raw ? JSON.parse(raw) : {};
+                        saved.time = val;
+                        localStorage.setItem(MOBILE_FILTERS_STORAGE_KEY, JSON.stringify(saved));
+                    } catch (err) {}
+                    timeMenu.style.display = 'none';
+                });
+            }
+            // 点其它区域关闭
+            document.addEventListener('click', function() {
+                statusMenu && (statusMenu.style.display = 'none');
+                timeMenu && (timeMenu.style.display = 'none');
+            });
         });
     </script>
 </body>

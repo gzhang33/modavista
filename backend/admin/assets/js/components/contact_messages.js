@@ -9,6 +9,7 @@ export default class ContactMessagesComponent extends BaseComponent {
         
         this.messages = [];
         this.filteredMessages = [];
+        this.mobileStorageKey = 'admin_mobile_filters_messages';
         
         // DOM elements
         this.messagesTableBody = document.getElementById('messages-table-body');
@@ -85,6 +86,7 @@ export default class ContactMessagesComponent extends BaseComponent {
             if (data.success) {
                 this.messages = data.data || [];
                 this.filteredMessages = [...this.messages];
+                this.applyMobileSavedFilters();
                 console.log('Loaded messages:', this.messages);
                 this.renderMessages();
                 this.showToast('数据加载成功', 'success');
@@ -107,6 +109,9 @@ export default class ContactMessagesComponent extends BaseComponent {
     filterMessages() {
         const searchTerm = this.searchInput.value.toLowerCase().trim();
         const dateFilter = this.dateFilter.value;
+        const saved = this.getMobileSavedFilters();
+        const statusPreset = saved && Array.isArray(saved.status) ? saved.status[0] : '';
+        const timePreset = saved && Array.isArray(saved.time) ? saved.time[0] : '';
         
         this.filteredMessages = this.messages.filter(message => {
             // Search filter
@@ -122,7 +127,7 @@ export default class ContactMessagesComponent extends BaseComponent {
                 }
             }
             
-            // Date filter
+            // Date filter (UI dropdown)
             if (dateFilter) {
                 const messageDate = new Date(message.created_at);
                 const now = new Date();
@@ -140,13 +145,40 @@ export default class ContactMessagesComponent extends BaseComponent {
                         const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
                         if (messageDate < monthAgo) return false;
                         break;
+                    case 'year':
+                        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                        if (messageDate < yearAgo) return false;
+                        break;
                 }
+            }
+            // Mobile saved status filter
+            if (statusPreset) {
+                if (statusPreset === '未完成') {
+                    if (!(message.todo.status === '待定' || message.todo.status === '进行中')) return false;
+                } else if (message.todo.status !== statusPreset) {
+                    return false;
+                }
+            }
+            // Mobile saved time filter
+            if (timePreset) {
+                const messageDate2 = new Date(message.created_at);
+                const now2 = new Date();
+                let from = new Date(now2);
+                if (timePreset === 'today') from = new Date(now2.getFullYear(), now2.getMonth(), now2.getDate());
+                else if (timePreset === 'week') from.setDate(now2.getDate() - 7);
+                else if (timePreset === 'month') from.setMonth(now2.getMonth() - 1);
+                else if (timePreset === 'year') from.setFullYear(now2.getFullYear() - 1);
+                if (messageDate2 < from) return false;
             }
             
             return true;
         });
         
         this.renderMessages();
+    }
+
+    getMobileSavedFilters() {
+        try { return JSON.parse(localStorage.getItem(this.mobileStorageKey) || '{}'); } catch(_) { return {}; }
     }
     
     clearFilters() {
@@ -199,6 +231,27 @@ export default class ContactMessagesComponent extends BaseComponent {
                 </td>
             </tr>
         `).join('');
+
+        // Render mobile cards
+        const cards = document.getElementById('messages-cards');
+        if (cards) {
+            cards.innerHTML = this.filteredMessages.map(message => `
+                <div class="message-card" data-id="${message.id}">
+                    <div class="message-card__title">${this.escapeHtml(message.name)} <span class="message-card__meta">${this.escapeHtml(message.email)}</span></div>
+                    <div class="message-card__row">${this.truncateText(this.escapeHtml(message.message), 100)}</div>
+                    <div class="message-card__meta">
+                        <span class="message-card__badge">#${message.id}</span>
+                        <span class="message-card__badge">${this.formatDateTime(message.created_at)}</span>
+                        <span class="message-card__badge">${this.escapeHtml(message.ip_address || '—')}</span>
+                        <span class="message-card__badge">${this.escapeHtml((message.todo && message.todo.status) || '待定')}</span>
+                    </div>
+                    <div class="message-card__actions">
+                        <a class="message-card__btn message-card__btn--primary" href="javascript:void(0)" onclick="contactMessagesComponent.viewMessage(${message.id})"><i class="fas fa-eye"></i> 查看</a>
+                        <a class="message-card__btn" href="javascript:void(0)" onclick="contactMessagesComponent.openTodoModal(${message.id})"><i class="fas fa-tasks"></i> 待办</a>
+                    </div>
+                </div>
+            `).join('');
+        }
     }
     
     viewMessage(messageId) {

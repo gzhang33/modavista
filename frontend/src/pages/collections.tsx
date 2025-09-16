@@ -32,7 +32,8 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
     category: 'all',
     fabric: 'all',
     season: '3', // Default to "Tutte le stagioni" (All Season)
-    style: 'all'
+    style: 'all',
+    color: 'all'
   });
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -214,6 +215,20 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
       return false;
     }
 
+    // Color filter
+    if (filters.color !== 'all' && product.color) {
+      const colorMatch = 
+        product.color.toLowerCase().includes(filters.color.toLowerCase()) ||
+        filterOptions.colors.find(col => 
+          col.id === filters.color && 
+          (col.name === product.color || col.label === product.color)
+        );
+      
+      if (!colorMatch) {
+        return false;
+      }
+    }
+
     // Search query filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -248,7 +263,8 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
       category: 'all',
       fabric: 'all',
       season: '3', // Default to "Tutte le stagioni" (All Season)
-      style: 'all'
+      style: 'all',
+      color: 'all'
     });
     setSearchQuery('');
     setPriceRange([0, 1000]);
@@ -314,7 +330,7 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
   return (
     <div className="min-h-screen bg-white">
       <SEOHead
-        title={t('products.seo_title', 'DreaModa Products - Premium Wholesale Garments Collection')}
+        title={t('products.seo_title', 'DreamModa Products - Premium Wholesale Garments Collection')}
         description={t('products.seo_description', 'Explore our complete collection of premium Italian fashion garments. Wholesale clothing, dresses, tops, outerwear and accessories for discerning fashion retailers.')}
         canonicalPath="/collections"
       />
@@ -398,76 +414,102 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
-              {/* Categories */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.category', 'Category')}</label>
-                <div className="space-y-2">
-                  {filterOptions.categories.map((category) => (
-                    <div key={category.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={category.id}
-                        checked={filters.category === category.id}
-                        onCheckedChange={() => updateFilters({ category: category.id })}
-                        data-testid={`checkbox-category-${category.id}`}
-                      />
-                      <label
-                        htmlFor={category.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {category.id === 'all' ? t('filters.all_categories', 'All Categories') : category.name}
-                      </label>
-                    </div>
-                  ))}
+                {/* Categories */}
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.category', 'Category')}</label>
+                  <div className="space-y-2">
+                    {filterOptions.categories.map((category) => (
+                      <div key={category.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={category.id}
+                          checked={filters.category === category.id}
+                          onCheckedChange={() => updateFilters({ category: category.id })}
+                          data-testid={`checkbox-category-${category.id}`}
+                        />
+                        <label
+                          htmlFor={category.id}
+                          className="text-sm text-text-grey cursor-pointer"
+                        >
+                          {category.id === 'all' ? t('filters.all_categories', 'All Categories') : category.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Fabric/Material */}
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.material', 'Material')}</label>
+                  <div className="space-y-2">
+                    {filterOptions.materials.map((material) => (
+                      <div key={material.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={material.id}
+                          checked={filters.fabric === material.id}
+                          onCheckedChange={() => updateFilters({ fabric: material.id })}
+                          data-testid={`checkbox-fabric-${material.id}`}
+                        />
+                        <label
+                          htmlFor={material.id}
+                          className="text-sm text-text-grey cursor-pointer"
+                        >
+                          {material.id === 'all' ? t('products.all_materials', 'All Materials') : material.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Season */}
+                <div>
+                  <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
+                  <div className="space-y-2">
+                    {filterOptions.seasons.map((season) => (
+                      <div key={season.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={season.id}
+                          checked={filters.season === season.id}
+                          onCheckedChange={() => updateFilters({ season: season.id })}
+                          data-testid={`checkbox-season-${season.id}`}
+                        />
+                        <label
+                          htmlFor={season.id}
+                          className="text-sm text-text-grey cursor-pointer"
+                        >
+                          {season.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Fabric/Material */}
               <div>
-                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.material', 'Material')}</label>
-                <div className="space-y-2">
-                  {filterOptions.materials.map((material) => (
-                    <div key={material.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={material.id}
-                        checked={filters.fabric === material.id}
-                        onCheckedChange={() => updateFilters({ fabric: material.id })}
-                        data-testid={`checkbox-fabric-${material.id}`}
-                      />
-                      <label
-                        htmlFor={material.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {material.id === 'all' ? t('products.all_materials', 'All Materials') : material.name}
-                      </label>
-                    </div>
-                  ))}
+                {/* Color */}
+                <div>
+                  <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.color', 'Color')}</label>
+                  <div className="space-y-2">
+                    {filterOptions.colors.map((color) => (
+                      <div key={color.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={color.id}
+                          checked={filters.color === color.id}
+                          onCheckedChange={() => updateFilters({ color: color.id })}
+                          data-testid={`checkbox-color-${color.id}`}
+                        />
+                        <label
+                          htmlFor={color.id}
+                          className="text-sm text-text-grey cursor-pointer"
+                        >
+                          {color.id === 'all' ? t('filters.all_colors', 'All Colors') : color.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-
-              {/* Season */}
-              <div>
-                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
-                <div className="space-y-2">
-                  {filterOptions.seasons.map((season) => (
-                    <div key={season.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={season.id}
-                        checked={filters.season === season.id}
-                        onCheckedChange={() => updateFilters({ season: season.id })}
-                        data-testid={`checkbox-season-${season.id}`}
-                      />
-                      <label
-                        htmlFor={season.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {season.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </div>
             
             {/* Show Collections Button */}
@@ -503,85 +545,114 @@ export default function CollectionsPage({ onOpenProductModal }: CollectionsPageP
                 </Button>
               </div>
 
-              {/* Search */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-2 block">{t('products.search_label', 'Search')}</label>
-                <Input
-                  type="text"
-                  placeholder={t('products.search_placeholder', 'Search products...')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
-                  data-testid="input-product-search"
-                />
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  {/* Search */}
+                  <div className="mb-6">
+                    <label className="text-sm font-medium text-charcoal mb-2 block">{t('products.search_label', 'Search')}</label>
+                    <Input
+                      type="text"
+                      placeholder={t('products.search_placeholder', 'Search products...')}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full"
+                      data-testid="input-product-search"
+                    />
+                  </div>
 
-              {/* Categories */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.category', 'Category')}</label>
-                <div className="space-y-2">
-                  {filterOptions.categories.map((category) => (
-                    <div key={category.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={category.id}
-                        checked={filters.category === category.id}
-                        onCheckedChange={() => updateFilters({ category: category.id })}
-                        data-testid={`checkbox-category-${category.id}`}
-                      />
-                      <label
-                        htmlFor={category.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {category.id === 'all' ? t('filters.all_categories', 'All Categories') : category.name}
-                      </label>
+                  {/* Categories */}
+                  <div className="mb-6">
+                    <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.category', 'Category')}</label>
+                    <div className="space-y-2">
+                      {filterOptions.categories.map((category) => (
+                        <div key={category.id} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={category.id}
+                            checked={filters.category === category.id}
+                            onCheckedChange={() => updateFilters({ category: category.id })}
+                            data-testid={`checkbox-category-${category.id}`}
+                          />
+                          <label
+                            htmlFor={category.id}
+                            className="text-sm text-text-grey cursor-pointer"
+                          >
+                            {category.id === 'all' ? t('filters.all_categories', 'All Categories') : category.name}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Fabric/Material */}
+                  <div className="mb-6">
+                    <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.material', 'Material')}</label>
+                    <div className="space-y-2">
+                      {filterOptions.materials.map((material) => (
+                        <div key={material.id} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={material.id}
+                            checked={filters.fabric === material.id}
+                            onCheckedChange={() => updateFilters({ fabric: material.id })}
+                            data-testid={`checkbox-fabric-${material.id}`}
+                          />
+                          <label
+                            htmlFor={material.id}
+                            className="text-sm text-text-grey cursor-pointer"
+                          >
+                            {material.id === 'all' ? t('products.all_materials', 'All Materials') : material.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Season */}
+                  <div>
+                    <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
+                    <div className="space-y-2">
+                      {filterOptions.seasons.map((season) => (
+                        <div key={season.id} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={season.id}
+                            checked={filters.season === season.id}
+                            onCheckedChange={() => updateFilters({ season: season.id })}
+                            data-testid={`checkbox-season-${season.id}`}
+                          />
+                          <label
+                            htmlFor={season.id}
+                            className="text-sm text-text-grey cursor-pointer"
+                          >
+                            {season.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Fabric/Material */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.material', 'Material')}</label>
-                <div className="space-y-2">
-                  {filterOptions.materials.map((material) => (
-                    <div key={material.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={material.id}
-                        checked={filters.fabric === material.id}
-                        onCheckedChange={() => updateFilters({ fabric: material.id })}
-                        data-testid={`checkbox-fabric-${material.id}`}
-                      />
-                      <label
-                        htmlFor={material.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {material.id === 'all' ? t('products.all_materials', 'All Materials') : material.name}
-                      </label>
+                <div>
+                  {/* Color */}
+                  <div>
+                    <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.color', 'Color')}</label>
+                    <div className="space-y-2">
+                      {filterOptions.colors.map((color) => (
+                        <div key={color.id} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={color.id}
+                            checked={filters.color === color.id}
+                            onCheckedChange={() => updateFilters({ color: color.id })}
+                            data-testid={`checkbox-color-${color.id}`}
+                          />
+                          <label
+                            htmlFor={color.id}
+                            className="text-sm text-text-grey cursor-pointer"
+                          >
+                            {color.id === 'all' ? t('filters.all_colors', 'All Colors') : color.name}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Season */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-charcoal mb-3 block">{t('products.season', 'Season')}</label>
-                <div className="space-y-2">
-                  {filterOptions.seasons.map((season) => (
-                    <div key={season.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={season.id}
-                        checked={filters.season === season.id}
-                        onCheckedChange={() => updateFilters({ season: season.id })}
-                        data-testid={`checkbox-season-${season.id}`}
-                      />
-                      <label
-                        htmlFor={season.id}
-                        className="text-sm text-text-grey cursor-pointer"
-                      >
-                        {season.name}
-                      </label>
-                    </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             </div>

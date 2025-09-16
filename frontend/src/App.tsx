@@ -70,7 +70,7 @@ function WhatsAppFloatingButton() {
       ? "Sono interessato al vostro business di abbigliamento all'ingrosso. Posso avere ulteriori dettagli?"
       : "I'm interested in your wholesale clothing business. May I have further details?";
     const message = encodeURIComponent(t('home.contact.auto_message') || defaultMessage);
-    const whatsappUrl = `https://wa.me/393888518810?text=${message}`;
+    const whatsappUrl = `https://wa.me/393388508068?text=${message}`;
     
     // 设置链接
     e.currentTarget.href = whatsappUrl;
@@ -78,7 +78,7 @@ function WhatsAppFloatingButton() {
 
   return (
     <a 
-      href="https://wa.me/393888518810" 
+      href="https://wa.me/393388508068" 
       target="_blank" 
       rel="noopener noreferrer"
       className="whatsapp-floating-button"

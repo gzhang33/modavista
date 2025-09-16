@@ -252,7 +252,7 @@ export default function ContactSection() {
                     <h5 className="font-semibold text-charcoal mb-1">{t('home.contact.info.inquiries')}</h5>
                     <div className="text-text-grey">
                       <a 
-                        href="https://wa.me/393888518810" 
+                        href="https://wa.me/39388508068" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-text-grey hover:text-accent-gold transition-colors duration-300 underline block mb-2"
@@ -262,7 +262,7 @@ export default function ContactSection() {
                             ? "Sono interessato al vostro business di abbigliamento all'ingrosso. Posso avere ulteriori dettagli?"
                             : "I'm interested in your wholesale clothing business. May I have further details?";
                           const message = encodeURIComponent(t('home.contact.auto_message') || defaultMessage);
-                          const whatsappUrl = `https://wa.me/393388508068?text=${message}`;
+                          const whatsappUrl = `https://wa.me/39388508068?text=${message}`;
                           e.currentTarget.href = whatsappUrl;
                         }}
                       >

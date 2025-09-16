@@ -25,7 +25,8 @@ export default function Home({}: HomeProps) {
     category: 'all',
     fabric: 'all',
     season: 'all',
-    style: 'all'
+    style: 'all',
+    color: 'all'
   });
 
   // Scroll to top when component mounts

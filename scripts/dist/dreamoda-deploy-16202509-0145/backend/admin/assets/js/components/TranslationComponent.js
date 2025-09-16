@@ -37,7 +37,7 @@ export default class TranslationComponent extends BaseComponent {
                 <div class="translation__header">
                     <h3 class="translation__title">多语言翻译</h3>
                     <p class="translation__description">
-                        自动生成产品名称和描述的多语言版本
+                        自动生成产品名称的多语言版本
                     </p>
                 </div>
 
@@ -106,8 +106,8 @@ export default class TranslationComponent extends BaseComponent {
         if (this.state.isTranslating) return;
 
         const content = this.getContentToTranslate();
-        if (!content.name && !content.description) {
-            this.showError('请填写产品名称或描述后再生成翻译');
+        if (!content.name) {
+            this.showError('请填写产品名称后再生成翻译');
             return;
         }
 
@@ -131,11 +131,11 @@ export default class TranslationComponent extends BaseComponent {
     getContentToTranslate() {
         // 从页面表单获取内容
         const nameInput = document.querySelector('input[name="base_name"], input[name="name"]');
-        const descriptionInput = document.querySelector('textarea[name="description"]');
+        // const descriptionInput = document.querySelector('textarea[name="description"]');
 
         return {
-            name: nameInput?.value?.trim() || '',
-            description: descriptionInput?.value?.trim() || ''
+            name: nameInput?.value?.trim() || ''
+            // description: descriptionInput?.value?.trim() || ''
         };
     }
 

@@ -1,4 +1,3 @@
-<?php require_once '_auth_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -860,7 +859,20 @@
 <body>
     <script>
         // 会话检查
-        // 服务器侧已做门禁
+        fetch('../api/check_session.php')
+            .then(r => r.json())
+            .then(d => { 
+                if (!d.loggedIn) { 
+                    console.log('Session check failed, redirecting to login');
+                    location.href = 'login.html'; 
+                } else {
+                    console.log('Session valid, loading page');
+                }
+            })
+            .catch((error) => {
+                console.error('Session check error:', error);
+                location.href = 'login.html';
+            });
     </script>
     
     <div class="dashboard-container">
@@ -1047,7 +1059,7 @@
             showLoading();
             console.log('Loading contact messages...');
             
-            fetch('/backend/api/contact_messages.php')
+            fetch('../api/contact_messages.php')
             .then(response => {
                 console.log('API response status:', response.status);
                 
@@ -1428,7 +1440,7 @@
                 notes: notes
             };
             
-            fetch('/backend/api/contact_messages.php', {
+            fetch('../api/contact_messages.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

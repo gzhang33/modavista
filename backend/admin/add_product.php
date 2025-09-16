@@ -1,3 +1,4 @@
+<?php require_once '_auth_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,20 +13,7 @@
 </head>
 <body>
     <script>
-    fetch('../api/check_session.php')
-        .then(r=>r.json())
-        .then(d=>{ 
-            if(!d.loggedIn){ 
-                console.log('Session check failed, redirecting to login');
-                location.href='login.html'; 
-            } else {
-                console.log('Session valid, loading page');
-            }
-        })
-        .catch((error)=>{
-            console.error('Session check error:', error);
-            location.href='login.html';
-        });
+    // 服务器侧已做门禁
     </script>
     
     <div class="dashboard-container">

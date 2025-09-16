@@ -1,3 +1,4 @@
+<?php require_once '_auth_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +25,12 @@
                     <li><a href="dashboard.php" class="nav-link active"><i class="fas fa-box"></i> 产品管理</a></li>
                     <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 主页表单查询</a></li>
                     <li><a href="translations.php" class="nav-link"><i class="fas fa-language"></i> 多语言翻译</a></li>
-                    <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    <li>
+                        <form id="logout-form" action="../api/logout.php" method="post" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+                            <button type="submit" class="nav-link logout" style="background:none;border:none;cursor:pointer"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
+                        </form>
+                    </li>
                 </ul>
             </div>
         </nav>

@@ -1,10 +1,8 @@
-<?php
+<?php require_once '_auth_guard.php';
 // admin/translations.php - 翻译管理界面
 
-require_once '../config/app.php';
 require_once '../api/utils.php';
 require_once '../api/language.php';
-require_auth();
 
 // 获取当前语言参数
 $current_lang = $_GET['lang'] ?? 'en';

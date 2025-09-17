@@ -8,6 +8,69 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Compact two-button bar for Filter and Sort */
+        .filter-actions-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+        .sort-button-container .btn {
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Desktop layout: push sort to the far right */
+        @media (min-width: 769px) {
+            .filter-actions-bar { display: flex; justify-content: flex-end; }
+            .sort-button-container .btn { width: auto; }
+        }
+        .sort-dropdown {
+            position: relative;
+        }
+        .sort-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+            min-width: 220px;
+            z-index: 60;
+            display: none;
+        }
+        .sort-menu.is-open { display: block; }
+        .sort-menu button {
+            display: block;
+            width: 100%;
+            background: transparent;
+            border: 0;
+            text-align: left;
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .sort-menu button:hover { background: #f3f4f6; }
+        /* Desktop: hide filter status panel */
+        @media (min-width: 769px) {
+            #filter-status-panel { display: none !important; }
+            .mobile-only { display: none !important; }
+        }
+
+        /* Mobile styles - reference contact_messages.php */
+        @media (max-width: 768px) {
+            .filter-bar-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; width: 100%; }
+            .mobile-only { display: inline-flex; align-items: center; gap: 6px; }
+            .sort-button-container .btn { font-weight: normal; }
+            .filter-button-container .btn { font-weight: normal; }
+        }
+    </style>
 </head>
 <body>
     <script>
@@ -44,16 +107,27 @@
             </header>
             <section id="products-management-section" class="product-list-section">
                 <div id="filter-bar" class="filter-bar">
-                    <!-- Filter buttons will be dynamically inserted here -->
-                    <div class="filter-bar-actions">
-                        <div class="filter-search">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="search-products" placeholder="搜索产品..." />
+                    <div class="filter-actions-bar filter-bar-actions">
+                        <!-- 仅保留：筛选 与 排序 两个按钮 -->
+                        <div class="filter-button-container">
+                            <a href="filters_mobile.php" class="btn btn-secondary mobile-only">
+                                <i class="fas fa-filter"></i> 筛选
+                            </a>
                         </div>
-                        <button id="clear-filters-btn" class="btn btn-secondary btn-sm">清除筛选</button>
-                        <a href="filters_mobile.php" class="btn btn-primary btn-sm mobile-only">
-                            <i class="fas fa-filter"></i> 筛选
-                        </a>
+                        <div class="sort-button-container sort-dropdown">
+                            <button id="sort-toggle" class="btn btn-secondary">
+                                <i class="fas fa-sort"></i>
+                                <span id="sort-label">排序：相关性</span>
+                                <i class="fas fa-chevron-down" style="font-size:12px"></i>
+                            </button>
+                            <div id="sort-menu" class="sort-menu" aria-hidden="true">
+                                <button type="button" data-sort="relevance">相关性</button>
+                                <button type="button" data-sort="newest">最新</button>
+                                <button type="button" data-sort="oldest">最早</button>
+                                <button type="button" data-sort="name_az">名称 A → Z</button>
+                                <button type="button" data-sort="name_za">名称 Z → A</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -113,5 +187,43 @@
 <div id="toast-notification" class="toast"></div>
 
     <script type="module" src="assets/js/main.js?v=6"></script>
+    <script>
+        // 仅处理排序下拉与事件派发
+        (function(){
+            const section = document.querySelector('#products-management-section');
+            const toggle = document.getElementById('sort-toggle');
+            const menu = document.getElementById('sort-menu');
+            const label = document.getElementById('sort-label');
+
+            const MAP = {
+                relevance: '排序：相关性',
+                newest: '排序：最新',
+                oldest: '排序：最早',
+                name_az: '排序：名称 A → Z',
+                name_za: '排序：名称 Z → A'
+            };
+
+            function closeMenu(){ menu && menu.classList.remove('is-open'); }
+
+            if (toggle && menu && section) {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('is-open');
+                });
+                menu.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-sort]');
+                    if (!btn) return;
+                    const sort = btn.getAttribute('data-sort');
+                    label.textContent = MAP[sort] || '排序：相关性';
+                    closeMenu();
+                    // 向产品组件派发自定义事件
+                    section.dispatchEvent(new CustomEvent('sortChanged', { detail: { criterion: sort }}));
+                });
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.sort-dropdown')) closeMenu();
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

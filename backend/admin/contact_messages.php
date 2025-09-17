@@ -503,6 +503,12 @@
             width: 40px;
             height: 40px;
         }
+
+        /* Desktop: hide filter status panel */
+        @media (min-width: 769px) {
+            #filter-status-panel { display: none !important; }
+            .mobile-only { display: none !important; }
+        }
         
         .modal-close:hover {
             background-color: #f3f4f6;
@@ -697,19 +703,17 @@
             margin-bottom: 20px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
+        /* Desktop defaults */
+        .desktop-only { display: block; }
+        .mobile-only { display: none; }
+        .filter-bar-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-left: auto; }
         
-        .filter-bar-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-search {
-            position: relative;
-            flex: 1;
-            min-width: 250px;
-        }
+        /* Sort dropdown styles (aligned with dashboard; used on mobile) */
+        .sort-dropdown { position: relative; }
+        .sort-menu { position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); min-width: 220px; z-index: 1000; display: none; }
+        .sort-menu.is-open { display: block; }
+        .sort-menu button { display:block; width:100%; background:transparent; border:0; text-align:left; padding:10px 12px; cursor:pointer; font-size:14px; }
+        .sort-menu button:hover { background:#f3f4f6; }
         
         .search-icon {
             position: absolute;
@@ -807,23 +811,96 @@
                 font-size: 18px;
             }
             
-            .filter-bar-actions {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 16px;
-            }
-            
-            .filter-search {
-                min-width: auto;
-            }
-            
-            .filter-controls {
-                flex-direction: column;
-                gap: 16px;
-            }
+            /* Mobile: show mobile-only, hide desktop-only */
+            .desktop-only { display: none; }
+            .mobile-only { display: block; }
+            /* Ensure desktop-only filter groups are hidden on mobile */
+            .filter-group { display: none; }
+            .filter-bar-actions { grid-template-columns: 1fr 1fr; gap: 8px; display: grid; width: 100%; }
+            .sort-button-container .btn { width: 100%; justify-content: center; }
+            .filter-controls { display:none; }
             
             .filter-buttons {
                 justify-content: flex-start;
+            }
+            
+            /* Mobile filter status panel visuals */
+            .filter-status-panel { 
+                margin: 10px 0 16px;
+                background-color: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 8px;
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .filter-status-panel.hidden {
+                display: none;
+            }
+            
+            .filter-status-header { 
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+            
+            .filter-status-title { 
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                color: #343a40;
+                font-weight: 600;
+            }
+            
+            .filter-status-title i {
+                color: #6c757d;
+            }
+            
+            .filter-status-count { 
+                background-color: #e9ecef;
+                color: #495057;
+                font-size: 12px;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-weight: 500;
+            }
+            
+            .filter-status-content { 
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 8px;
+            }
+            
+            .filter-tag {
+                display: inline-flex;
+                align-items: center;
+                background-color: #e9ecef;
+                border-radius: 16px;
+                padding: 4px 12px;
+                font-size: 13px;
+                color: #495057;
+            }
+            
+            .filter-tag-remove {
+                background: none;
+                border: none;
+                color: #6c757d;
+                margin-left: 6px;
+                cursor: pointer;
+                padding: 2px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+            }
+            
+            .filter-tag-remove:hover {
+                background-color: #dee2e6;
+                color: #dc3545;
             }
         }
         
@@ -908,28 +985,66 @@
         <main class="main-content">
             <header class="main-header">
                 <h2><i class="fas fa-envelope"></i> 表单查询</h2>
-                <div class="header-actions">
+                <!-- 隐藏重置布局和刷新数据按钮 -->
+                <!-- <div class="header-actions">
                     <button id="reset-table-btn" class="btn btn-secondary" onclick="resetTableSettings()" title="重置表格布局">
                         <i class="fas fa-undo"></i> 重置布局
                     </button>
                     <button id="refresh-btn" class="btn btn-primary">
                         <i class="fas fa-sync-alt"></i> 刷新数据
                     </button>
-                </div>
+                </div> -->
             </header>
             
             <section id="messages-section" class="messages-list-section">
                 <div id="filter-bar" class="filter-bar">
-                    <div class="filter-bar-actions">
-                        <div class="filter-search">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="search-messages" placeholder="搜索姓名、邮箱或留言内容..." />
+                    <!-- Desktop filter dropdown (left): Status -->
+                    <div class="filter-group" id="status-filter-group">
+                        <button class="filter-button" id="status-filter-button">
+                            <span>状态</span>
+                            <span class="filter-current" id="status-filter-current"></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="filter-dropdown" id="status-filter-dropdown">
+                            <div class="filter-option" data-status=""><label>全部</label></div>
+                            <div class="filter-option" data-status="待定"><label>待处理</label></div>
+                            <div class="filter-option" data-status="进行中"><label>处理中</label></div>
+                            <div class="filter-option" data-status="完成"><label>完成</label></div>
                         </div>
-                        <div class="filter-controls">
-                            
-                        </div>
-                        <button id="clear-filters-btn" class="btn btn-secondary btn-sm">清除筛选</button>
                     </div>
+
+                    <div class="filter-bar-actions">
+                        <div class="filter-button-container">
+                            <a href="filters_mobile.php?page=messages" class="btn btn-secondary mobile-only">
+                                <i class="fas fa-filter"></i> 筛选
+                            </a>
+                        </div>
+                        <div class="sort-button-container sort-dropdown">
+                            <button id="sort-toggle" class="btn btn-secondary">
+                                <i class="fas fa-sort"></i>
+                                <span id="sort-label">排序：相关性</span>
+                                <i class="fas fa-chevron-down" style="font-size:12px"></i>
+                            </button>
+                            <div id="sort-menu" class="sort-menu" aria-hidden="true">
+                                <button type="button" data-sort="relevance">相关性</button>
+                                <button type="button" data-sort="newest">最新</button>
+                                <button type="button" data-sort="oldest">最早</button>
+                                <button type="button" data-sort="name_az">名称 A → Z</button>
+                                <button type="button" data-sort="name_za">名称 Z → A</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Status Panel -->
+                <div id="filter-status-panel" class="filter-status-panel hidden">
+                    <div class="filter-status-header">
+                        <span class="filter-status-title">
+                            <i class="fas fa-filter"></i> 当前筛选条件
+                        </span>
+                        <span class="filter-status-count">0 项</span>
+                    </div>
+                    <div class="filter-status-content"></div>
                 </div>
 
                 <div class="table-container">
@@ -1025,6 +1140,8 @@
             time: ''
         };
         const MOBILE_FILTERS_STORAGE_KEY = 'admin_mobile_filters_messages';
+        // Sorting state for messages list
+        let sortCriterion = 'relevance'; // relevance | newest | oldest | name_az | name_za
 
         function applyMobileSavedFilters() {
             try {
@@ -1141,6 +1258,8 @@
                     applyMobileSavedFilters();
                     // 如果未设置或无效，按当前筛选渲染
                     applyFilters();
+                    // 同步筛选按钮文案
+                    if (window.updateMessageFilterButtons) { window.updateMessageFilterButtons(); }
                     showToast('数据加载成功', 'success');
                 } else {
                     throw new Error(data.message || 'Failed to load messages');
@@ -1152,10 +1271,89 @@
                 contactMessages = [];
                 filteredMessages = [];
                 renderMessages();
+            updateFilterStatusPanel();
             })
             .finally(() => {
                 hideLoading();
             });
+
+        // Sort dropdown wiring
+        (function setupSortDropdown(){
+            const toggle = document.getElementById('sort-toggle');
+            const menu = document.getElementById('sort-menu');
+            const label = document.getElementById('sort-label');
+            if (!toggle || !menu || !label) return;
+            const MAP = {
+                relevance: '排序：相关性',
+                newest: '排序：最新',
+                oldest: '排序：最早',
+                name_az: '排序：姓名 A → Z',
+                name_za: '排序：姓名 Z → A'
+            };
+            function closeMenu(){ menu.classList.remove('is-open'); }
+            toggle.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.toggle('is-open'); });
+            menu.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-sort]');
+                if (!btn) return;
+                sortCriterion = btn.getAttribute('data-sort');
+                label.textContent = MAP[sortCriterion] || '排序：相关性';
+                closeMenu();
+                // Re-apply sorting to current list and re-render
+                filteredMessages = sortMessages(filteredMessages, sortCriterion);
+                renderMessages();
+            });
+            document.addEventListener('click', (e) => { if (!e.target.closest('.sort-dropdown')) closeMenu(); });
+        })();
+
+        // Desktop inline filter (status) using dashboard pill style
+        (function setupInlineFilters(){
+            const statusBtn = document.getElementById('status-filter-button');
+            const statusDd = document.getElementById('status-filter-dropdown');
+            const statusCur = document.getElementById('status-filter-current');
+
+            function closeAll(){
+                statusDd && statusDd.classList.remove('is-open');
+                statusBtn && statusBtn.classList.remove('is-open');
+            }
+
+            function mapStatusLabel(val){
+                if (!val) return '';
+                if (val === '待定') return '待处理';
+                if (val === '进行中') return '处理中';
+                if (val === '完成') return '已完成';
+                if (val === '未完成') return '未完成';
+                return '';
+            }
+
+            function updateButtons(){
+                if (statusCur) statusCur.textContent = mapStatusLabel(currentFilters.status);
+            }
+
+            // Expose for external calls after data load or mobile sync
+            window.updateMessageFilterButtons = updateButtons;
+            updateButtons();
+
+            if (statusBtn && statusDd) {
+                statusBtn.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    const open = statusDd.classList.contains('is-open');
+                    closeAll();
+                    if (!open) { statusDd.classList.add('is-open'); statusBtn.classList.add('is-open'); }
+                });
+                statusDd.addEventListener('click', (e)=>{
+                    const opt = e.target.closest('.filter-option');
+                    if (!opt) return;
+                    const val = opt.getAttribute('data-status') || '';
+                    setFilter('status', val);
+                    updateButtons();
+                    closeAll();
+                });
+            }
+
+            document.addEventListener('click', (e)=>{
+                if (!e.target.closest('.filter-group')) closeAll();
+            });
+        })();
         }
         
         function renderMessages() {
@@ -1313,6 +1511,82 @@
             }
         }
         
+        // 更新筛选状态面板
+        function updateFilterStatusPanel() {
+            const panel = document.getElementById('filter-status-panel');
+            const content = document.querySelector('#filter-status-panel .filter-status-content');
+            const countEl = document.querySelector('#filter-status-panel .filter-status-count');
+            
+            if (!panel || !content || !countEl) return;
+            
+            const activeFilters = [];
+            
+            // 检查状态筛选
+            if (currentFilters.status) {
+                let statusText = '';
+                if (currentFilters.status === '待定') statusText = '待处理';
+                else if (currentFilters.status === '进行中') statusText = '处理中';
+                else if (currentFilters.status === '完成') statusText = '已完成';
+                else if (currentFilters.status === '未完成') statusText = '未完成';
+                
+                if (statusText) {
+                    activeFilters.push({
+                        type: 'status',
+                        text: `状态: ${statusText}`,
+                        value: currentFilters.status
+                    });
+                }
+            }
+            
+            // 检查时间筛选
+            if (currentFilters.time) {
+                let timeText = '';
+                if (currentFilters.time === 'today') timeText = '今天';
+                else if (currentFilters.time === 'week') timeText = '本周';
+                else if (currentFilters.time === 'month') timeText = '本月';
+                else if (currentFilters.time === 'year') timeText = '今年';
+                
+                if (timeText) {
+                    activeFilters.push({
+                        type: 'time',
+                        text: `时间: ${timeText}`,
+                        value: currentFilters.time
+                    });
+                }
+            }
+            
+            // 更新UI
+            if (activeFilters.length > 0) {
+                panel.classList.remove('hidden');
+                countEl.textContent = `${activeFilters.length} 项`;
+                
+                // 创建筛选标签
+                content.innerHTML = activeFilters.map(filter => `
+                    <div class="filter-tag" data-type="${filter.type}">
+                        <span>${filter.text}</span>
+                        <button type="button" class="filter-tag-remove" data-type="${filter.type}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                // 添加移除筛选事件
+                document.querySelectorAll('.filter-tag-remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const type = btn.getAttribute('data-type');
+                        if (type) {
+                            currentFilters[type] = '';
+                            applyFilters();
+                            updateFilterStatusPanel();
+                        }
+                    });
+                });
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+        
         // 筛选功能
         function applyFilters() {
             filteredMessages = contactMessages.filter(message => {
@@ -1377,35 +1651,39 @@
                 return true;
             });
             
-            renderMessages();
+            // 应用排序
+            filteredMessages = sortMessages(filteredMessages, sortCriterion);
 
-            // 更新状态/时间当前筛选显示
-            try {
-                const statusEl = document.getElementById('current-status-filter');
-                const timeEl = document.getElementById('current-time-filter');
-                if (statusEl) {
-                    let txt = '全部';
-                    if (currentFilters.status === '待定') txt = '待处理';
-                    else if (currentFilters.status === '进行中') txt = '处理中';
-                    else if (currentFilters.status === '完成') txt = '已完成';
-                    else if (currentFilters.status === '未完成') txt = '未完成';
-                    statusEl.textContent = txt;
-                }
-                if (timeEl) {
-                    let t = '全部';
-                    if (currentFilters.time === 'today') t = '今天';
-                    else if (currentFilters.time === 'week') t = '本周';
-                    else if (currentFilters.time === 'month') t = '本月';
-                    else if (currentFilters.time === 'year') t = '今年';
-                    timeEl.textContent = t;
-                }
-            } catch (e) {}
+            // 渲染消息列表
+            renderMessages();
+            
+            // 更新筛选状态面板
+            updateFilterStatusPanel();
         }
         
         // 设置筛选器
         function setFilter(type, value) {
             currentFilters[type] = value;
             applyFilters();
+            updateFilterStatusPanel();
+        }
+
+        // Sort helpers
+        function sortMessages(list, criterion) {
+            if (!Array.isArray(list)) return [];
+            const arr = list.slice();
+            switch (criterion) {
+                case 'newest':
+                    return arr.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                case 'oldest':
+                    return arr.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+                case 'name_az':
+                    return arr.sort((a,b) => (a.name || '').localeCompare(b.name || ''));
+                case 'name_za':
+                    return arr.sort((a,b) => (b.name || '').localeCompare(a.name || ''));
+                default:
+                    return arr; // relevance: keep data order
+            }
         }
         
         // 清除所有筛选

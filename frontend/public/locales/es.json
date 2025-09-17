@@ -61,7 +61,8 @@
         "consultations": "Consultas de diseño a medida",
         "previews": "Vistas previas de colección estacional",
         "services": "Servicios a medida"
-      }
+      },
+      "auto_message": "Estoy interesado en su negocio de ropa al por mayor. ¿Puedo tener más detalles?"
     },
     "business_types": {
       "retailer": "Minorista",

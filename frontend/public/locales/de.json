@@ -61,7 +61,8 @@
         "consultations": "Maßgeschneiderte Designberatungen",
         "previews": "Saisonale Kollektionsvorschauen",
         "services": "Maßgeschneiderte Services"
-      }
+      },
+      "auto_message": "Ich interessiere mich für Ihr Großhandelsgeschäft mit Bekleidung. Kann ich weitere Details erhalten?"
     },
     "business_types": {
       "retailer": "Einzelhändler",

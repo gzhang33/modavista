@@ -56,13 +56,14 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       }
     } catch (error) {
       console.error('Failed to fetch languages:', error);
-      // 设置可用语言（英文、法语、德语、意大利语、西班牙语）
+      // 设置可用语言（英文、法语、德语、意大利语、西班牙语、中文）
       setAvailableLanguages([
         { language_code: 'en', language_name: 'English', language_name_native: 'English', is_default: true },
         { language_code: 'fr', language_name: 'French', language_name_native: 'Français', is_default: false },
         { language_code: 'de', language_name: 'German', language_name_native: 'Deutsch', is_default: false },
         { language_code: 'it', language_name: 'Italian', language_name_native: 'Italiano', is_default: false },
-        { language_code: 'es', language_name: 'Spanish', language_name_native: 'Español', is_default: false }
+        { language_code: 'es', language_name: 'Spanish', language_name_native: 'Español', is_default: false },
+        { language_code: 'zh', language_name: 'Chinese', language_name_native: '中文', is_default: false }
       ]);
     }
   };

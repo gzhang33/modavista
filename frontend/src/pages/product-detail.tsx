@@ -281,11 +281,11 @@ Please process this sample request as soon as possible.`)
   
 
 
-  // Convert specifications to table format
+  // Convert specifications to table format (translated labels)
   const specificationRows = [
-    { name: "Category", value: product.category },
-    { name: "Season", value: product.season.replace('-', '/') },
-    { name: "Origin", value: product.origin },
+    { name: t('product_detail.fields.category', 'Category'), value: product.category },
+    { name: t('product_detail.fields.season', 'Season'), value: product.season.replace('-', '/') },
+    { name: t('product_detail.fields.origin', 'Origin'), value: product.origin },
     ...Object.entries(product.specifications).map(([key, value]) => ({
       name: key,
       value: value
@@ -354,7 +354,7 @@ Please process this sample request as soon as possible.`)
           <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
             {/* Product Gallery */}
             <div className="flex flex-col">
-cd              {/* Mobile Product Name - Only visible on mobile */}
+              {/* Mobile Product Name - Only visible on mobile */}
               <h1 className="text-xl font-bold tracking-tight text-gray-900 mb-4 md:hidden">
                 {product.name}
               </h1>

@@ -176,13 +176,14 @@ export function getAllStaticKeys(languageCode: string): Promise<string[]> {
 // =============================================
 
 // 支持的语言代码映射
-export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'it', 'es'];
+export const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'it', 'es', 'zh'];
 export const LANGUAGE_TO_LOCALE: Record<string, string> = {
   'en': 'en-GB',
   'fr': 'fr-FR',
   'de': 'de-DE',
   'it': 'it-IT',
-  'es': 'es-ES'
+  'es': 'es-ES',
+  'zh': 'zh-CN'
 };
 
 // 从URL路径检测语言代码

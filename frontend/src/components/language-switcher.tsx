@@ -16,7 +16,8 @@ const FLAG_ICONS: Record<string, string> = {
   'fr': '🇫🇷', 
   'de': '🇩🇪',
   'it': '🇮🇹',
-  'es': '🇪🇸'
+  'es': '🇪🇸',
+  'zh': '🇨🇳'
 };
 
 // 语言信息映射
@@ -25,7 +26,8 @@ const LANGUAGE_INFO: Record<string, { name: string; native: string }> = {
   'fr': { name: 'French', native: 'Français' },
   'de': { name: 'German', native: 'Deutsch' },
   'it': { name: 'Italian', native: 'Italiano' },
-  'es': { name: 'Spanish', native: 'Español' }
+  'es': { name: 'Spanish', native: 'Español' },
+  'zh': { name: 'Chinese', native: '中文' }
 };
 
 export default function LanguageSwitcher() {

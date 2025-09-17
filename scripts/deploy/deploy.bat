@@ -30,27 +30,14 @@ if not exist "%projectRoot%\backend" (
     exit /b 1
 )
 
-if not exist "%projectRoot%\storage" (
-    echo ERROR: Storage directory not found!
-    pause
-    exit /b 1
-)
-
-echo [1/5] Copying backend files...
+echo [1/4] Copying backend files...
 xcopy "%projectRoot%\backend" "%tempDir%\backend\" /E /I /Y /Q
 if errorlevel 1 (
     echo ERROR: Failed to copy backend files
     goto :cleanup_and_exit
 )
 
-echo [2/5] Copying storage directory...
-xcopy "%projectRoot%\storage" "%tempDir%\storage\" /E /I /Y /Q
-if errorlevel 1 (
-    echo ERROR: Failed to copy storage files
-    goto :cleanup_and_exit
-)
-
-echo [3/5] Copying frontend build files...
+echo [2/4] Copying frontend build files...
 if exist "%projectRoot%\frontend\dist" (
     xcopy "%projectRoot%\frontend\dist\*" "%tempDir%\" /E /Y /Q
     if errorlevel 1 (
@@ -62,23 +49,17 @@ if exist "%projectRoot%\frontend\dist" (
     echo   WARNING: Frontend dist directory not found - run 'npx vite build' first
 )
 
-echo [4/5] Copying configuration files...
+echo [3/4] Copying configuration files...
 set configCount=0
 if exist "%projectRoot%\.htaccess" (
     copy "%projectRoot%\.htaccess" "%tempDir%\" /Y >nul
     set /a configCount+=1
     echo   .htaccess copied
 )
-if exist "%projectRoot%\.env" (
-    copy "%projectRoot%\.env" "%tempDir%\" /Y >nul
-    set /a configCount+=1
-    echo   .env file copied
-    echo   WARNING: The .env file is included. Ensure this is intended for your deployment target.
-)
 echo   %configCount% configuration files copied
 
 echo.
-echo [5/5] Creating deployment ZIP file...
+echo [4/4] Creating deployment ZIP file...
 powershell -command "Add-Type -AssemblyName System.IO.Compression.FileSystem; try { [System.IO.Compression.ZipFile]::CreateFromDirectory('%tempDir%', '%zipPath%'); Write-Host 'ZIP file created successfully' } catch { Write-Host 'ERROR: Failed to create ZIP file -' $_.Exception.Message; exit 1 }"
 
 if errorlevel 1 (
@@ -100,17 +81,15 @@ echo Size: %fileSizeMB% MB (%fileSize% bytes)
 echo.
 echo Package Contents:
 echo - Backend API (PHP + Environment Adapter)
-echo - Storage Directory (Upload + Logs)  
 echo - Frontend Application (React Build + Assets)
-echo - Configuration Files (.htaccess, .env, etc.)
+echo - Configuration Files (.htaccess)
 echo.
 echo ===== NEXT STEPS =====
 echo 1. Login to Hostinger hPanel
 echo 2. Go to File Manager ^> public_html
 echo 3. Upload the ZIP file above
 echo 4. Extract files to root directory
-echo 5. Set storage permissions: chmod 755 storage/
-echo 6. Visit: https://yourdomain.com/scripts/deploy/verify_deployment.php
+echo 5. Visit: https://yourdomain.com/scripts/deploy/verify_deployment.php
 echo.
 echo Ready to upload to Hostinger!
 echo.

@@ -61,7 +61,8 @@
         "consultations": "Consultations de design sur mesure",
         "previews": "Aperçus de collection saisonnière",
         "services": "Services de mesures personnalisées"
-      }
+      },
+      "auto_message": "Je suis intéressé par votre entreprise de vêtements en gros. Puis-je avoir plus de détails ?"
     },
     "business_types": {
       "retailer": "Détaillant",

@@ -1,0 +1,253 @@
+{
+  "nav": {
+    "home": "首页",
+    "collections": "系列产品",
+    "about": "关于我们",
+    "contact": "联系我们"
+  },
+  "home": {
+    "title": "DreamModa - 意大利时尚卓越",
+    "hero": {
+      "title": "优质批发服装系列",
+      "subtitle": "探索我们为精明的批发合作伙伴精心挑选的高质量服装系列",
+      "explore": "探索系列",
+      "samples": "请求样品"
+    },
+    "categories": {
+      "title": "按类别购物服装",
+      "subtitle": "探索我们各个类别的高质量时尚服装系列"
+    },
+    "featured": {
+      "title": "精选系列",
+      "subtitle": "从我们最新的季节性系列中精心挑选，展示卓越的工艺和当代设计",
+      "view_all": "查看完整系列"
+    },
+    "about": {
+      "title": "将梦想转化为时尚",
+      "description1": "DreamModa代表了意大利时尚遗产与当代设计的完美融合。总部位于托斯卡纳的普拉托，我们的工坊将传统工艺与创新技术相结合，为您打造体现优雅、品质和现代意大利时尚标志性精髓的卓越服装。我们秉承卓越的承诺，对细节一丝不苟，确保每一件作品都体现了最高标准的意大利时尚。",
+      "description2": "自2005年以来，我们将自己定位为客户的战略合作伙伴，而不仅仅是供应商。通过走在市场趋势前沿，我们经验丰富的团队和现代设施使我们能够交付既时尚又具有商业可行性的服装系列。我们致力于通过提供可靠的供应链和专业服务来促进您的业务增长，确保我们共同成功。",
+      "designs": "时尚设计",
+      "experience": "年经验"
+    },
+    "partners": {
+      "title": "欧洲合作伙伴",
+      "subtitle": "我们很荣幸为欧洲各地的客户服务，为欧洲市场带来意大利时尚卓越"
+    },
+    "contact": {
+      "title": "联系DreamModa",
+      "subtitle": "探索我们的独家时尚系列。联系我们获取查询、预约或了解更多我们的定制服务。",
+      "form": {
+        "title": "请求信息",
+        "first_name": "名字",
+        "last_name": "姓氏",
+        "email": "邮箱",
+        "company": "公司名称（可选）",
+        "business_type": "业务类型",
+        "requirements": "告诉我们您的需求...",
+        "submit": "发送查询"
+      },
+      "info": {
+        "title": "获取联系方式",
+        "headquarters": "DreamModa总部",
+        "address": "Via Gherardacci 47/C, Iolo, Prato, Tuscany, Italy",
+        "inquiries": "业务查询",
+        "phone_hours": "周一至周五，CET上午10:00至晚上9:00",
+        "email": "邮箱",
+        "email_address": "Hi@DreamModa.store"
+      },
+      "visit": {
+        "title": "参观我们的工坊",
+        "appointments": "提供私人预约",
+        "consultations": "定制设计咨询",
+        "previews": "季节性系列预览",
+        "services": "量身定制服务"
+      },
+      "auto_message": "我对您的批发服装业务感兴趣。能否提供更多详细信息？"
+    },
+    "business_types": {
+      "retailer": "零售商",
+      "distributor": "分销商",
+      "fashion_brand": "时尚品牌",
+      "other": "其他"
+    }
+  },
+  "footer": {
+    "description": "为全球 discerning 客户创造卓越服装的优质时尚制造商和设计师，使用意大利工艺和现代风格。",
+    "quick_links": "快速链接",
+    "all_products": "所有系列",
+    "collections": "系列",
+    "categories": "类别",
+    "about_us": "关于我们",
+    "contact": "联系我们",
+    "copyright": "© 2025 DREAMMODA。保留所有权利。| 带着对时尚的热情在托斯卡纳制作。"
+  },
+  "filters": {
+    "all_categories": "所有类别",
+    "all_fabrics": "所有面料",
+    "all_seasons": "所有季节",
+    "all_styles": "所有款式",
+    "apply": "应用筛选",
+    "sort": {
+      "featured": "精选",
+      "newest": "最新"
+    },
+    "reset": "重置"
+  },
+  "products": {
+    "back_to_home": "返回首页",
+    "title": "所有系列",
+    "subtitle_plural": "",
+    "filters_title": "筛选",
+    "clear_all": "清除全部",
+    "search_label": "搜索",
+    "search_placeholder": "搜索产品...",
+    "category": "类别",
+    "material": "材料",
+    "all_materials": "所有材料",
+    "season": "季节",
+    "color": "颜色",
+    "all_colors": "所有颜色",
+    "results_count": "{count} 件产品",
+    "sort_by": "排序方式",
+    "sort_most_popular": "最热门",
+    "sort_name_asc": "名称 A-Z",
+    "sort_name_desc": "名称 Z-A",
+    "sort_newest": "最新优先",
+    "show_collections": "显示系列",
+    "empty": {
+      "no_products": "没有可用的产品。请从管理面板添加一些产品。",
+      "no_match": "没有找到符合您条件的產品。",
+      "visit_admin": "访问管理面板添加您的第一个产品。",
+      "try_adjust": "尝试调整您的筛选条件或搜索词。"
+    },
+    "uncategorized": "未分类",
+    "cotton": "棉",
+    "casual": "休闲",
+    "all_season": "全年",
+    "machine_wash": "机洗",
+    "made_in_italy": "意大利制造",
+    "sku": "SKU",
+    "no": "否",
+    "error_loading": "加载产品时出错：",
+    "refresh_page": "请尝试刷新页面。",
+    "seo_title": "DreamModa系列 - 优质批发服装系列",
+    "seo_description": "探索我们完整的优质意大利时尚服装系列。为精明的时尚零售商提供批发服装、连衣裙、上衣、外衣和配饰。"
+  },
+  "product_detail": {
+    "title": "产品详情",
+    "features": "产品特点",
+    "specifications": "产品规格",
+    "description_fallback": "这款精美的{name}展示了我们对品质和工艺的承诺。使用优质材料，注重每一个细节，为您带来舒适与时尚的完美结合。",
+    "description_rich": "{name}采用精心挑选的材料，体现了我们对品质和设计的坚定追求。每件产品都经过严格的质量控制，以确保最佳的客户体验。",
+    "fields": {
+      "sku": "产品代码",
+      "fabric": "面料",
+      "category": "类别",
+      "season": "季节",
+      "care": "护理说明",
+      "origin": "产地",
+      "specifications": "规格",
+      "description": "描述"
+    },
+    "actions": {
+      "add_to_inquiry": "请求样品",
+      "sending": "发送请求中...",
+      "favorite": "收藏",
+      "back_to_list": "返回列表",
+      "view_all_products": "查看所有产品"
+    },
+    "not_found": {
+      "title": "未找到产品",
+      "desc": "抱歉，您查找的产品不存在或已被移除。"
+    },
+    "sample_request_name": "样品请求",
+    "sample_request_company": "样品请求公司",
+    "sample_request_message": "样品请求 - 产品：{productName} (SKU：{productSku})\n\n客户希望请求此产品的样品以评估品质和适用性。请联系客户安排样品发货。\n\n产品详情：\n- 产品名称：{productName}\n- SKU：{productSku}\n- 类别：{productCategory}\n- 材料：{productMaterial}\n\n请尽快处理此样品请求。",
+    "toast": {
+      "sample_request_sent_title": "样品请求已发送",
+      "sample_request_sent_description": "我们将处理您的样品请求并尽快联系您。正在重定向到联系页面...",
+      "request_failed_title": "请求失败",
+      "request_failed_description": "请重试或直接联系我们。如果问题持续存在，请发送邮件至 info@dreamoda.com"
+    },
+    "product_features": {
+      "fabric": "采用优质{fabric}面料制作",
+      "season": "适合{season}季节穿着",
+      "style": "{style}风格设计，适合各种场合",
+      "care": "严格的{care}护理要求",
+      "origin": "产地：{origin}",
+      "sku": "SKU：{sku}"
+    },
+    "seo_title": "{productName} - DreamModa优质批发服装",
+    "seo_title_fallback": "产品 - DreamModa",
+    "seo_description": "{productName} - 优质意大利时尚服装。{productDescription} 材料：{productMaterial}，颜色：{productColor}。提供批发定价。",
+    "seo_description_fallback": "批发优质意大利时尚服装",
+    "thumbnail_alt": "缩略图"
+  },
+  "common": {
+    "badges": {
+      "new": "新品",
+      "featured": "精选"
+    },
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试"
+  },
+  "errors": {
+    "general": {
+      "title": "错误",
+      "message": "发生意外错误。请重试。",
+      "network_error": "网络连接错误。请检查您的互联网连接并重试。",
+      "server_error": "服务器错误。请稍后重试。",
+      "not_found": "未找到请求的资源。",
+      "unauthorized": "您无权执行此操作。",
+      "forbidden": "访问被拒绝。",
+      "validation_error": "请检查您的输入并重试。",
+      "timeout": "请求超时。请重试。",
+      "unknown": "发生未知错误。"
+    },
+    "api": {
+      "connection_failed": "连接服务器失败。请稍后重试。",
+      "invalid_response": "服务器响应无效。",
+      "request_failed": "API请求失败",
+      "rate_limited": "请求过于频繁。请稍等片刻后重试。"
+    },
+    "form": {
+      "required_field": "此字段为必填项。",
+      "invalid_email": "请输入有效的邮箱地址。",
+      "invalid_phone": "请输入有效的电话号码。",
+      "min_length": "此字段至少需要{min}个字符。",
+      "max_length": "此字段不能超过{max}个字符。",
+      "invalid_format": "此字段格式无效。",
+      "password_mismatch": "密码不匹配。",
+      "submit_error": "提交表单失败。请重试。",
+      "validation_error": "请更正以下错误并重试。"
+    },
+    "products": {
+      "load_failed": "加载产品失败。请刷新页面。",
+      "not_found": "未找到产品。",
+      "details_load_failed": "加载产品详情失败。",
+      "search_failed": "搜索失败。请重试。",
+      "filter_failed": "应用筛选失败。请重试。"
+    },
+    "contact": {
+      "submit_failed": "发送消息失败。请重试或直接联系我们。",
+      "submit_success": "消息发送成功！我们将尽快联系您。",
+      "success_description": "感谢您的关注。我们将在48小时内联系您。",
+      "rate_limited": "请在发送下一条消息前稍等。",
+      "invalid_data": "请检查您的信息并重试。"
+    },
+    "images": {
+      "load_failed": "加载图片失败。",
+      "upload_failed": "上传图片失败。",
+      "invalid_format": "图片格式无效。",
+      "file_too_large": "图片文件过大。",
+      "category_load_failed": "加载类别图片失败：{categoryName}",
+      "product_load_failed": "加载产品图片失败：{productName}"
+    }
+  },
+  "seo": {
+    "title": "DreamModa - 意大利时尚卓越 | 批发服装制造商",
+    "description": "专注于批发服装的优质意大利时尚制造商。为全球精明的批发合作伙伴发现我们精心挑选的高质量时尚作品。",
+    "keywords": "意大利时尚，批发服装，时尚制造商，普拉托时尚，优质服装，批发时尚"
+  }
+}

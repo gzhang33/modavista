@@ -34,7 +34,8 @@ export default function CategoryCarousel({ onNavigateToCategory }: CategoryCarou
           'it': 'it-IT',
           'fr': 'fr-FR',
           'de': 'de-DE',
-          'es': 'es-ES'
+          'es': 'es-ES',
+          'zh': 'zh-CN'
         };
         const locale = localeMap[currentLanguage] || 'en-GB';
         const response = await fetch(`/api/categories.php?lang=${locale}`);

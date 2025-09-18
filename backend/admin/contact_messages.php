@@ -36,7 +36,7 @@
             <section id="messages-section" class="messages-list-section">
                 <div id="filter-bar" class="filter-bar">
                     <!-- Desktop filter dropdown (left): Status -->
-                    <div class="filter-group" id="status-filter-group">
+                    <div class="filter-group" id="status-filter-group" style="display: none;">
                         <button class="filter-button" id="status-filter-button">
                             <span>状态</span>
                             <span class="filter-current" id="status-filter-current"></span>
@@ -51,36 +51,40 @@
                     </div>
 
                     <!-- Desktop filter controls -->
-                    <div class="filter-controls desktop-only">
-                        <div class="filter-search">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="search-messages" placeholder="搜索姓名、邮箱或留言内容...">
-                        </div>
-                        
-                        <div class="filter-group" id="time-filter-group">
-                            <label>时间</label>
-                            <div class="filter-buttons" id="time-filters">
-                                <button class="filter-btn active" data-time="">全部</button>
-                                <button class="filter-btn" data-time="today">今天</button>
-                                <button class="filter-btn" data-time="week">本周</button>
-                                <button class="filter-btn" data-time="month">本月</button>
+                    <div class="filter-controls desktop-only" style="display: flex; align-items: center; gap: 1.5rem; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1;">
+                            <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <label style="white-space: nowrap; margin: 0;">时间</label>
+                                <div class="filter-buttons" id="time-filters" style="display: flex; gap: 0.25rem;">
+                                    <button class="filter-btn active" data-time="">全部</button>
+                                    <button class="filter-btn" data-time="today">今天</button>
+                                    <button class="filter-btn" data-time="week">本周</button>
+                                    <button class="filter-btn" data-time="month">本月</button>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <label style="white-space: nowrap; margin: 0;">状态</label>
+                                <div class="filter-buttons" id="status-filters" style="display: flex; gap: 0.25rem;">
+                                    <button class="filter-btn active" data-status="">全部</button>
+                                    <button class="filter-btn" data-status="待定">待处理</button>
+                                    <button class="filter-btn" data-status="进行中">处理中</button>
+                                    <button class="filter-btn" data-status="完成">已完成</button>
+                                    <button class="filter-btn" data-status="未完成">未完成</button>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="filter-group" id="status-filter-group-buttons">
-                            <label>状态</label>
-                            <div class="filter-buttons" id="status-filters">
-                                <button class="filter-btn active" data-status="">全部</button>
-                                <button class="filter-btn" data-status="待定">待处理</button>
-                                <button class="filter-btn" data-status="进行中">处理中</button>
-                                <button class="filter-btn" data-status="完成">已完成</button>
-                                <button class="filter-btn" data-status="未完成">未完成</button>
+
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button id="clear-filters-btn" class="btn btn-secondary" style="white-space: nowrap;">
+                                <i class="fas fa-times"></i> 清除筛选
+                            </button>
+
+                            <div class="filter-search" style="display: flex; align-items: center; position: relative; margin: 0;">
+                                <i class="fas fa-search search-icon" style="position: absolute; left: 10px; color: #6c757d;"></i>
+                                <input type="text" id="search-messages" placeholder="搜索姓名、邮箱或留言内容..." style="padding-left: 35px; height: 38px; border-radius: 4px; border: 1px solid #ced4da; width: 250px;">
                             </div>
                         </div>
-                        
-                        <button id="clear-filters-btn" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> 清除筛选
-                        </button>
                     </div>
 
                     <div class="filter-bar-actions">

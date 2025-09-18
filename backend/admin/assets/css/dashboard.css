@@ -900,8 +900,11 @@
     gap: 8px;
 }
 @media (min-width: 769px) {
-    .filter-actions-bar { display: flex; justify-content: flex-end; }
+    .filter-actions-bar { display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; }
     .sort-button-container .btn { width: auto; }
+    /* Ensure desktop shows the filter trigger and aligns it with clear button */
+    /* Force clear button to be visible and aligned on desktop */
+    #clear-filters-btn { display: inline-flex !important; align-items: center; }
 }
 .sort-dropdown { position: relative; }
 .sort-menu {

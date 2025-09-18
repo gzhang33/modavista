@@ -1034,10 +1034,22 @@
     flex-wrap: wrap;
 }
 
+/* Desktop: place label to the left of its buttons and align horizontally */
 .filter-group {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
+}
+
+.filter-group label {
+    white-space: nowrap;
+    margin: 0;
+}
+
+.filter-buttons {
+    display: flex;
+    align-items: center;
 }
 
 .filter-group label {

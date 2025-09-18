@@ -30,7 +30,10 @@ export default class FilterComponent extends BaseComponent {
         this.filter_bar = this.element.querySelector('#filter-bar');
         // The clear button is inside the actions container, which is preserved
         this.actions_container = this.filter_bar ? this.filter_bar.querySelector('.filter-bar-actions') : null;
-        this.clear_filters_btn = this.actions_container ? this.actions_container.querySelector('#clear-filters-btn') : null;
+        this.clear_filters_btn = this.filter_bar ? this.filter_bar.querySelector('#clear-filters-btn') : null;
+        if (this.clear_filters_btn) {
+            this.clear_filters_btn.removeAttribute('style');
+        }
         this.search_input = this.filter_bar ? this.filter_bar.querySelector('#search-products') : null;
         
         // Filter status display elements
@@ -42,6 +45,11 @@ export default class FilterComponent extends BaseComponent {
     init_listeners() {
         if (this.clear_filters_btn) {
             this.clear_filters_btn.addEventListener('click', () => this.clear_all_filters());
+        }
+
+        // Keep clear button visible for desktop UX; show as inline-flex
+        if (this.clear_filters_btn) {
+            this.clear_filters_btn.style.display = 'inline-flex';
         }
 
         // Search functionality
@@ -415,8 +423,10 @@ export default class FilterComponent extends BaseComponent {
         // Update display
         if (active_filters.length === 0) {
             this.filter_status_panel.classList.add('hidden');
+            if (this.clear_filters_btn) this.clear_filters_btn.style.display = 'inline-flex'; // Keep visible
         } else {
             this.filter_status_panel.classList.remove('hidden');
+            if (this.clear_filters_btn) this.clear_filters_btn.style.display = 'inline-flex'; // Show clear button
             this.filter_status_count.textContent = `${active_filters.length} 项`;
             
             // Generate filter tags

@@ -135,9 +135,22 @@ export default class ProductFormComponent extends BaseComponent {
             if (idInput) idInput.value = product.id;
         }
         
-        // 设置产品名称
+        // 设置产品名称 - 只使用 base_name 而不是组合名称
         const nameInput = this.form.querySelector('#name');
-        if (nameInput) nameInput.value = product.name || product.base_name || '';
+        if (nameInput) {
+            // 使用 base_name 如果存在，否则尝试从组合名称中移除颜色部分
+            if (product.base_name) {
+                nameInput.value = product.base_name;
+            } else if (product.name && product.color) {
+                // 如果只有组合名称，尝试移除颜色部分
+                const colorSuffix = ` - ${product.color}`;
+                nameInput.value = product.name.endsWith(colorSuffix) 
+                    ? product.name.slice(0, -colorSuffix.length).trim()
+                    : product.name;
+            } else {
+                nameInput.value = product.name || '';
+            }
+        }
         
         // 设置产品分类 - 使用映射关系将英文分类转换为意大利语
         if (this.category_select && product.category) {

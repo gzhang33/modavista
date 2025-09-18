@@ -42,11 +42,10 @@
                 <div id="filter-bar" class="filter-bar">
                     <div class="filter-actions-bar filter-bar-actions">
                         <!-- 仅保留：筛选 与 排序 两个按钮 -->
-                        <div class="filter-button-container">
-                            <a href="filters_mobile.php" class="btn btn-secondary mobile-only">
-                                <i class="fas fa-filter"></i> 筛选
-                            </a>
-                        </div>
+                        
+                        <button id="clear-filters-btn" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> 清除筛选
+                        </button>
                         <div class="sort-button-container sort-dropdown">
                             <button id="sort-toggle" class="btn btn-secondary">
                                 <i class="fas fa-sort"></i>

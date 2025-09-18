@@ -113,10 +113,10 @@
 
 
     <script type="module">
-        import EventBus from './assets/js/EventBus.js';
-        import ProductFormComponent from './assets/js/components/add_product.js';
-        import ToastComponent from './assets/js/components/ToastComponent.js';
-        import TranslationComponent from './assets/js/components/TranslationComponent.js';
+        import EventBus from './assets/js/components/shared/EventBus.js';
+        import ProductFormComponent from './assets/js/components/dashboard/add_product.js';
+        import ToastComponent from './assets/js/components/shared/ToastComponent.js';
+        import TranslationComponent from './assets/js/components/shared/TranslationComponent.js';
         
         // 仅初始化表单与通知（新增专用，不处理编辑模式）
         const eventBus = new EventBus();

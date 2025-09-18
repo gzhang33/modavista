@@ -1,4 +1,5 @@
 // admin/assets/js/utils/sessionManager.js - 增强的会话管理
+import EventBus from '../components/shared/EventBus.js';
 
 class SessionManager {
     constructor(eventBus) {

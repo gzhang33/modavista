@@ -114,10 +114,10 @@
 
 
     <script type="module">
-        import EventBus from './assets/js/EventBus.js';
-        import ProductFormComponent from './assets/js/components/add_product.js';
-        import ToastComponent from './assets/js/components/ToastComponent.js';
-        import TranslationComponent from './assets/js/components/TranslationComponent.js';
+        import EventBus from './assets/js/components/shared/EventBus.js';
+        import ProductFormComponent from './assets/js/components/dashboard/add_product.js';
+        import ToastComponent from './assets/js/components/shared/ToastComponent.js';
+        import TranslationComponent from './assets/js/components/shared/TranslationComponent.js';
         
         const eventBus = new EventBus();
         new ToastComponent('#toast-notification', eventBus);
@@ -129,11 +129,13 @@
         if (translationElement) {
             translationElement._componentInstance = translationComponent;
         }
-        // 强制编辑模式：需要 URL 中的 id
-        const sp = new URLSearchParams(location.search);
-        const id = sp.get('id');
-        if (id) {
-            formComp.show_form({ id: id });
+        
+        // 从 URL 获取产品 ID 并触发加载事件
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        if (productId) {
+            // 触发加载产品详情
+            formComp.show_form({ id: productId });
         } else {
             // 无 id 时返回列表
             location.href = 'dashboard.php#products';

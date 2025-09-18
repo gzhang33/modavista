@@ -1,14 +1,13 @@
 // htdocs/admin/assets/js/main.js
-// htdocs/admin/assets/js/main.js
-import EventBus from './EventBus.js';
-import ComponentManager from './ComponentManager.js';
+import EventBus from './components/shared/EventBus.js';
+import ComponentManager from './components/shared/ComponentManager.js';
 import SessionManager from './utils/sessionManager.js';
 import apiClient from './utils/apiClient.js';
 
 // Import all components
-import ProductTableComponent from './components/dashboard_products.js';
-import FilterComponent from './components/dashboard_filters.js'; // Import the new filter component
-import ToastComponent from './components/ToastComponent.js';
+import ProductTableComponent from './components/dashboard/dashboard_products.js';
+import FilterComponent from './components/dashboard/dashboard_filters.js'; // Import the new filter component
+import ToastComponent from './components/shared/ToastComponent.js';
 
 // Initialize immediately since DOM is already loaded
 console.log('Main.js executing...');

@@ -8,75 +8,8 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* Compact two-button bar for Filter and Sort */
-        .filter-actions-bar {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            width: 100%;
-        }
-        .sort-button-container .btn {
-            width: 100%;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        /* Desktop layout: push sort to the far right */
-        @media (min-width: 769px) {
-            .filter-actions-bar { display: flex; justify-content: flex-end; }
-            .sort-button-container .btn { width: auto; }
-        }
-        .sort-dropdown {
-            position: relative;
-        }
-        .sort-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
-            min-width: 220px;
-            z-index: 60;
-            display: none;
-        }
-        .sort-menu.is-open { display: block; }
-        .sort-menu button {
-            display: block;
-            width: 100%;
-            background: transparent;
-            border: 0;
-            text-align: left;
-            padding: 10px 12px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .sort-menu button:hover { background: #f3f4f6; }
-        /* Desktop: hide filter status panel */
-        @media (min-width: 769px) {
-            #filter-status-panel { display: none !important; }
-            .mobile-only { display: none !important; }
-        }
-
-        /* Mobile styles - reference contact_messages.php */
-        @media (max-width: 768px) {
-            .filter-bar-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; width: 100%; }
-            .mobile-only { display: inline-flex; align-items: center; gap: 6px; }
-            .sort-button-container .btn { font-weight: normal; }
-            .filter-button-container .btn { font-weight: normal; }
-        }
-    </style>
 </head>
 <body>
-    <script>
-        // 会话检查现在由SessionManager处理
-        // 移除了硬编码的会话检查，改为动态管理
-    </script>
     <div class="dashboard-container">
         <!-- 管理导航栏 -->
         <nav class="admin-nav-bar">
@@ -181,58 +114,10 @@
         </main>
     </div>
     
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="toast"></div>
 
-
-<!-- Toast Notification -->
-<div id="toast-notification" class="toast"></div>
-
-    <script type="module" src="assets/js/main.js?v=6"></script>
-    <script>
-        // 仅处理排序下拉与事件派发
-        (function(){
-            const section = document.querySelector('#products-management-section');
-            const toggle = document.getElementById('sort-toggle');
-            const menu = document.getElementById('sort-menu');
-            const label = document.getElementById('sort-label');
-
-            const MAP = {
-                relevance: '排序：相关性',
-                newest: '排序：最新',
-                oldest: '排序：最早',
-                name_az: '排序：名称 A → Z',
-                name_za: '排序：名称 Z → A'
-            };
-
-            function closeMenu(){ 
-                menu && menu.classList.remove('is-open'); 
-                menu && menu.setAttribute('aria-hidden', 'true');
-            }
-
-            if (toggle && menu && section) {
-                toggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isOpen = menu.classList.contains('is-open');
-                    if (isOpen) {
-                        closeMenu();
-                    } else {
-                        menu.classList.add('is-open');
-                        menu.setAttribute('aria-hidden', 'false');
-                    }
-                });
-                menu.addEventListener('click', (e) => {
-                    const btn = e.target.closest('button[data-sort]');
-                    if (!btn) return;
-                    const sort = btn.getAttribute('data-sort');
-                    label.textContent = MAP[sort] || '排序：相关性';
-                    closeMenu();
-                    // 向产品组件派发自定义事件
-                    section.dispatchEvent(new CustomEvent('sortChanged', { detail: { criterion: sort }}));
-                });
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.sort-dropdown')) closeMenu();
-                });
-            }
-        })();
-    </script>
+    <script type="module" src="assets/js/main.js?v=7"></script>
+    <script src="assets/js/components/dashboard/dashboard.js"></script>
 </body>
 </html>

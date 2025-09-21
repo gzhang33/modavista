@@ -6,40 +6,334 @@
     <title>管理员登录 - 展示管理系统</title>
     <link rel="stylesheet" href="assets/css/base.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Modern Login Styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .login-form {
+            padding: 3rem 2.5rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-icon i {
+            font-size: 1.75rem;
+            color: white;
+        }
+
+        .login-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.025em;
+        }
+
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group label i {
+            color: #6b7280;
+            width: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            color: #1f2937;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: #ffffff;
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .login-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.3);
+        }
+
+        .login-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px 0 rgba(102, 126, 234, 0.4);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-button i {
+            font-size: 1rem;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* Loading animation */
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-form {
+                padding: 2rem 1.5rem;
+            }
+            
+            .login-title {
+                font-size: 1.5rem;
+            }
+            
+            .login-icon {
+                width: 56px;
+                height: 56px;
+            }
+            
+            .login-icon i {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Accessibility improvements */
+        .form-group input:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .login-button:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
         <form id="login-form" class="login-form" autocomplete="off">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <i class="fas fa-store" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
-                <h2>展示管理系统</h2>
-                <p style="color: #718096; margin: 0;">管理员登录</p>
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1 class="login-title">管理员登录</h1>
+                <p class="login-subtitle">展示管理系统</p>
             </div>
+
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+
             <div class="form-group">
                 <label for="username">
-                    <i class="fas fa-user"></i> 用户名
+                    <i class="fas fa-user"></i>
+                    用户名
                 </label>
-                <input type="text" id="username" name="username" required value="admin" placeholder="请输入用户名">
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    value="admin" 
+                    placeholder="请输入用户名"
+                    autocomplete="username"
+                >
             </div>
+
             <div class="form-group">
                 <label for="password">
-                    <i class="fas fa-lock"></i> 密码
+                    <i class="fas fa-lock"></i>
+                    密码
                 </label>
-                <input type="password" id="password" name="password" required autocomplete="off" placeholder="请输入密码">
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    autocomplete="current-password" 
+                    placeholder="请输入密码"
+                >
             </div>
-            <button type="submit" class="btn btn-primary" id="login-button">
-                <i class="fas fa-sign-in-alt"></i> <span>登录系统</span>
+
+            <button type="submit" class="login-button" id="login-button">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>登录系统</span>
             </button>
         </form>
     </div>
 
     <script>
+        // UI Helper Functions
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+
+        function hideMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        function setLoadingState(isLoading) {
+            const loginButton = document.getElementById('login-button');
+            const buttonText = loginButton.querySelector('span');
+            const buttonIcon = loginButton.querySelector('i');
+            
+            if (isLoading) {
+                loginButton.disabled = true;
+                buttonText.textContent = '正在登录...';
+                buttonIcon.style.display = 'none';
+                
+                // Add loading spinner
+                const spinner = document.createElement('div');
+                spinner.className = 'loading-spinner';
+                spinner.id = 'loading-spinner';
+                loginButton.insertBefore(spinner, buttonText);
+            } else {
+                loginButton.disabled = false;
+                buttonText.textContent = '登录系统';
+                buttonIcon.style.display = 'inline';
+                
+                // Remove loading spinner
+                const spinner = document.getElementById('loading-spinner');
+                if (spinner) {
+                    spinner.remove();
+                }
+            }
+        }
+
         // 会话检查：优先使用服务器会话
         fetch('../api/check_session.php')
             .then(r => r.json())
             .then(data => {
                 if (data.loggedIn) {
-                    window.location.href = 'dashboard.php';
+                    showSuccess('正在跳转到管理面板...');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.php';
+                    }, 1000);
                 } else {
                     localStorage.removeItem('adminLoggedIn');
                     localStorage.removeItem('adminLoginTime');
@@ -49,17 +343,28 @@
                 // 忽略网络错误，停留在登录页
             });
 
-
+        // Form submission handler
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
+            hideMessages();
             
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            const loginButton = document.getElementById('login-button');
-            const buttonText = loginButton.querySelector('span');
+            
+            // Basic validation
+            if (!username) {
+                showError('请输入用户名');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            if (!password) {
+                showError('请输入密码');
+                document.getElementById('password').focus();
+                return;
+            }
 
-            buttonText.textContent = '正在登录...';
-            loginButton.disabled = true;
+            setLoadingState(true);
             
             fetch('../api/login.php', {
                 method: 'POST',
@@ -68,32 +373,75 @@
                 },
                 body: JSON.stringify({ username, password })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Login response:', data);
                 if (data.success) {
+                    showSuccess('登录成功，正在跳转...');
                     // 可选：本地存储镜像，仅作前端提示使用
                     localStorage.setItem('adminLoggedIn', 'true');
                     localStorage.setItem('adminLoginTime', Date.now().toString());
-                    window.location.href = 'dashboard.php';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.php';
+                    }, 1000);
                 } else {
-                    alert(data.message || '登录失败');
+                    showError(data.message || '登录失败，请检查用户名和密码');
                 }
             })
             .catch(error => {
                 console.error('Login error:', error);
-                alert('网络错误，请检查服务器连接');
+                if (error.message.includes('Failed to fetch')) {
+                    showError('网络连接失败，请检查服务器状态');
+                } else {
+                    showError('登录过程中发生错误，请稍后重试');
+                }
             })
             .finally(() => {
-                buttonText.textContent = '登录系统';
-                loginButton.disabled = false;
+                setLoadingState(false);
             });
         });
 
         // 添加回车键登录支持
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                document.getElementById('login-form').dispatchEvent(new Event('submit'));
+                const form = document.getElementById('login-form');
+                if (form) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+
+        // Auto-focus on username field when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameField = document.getElementById('username');
+            if (usernameField && usernameField.value === 'admin') {
+                // If username is pre-filled, focus on password field
+                document.getElementById('password').focus();
+            } else {
+                usernameField.focus();
+            }
+        });
+
+        // Real-time validation feedback
+        document.getElementById('username').addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.style.borderColor = '#10b981';
+            } else {
+                this.style.borderColor = '#e5e7eb';
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value) {
+                this.style.borderColor = '#10b981';
+            } else {
+                this.style.borderColor = '#e5e7eb';
             }
         });
     </script>

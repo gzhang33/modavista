@@ -73,7 +73,7 @@
                                     <button class="filter-btn" data-status="未完成">未完成</button>
                                 </div>
                             </div>
-                        </div>
+                                </div>
 
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <button id="clear-filters-btn" class="btn btn-secondary" style="white-space: nowrap;">

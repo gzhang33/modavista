@@ -187,6 +187,7 @@ $stmt_products->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Product Translation Management - DreamModa Admin Panel</title>
     <link href="assets/css/base.css" rel="stylesheet">
     <link href="assets/css/dashboard.css" rel="stylesheet">
@@ -480,7 +481,11 @@ $stmt_products->close();
                     <li><a href="dashboard.php" class="nav-link"><i class="fas fa-box"></i> 产品管理</a></li>
                     <li><a href="contact_messages.php" class="nav-link"><i class="fas fa-envelope"></i> 表单查询</a></li>
                     <li><a href="translations.php" class="nav-link active"><i class="fas fa-language"></i> 产品翻译</a></li>
-                    <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    <li>
+                        <button type="button" class="nav-link logout logout-btn" data-admin-logout>
+                            <i class="fas fa-sign-out-alt"></i> 退出登录
+                        </button>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -616,6 +621,7 @@ $stmt_products->close();
         </main>
     </div>
 
+    <script src="assets/js/utils/logout.js" defer></script>
     <script src="assets/js/components/translations/translations.js"></script>
 </body>
 </html>

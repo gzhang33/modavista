@@ -105,6 +105,8 @@ html, body { max-width: 100%; overflow-x: hidden; -webkit-text-size-adjust: 100%
     background: none;
     border: none;
     cursor: pointer;
+    color: inherit;
+    font: inherit;
 }
 
 .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }

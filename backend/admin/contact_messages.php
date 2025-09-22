@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>联系我们 - DreamModa 管理后台</title>
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
@@ -23,7 +24,11 @@
                     <li><a href="dashboard.php" class="nav-link"><i class="fas fa-box"></i> 产品管理</a></li>
                     <li><a href="contact_messages.php" class="nav-link active"><i class="fas fa-envelope"></i> 表单查询</a></li>
                     <li><a href="translations.php" class="nav-link"><i class="fas fa-language"></i> 多语言翻译</a></li>
-                    <li><a href="../api/logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    <li>
+                        <button type="button" class="nav-link logout logout-btn" data-admin-logout>
+                            <i class="fas fa-sign-out-alt"></i> 退出登录
+                        </button>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -197,6 +202,7 @@
     <script src="assets/js/components/contact_messages/contact_messages_modal.js"></script>
     <script src="assets/js/components/contact_messages/contact_messages_table.js"></script>
     <script src="assets/js/components/contact_messages/contact_messages_status.js"></script>
+    <script src="assets/js/utils/logout.js" defer></script>
     <script>
         // Initialize contact messages functionality
         document.addEventListener('DOMContentLoaded', function() {

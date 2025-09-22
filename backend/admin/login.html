@@ -3,447 +3,776 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理员登录 - 展示管理系统</title>
+    <title>管理后台登录 · Dreamoda</title>
     <link rel="stylesheet" href="assets/css/base.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Modern Login Styles */
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
+        :root {
+            color-scheme: light;
+            --primary-500: #6366f1;
+            --primary-600: #4f46e5;
+            --primary-700: #4338ca;
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-600: #4b5563;
+            --neutral-700: #374151;
+            --neutral-900: #111827;
+            --success-500: #10b981;
+            --error-500: #ef4444;
+            --warning-500: #f59e0b;
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-
-        .login-form {
-            padding: 3rem 2.5rem;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .login-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        }
-
-        .login-icon i {
-            font-size: 1.75rem;
-            color: white;
-        }
-
-        .login-title {
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin: 0 0 0.5rem 0;
-            letter-spacing: -0.025em;
-        }
-
-        .login-subtitle {
-            color: #6b7280;
-            font-size: 0.875rem;
-            margin: 0;
-            font-weight: 500;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-group label i {
-            color: #6b7280;
-            width: 16px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            color: #1f2937;
-            background: #ffffff;
-            transition: all 0.2s ease;
+        * {
             box-sizing: border-box;
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: #ffffff;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 32px 16px;
+            background: radial-gradient(circle at top, rgba(79, 70, 229, 0.15), transparent 55%),
+                        radial-gradient(circle at bottom, rgba(99, 102, 241, 0.12), transparent 45%),
+                        linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
         }
 
-        .form-group input::placeholder {
+        .auth-shell {
+            width: 100%;
+            max-width: 520px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 24px;
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 32px 64px -20px rgba(79, 70, 229, 0.25);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .auth-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            pointer-events: none;
+        }
+
+        .auth-content {
+            padding: 48px 44px;
+        }
+
+        .auth-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .auth-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(79, 70, 229, 0.08);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-600);
+            width: fit-content;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--neutral-900);
+            margin: 0;
+        }
+
+        .auth-subtitle {
+            font-size: 15px;
+            color: var(--neutral-600);
+            margin: 0;
+        }
+
+        .step-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .step-indicator {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-600);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .step-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--neutral-900);
+            margin: 0;
+        }
+
+        .step-subtitle {
+            font-size: 15px;
+            color: var(--neutral-600);
+            margin: 0;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--neutral-700);
+        }
+
+        .form-control {
+            width: 100%;
+            font-size: 15px;
+            line-height: 22px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1.5px solid var(--neutral-200);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--neutral-900);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+            background: #fff;
+        }
+
+        .form-control::placeholder {
             color: #9ca3af;
         }
 
-        .login-button {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 0.875rem 1.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .totp-input {
+            font-size: 24px;
+            letter-spacing: 8px;
+            text-align: center;
+            padding: 16px 20px;
+        }
+
+        .form-hint {
+            font-size: 13px;
+            color: var(--neutral-600);
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .recovery-hint {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--neutral-700);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .recovery-hint strong {
+            font-size: 13px;
+            letter-spacing: 0.02em;
+        }
+
+        .recovery-hint ul {
+            margin: 0;
+            padding-left: 18px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .recovery-hint code {
+            font-family: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .recovery-hint p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--neutral-600);
+        }
+
+        .totp-input.is-recovery {
+            letter-spacing: 2px;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+
+        .checkbox-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.3);
+            gap: 10px;
+            font-size: 14px;
+            color: var(--neutral-600);
         }
 
-        .login-button:hover:not(:disabled) {
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            border: 1.5px solid var(--neutral-200);
+            accent-color: var(--primary-600);
+        }
+
+        .auth-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .primary-button {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .primary-button:hover {
             transform: translateY(-1px);
-            box-shadow: 0 8px 25px 0 rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 24px -12px rgba(79, 70, 229, 0.55);
         }
 
-        .login-button:active {
-            transform: translateY(0);
-        }
-
-        .login-button:disabled {
-            opacity: 0.7;
+        .primary-button:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
-        .login-button i {
-            font-size: 1rem;
+        .ghost-button {
+            border: none;
+            background: transparent;
+            color: var(--neutral-600);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
         }
 
-        .error-message {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-            display: none;
+        .auth-message {
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
         }
 
-        .success-message {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-            display: none;
+        .auth-message[data-type="success"] {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: var(--success-500);
         }
 
-        /* Loading animation */
-        .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .auth-message[data-type="error"] {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: var(--error-500);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .auth-message[data-type="info"] {
+            background: rgba(79, 70, 229, 0.12);
+            border: 1px solid rgba(79, 70, 229, 0.35);
+            color: var(--primary-600);
         }
 
-        /* Responsive design */
-        @media (max-width: 480px) {
-            .login-form {
-                padding: 2rem 1.5rem;
+        .auth-message[data-type="warning"] {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: var(--warning-500);
+        }
+
+        .auth-footer {
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--neutral-500);
+            text-align: center;
+        }
+
+        .is-hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 24px 12px;
             }
-            
-            .login-title {
-                font-size: 1.5rem;
-            }
-            
-            .login-icon {
-                width: 56px;
-                height: 56px;
-            }
-            
-            .login-icon i {
-                font-size: 1.5rem;
-            }
-        }
 
-        /* Accessibility improvements */
-        .form-group input:focus-visible {
-            outline: 2px solid #667eea;
-            outline-offset: 2px;
-        }
+            .auth-content {
+                padding: 32px 24px;
+            }
 
-        .login-button:focus-visible {
-            outline: 2px solid #667eea;
-            outline-offset: 2px;
+            .auth-title {
+                font-size: 24px;
+            }
+
+            .step-title {
+                font-size: 20px;
+            }
+
+            .totp-input {
+                letter-spacing: 6px;
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <form id="login-form" class="login-form" autocomplete="off">
-            <div class="login-header">
-                <div class="login-icon">
-                    <i class="fas fa-shield-alt"></i>
+    <div class="auth-shell">
+        <div class="auth-card">
+            <div class="auth-content">
+                <div class="auth-brand">
+                    <div class="auth-badge">Dreamoda Admin Center</div>
+                    <h1 class="auth-title">欢迎回来，管理员</h1>
+                    <p class="auth-subtitle">为了保护品牌数据，请完成账号登录与二次验证</p>
                 </div>
-                <h1 class="login-title">管理员登录</h1>
-                <p class="login-subtitle">展示管理系统</p>
+
+                <div class="step-header">
+                    <span class="step-indicator" data-step-indicator>Step 1</span>
+                    <h2 class="step-title" data-step-title>账号登录</h2>
+                    <p class="step-subtitle" data-step-subtitle>输入管理员账号与密码进入控制台</p>
+                </div>
+
+                <div id="auth-message" class="auth-message is-hidden" role="alert" data-type="info">
+                    <span id="auth-message-text"></span>
+                </div>
+
+                <form id="credentials-form" class="auth-form" autocomplete="on">
+                    <div class="form-group">
+                        <label class="form-label" for="username">账号</label>
+                        <input class="form-control" type="text" id="username" name="username" placeholder="admin" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">密码</label>
+                        <input class="form-control" type="password" id="password" name="password" placeholder="请输入密码" autocomplete="current-password" required>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="submit" class="primary-button" id="login-submit">登录并继续</button>
+                        <button type="button" class="ghost-button" id="forgot-password">使用恢复代码登录</button>
+                    </div>
+                </form>
+
+                <form id="totp-form" class="auth-form is-hidden" autocomplete="off" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="totp-code" data-totp-label>二次验证 · 动态验证码</label>
+                        <input class="form-control totp-input" type="text" id="totp-code" name="totp-code" inputmode="numeric" placeholder="000000" maxlength="6" autocomplete="one-time-code" required>
+                        <p class="form-hint" data-totp-hint>打开认证器 App，输入当前 6 位验证码。验证码每 30 秒更新一次。</p>
+                        <div class="recovery-hint is-hidden" data-recovery-hint>
+                        </div>
+                    </div>
+                    <label class="checkbox-row">
+                        <input type="checkbox" id="remember-device">
+                        <span>记住此设备 30 天（仅在可信环境勾选）</span>
+                    </label>
+                    <div class="auth-actions">
+                        <button type="submit" class="primary-button" id="totp-submit">验证安全码</button>
+                        <div style="display:flex; gap:16px; flex-wrap: wrap;">
+                            <button type="button" class="ghost-button" id="use-recovery-code">使用恢复代码</button>
+                            <button type="button" class="ghost-button" id="back-to-login">返回账号登录</button>
+                        </div>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <div id="error-message" class="error-message"></div>
-            <div id="success-message" class="success-message"></div>
-
-            <div class="form-group">
-                <label for="username">
-                    <i class="fas fa-user"></i>
-                    用户名
-                </label>
-                <input 
-                    type="text" 
-                    id="username" 
-                    name="username" 
-                    required 
-                    value="admin" 
-                    placeholder="请输入用户名"
-                    autocomplete="username"
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">
-                    <i class="fas fa-lock"></i>
-                    密码
-                </label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    required 
-                    autocomplete="current-password" 
-                    placeholder="请输入密码"
-                >
-            </div>
-
-            <button type="submit" class="login-button" id="login-button">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>登录系统</span>
-            </button>
-        </form>
     </div>
 
     <script>
-        // UI Helper Functions
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            const successDiv = document.getElementById('success-message');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            successDiv.style.display = 'none';
-        }
+        const endpoints = {
+            login: '../api/login.php',
+            verify2fa: '../api/verify_2fa.php',
+            verifyRecovery: '../api/verify_recovery_code.php',
+            checkSession: '../api/check_session.php'
+        };
 
-        function showSuccess(message) {
-            const errorDiv = document.getElementById('error-message');
-            const successDiv = document.getElementById('success-message');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-        }
+        const ui = {
+            messageBox: document.getElementById('auth-message'),
+            messageText: document.getElementById('auth-message-text'),
+            stepIndicator: document.querySelector('[data-step-indicator]'),
+            stepTitle: document.querySelector('[data-step-title]'),
+            stepSubtitle: document.querySelector('[data-step-subtitle]'),
+            loginForm: document.getElementById('credentials-form'),
+            totpForm: document.getElementById('totp-form'),
+            loginButton: document.getElementById('login-submit'),
+            totpButton: document.getElementById('totp-submit'),
+            usernameInput: document.getElementById('username'),
+            passwordInput: document.getElementById('password'),
+            totpInput: document.getElementById('totp-code'),
+            totpLabel: document.querySelector('[data-totp-label]'),
+            totpHint: document.querySelector('[data-totp-hint]'),
+            recoveryHint: document.querySelector('[data-recovery-hint]'),
+            rememberDevice: document.getElementById('remember-device'),
+            backToLogin: document.getElementById('back-to-login'),
+            useRecovery: document.getElementById('use-recovery-code'),
+            forgotPassword: document.getElementById('forgot-password'),
+        };
 
-        function hideMessages() {
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('success-message').style.display = 'none';
-        }
+        const state = {
+            pendingTwoFaToken: null,
+            lastUsername: '',
+            recoveryMode: false
+        };
 
-        function setLoadingState(isLoading) {
-            const loginButton = document.getElementById('login-button');
-            const buttonText = loginButton.querySelector('span');
-            const buttonIcon = loginButton.querySelector('i');
-            
-            if (isLoading) {
-                loginButton.disabled = true;
-                buttonText.textContent = '正在登录...';
-                buttonIcon.style.display = 'none';
-                
-                // Add loading spinner
-                const spinner = document.createElement('div');
-                spinner.className = 'loading-spinner';
-                spinner.id = 'loading-spinner';
-                loginButton.insertBefore(spinner, buttonText);
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        function configureVerificationField() {
+            if (!ui.totpInput || !ui.totpLabel || !ui.totpHint || !ui.recoveryHint) {
+                return;
+            }
+
+            const isRecovery = state.recoveryMode;
+            ui.totpInput.classList.toggle('is-recovery', isRecovery);
+
+            if (isRecovery) {
+                ui.totpLabel.textContent = '二次验证 · 恢复代码';
+                ui.totpInput.placeholder = 'XXXXXX-XXXXXX';
+                ui.totpInput.setAttribute('inputmode', 'text');
+                ui.totpInput.setAttribute('maxlength', '13');
+                ui.totpInput.setAttribute('autocomplete', 'off');
+                ui.recoveryHint.classList.remove('is-hidden');
+
+                const stripped = ui.totpInput.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                const first = stripped.slice(0, 6);
+                const second = stripped.slice(6, 12);
+                ui.totpInput.value = second ? `${first}-${second}` : first;
             } else {
-                loginButton.disabled = false;
-                buttonText.textContent = '登录系统';
-                buttonIcon.style.display = 'inline';
-                
-                // Remove loading spinner
-                const spinner = document.getElementById('loading-spinner');
-                if (spinner) {
-                    spinner.remove();
-                }
+                ui.totpLabel.textContent = '二次验证 · 动态验证码';
+                ui.totpInput.placeholder = '000000';
+                ui.totpInput.setAttribute('inputmode', 'numeric');
+                ui.totpInput.setAttribute('maxlength', '6');
+                ui.totpInput.setAttribute('autocomplete', 'one-time-code');
+                ui.totpHint.textContent = '打开认证器 App，输入当前 6 位验证码。验证码每 30 秒更新一次。';
+                ui.recoveryHint.classList.add('is-hidden');
+                ui.totpInput.value = ui.totpInput.value.replace(/\D/g, '').slice(0, 6);
             }
         }
 
-        // 会话检查：优先使用服务器会话
-        fetch('../api/check_session.php')
-            .then(r => r.json())
-            .then(data => {
-                if (data.loggedIn) {
-                    showSuccess('正在跳转到管理面板...');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.php';
-                    }, 1000);
-                } else {
-                    localStorage.removeItem('adminLoggedIn');
-                    localStorage.removeItem('adminLoginTime');
-                }
-            })
-            .catch(() => {
-                // 忽略网络错误，停留在登录页
-            });
+        function handleVerificationInput(event) {
+            const input = event.target;
 
-        // Form submission handler
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            hideMessages();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Basic validation
+            if (state.recoveryMode) {
+                const stripped = input.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                const first = stripped.slice(0, 6);
+                const second = stripped.slice(6, 12);
+                input.value = second ? `${first}-${second}` : first;
+            } else {
+                input.value = input.value.replace(/\D/g, '').slice(0, 6);
+            }
+        }
+
+        function showMessage(type, text) {
+            ui.messageBox.dataset.type = type;
+            ui.messageText.textContent = text;
+            ui.messageBox.classList.remove('is-hidden');
+        }
+
+        function hideMessage() {
+            ui.messageBox.classList.add('is-hidden');
+            ui.messageText.textContent = '';
+        }
+
+        function switchStep(step) {
+            const isLogin = step === 'login';
+            ui.loginForm.classList.toggle('is-hidden', !isLogin);
+            ui.totpForm.classList.toggle('is-hidden', isLogin);
+            ui.stepIndicator.textContent = isLogin ? 'Step 1' : 'Step 2';
+            ui.stepTitle.textContent = isLogin ? '账号登录' : (state.recoveryMode ? '恢复代码验证' : '二次验证');
+            ui.stepSubtitle.textContent = isLogin
+                ? '输入管理员账号与密码进入控制台'
+                : (state.recoveryMode
+                    ? '输入一次性恢复代码以重置二次验证'
+                    : '输入认证器中的 6 位动态验证码完成登录');
+
+            configureVerificationField();
+
+            hideMessage();
+
+            requestAnimationFrame(() => {
+                if (isLogin) {
+                    ui.usernameInput.focus();
+                } else {
+                    ui.totpInput.focus();
+                }
+            });
+        }
+
+        function setButtonLoading(button, loading, loadingText = '处理中...') {
+            if (!button) return;
+            if (loading) {
+                button.dataset.originalText = button.textContent;
+                button.textContent = loadingText;
+                button.disabled = true;
+            } else {
+                const original = button.dataset.originalText;
+                if (original) {
+                    button.textContent = original;
+                }
+                button.disabled = false;
+            }
+        }
+
+        function persistLoginState() {
+            localStorage.setItem('adminLoggedIn', 'true');
+            localStorage.setItem('adminLoginTime', Date.now().toString());
+        }
+
+        function handleRedirect() {
+            setTimeout(() => {
+                window.location.href = 'dashboard.php';
+            }, 900);
+        }
+
+        function handleLoginSuccess(message) {
+            state.pendingTwoFaToken = null;
+            state.recoveryMode = false;
+            ui.rememberDevice.checked = false;
+            ui.totpInput.value = '';
+            showMessage('success', message || '登录成功，正在跳转后台...');
+            persistLoginState();
+            handleRedirect();
+        }
+
+        async function submitLogin(event) {
+            event.preventDefault();
+            hideMessage();
+
+            const username = ui.usernameInput.value.trim();
+            const password = ui.passwordInput.value;
+
             if (!username) {
-                showError('请输入用户名');
-                document.getElementById('username').focus();
+                showMessage('error', '请输入管理员账号');
+                ui.usernameInput.focus();
                 return;
             }
-            
+
             if (!password) {
-                showError('请输入密码');
-                document.getElementById('password').focus();
+                showMessage('error', '请输入密码');
+                ui.passwordInput.focus();
                 return;
             }
 
-            setLoadingState(true);
-            
-            fetch('../api/login.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => {
+            setButtonLoading(ui.loginButton, true, '正在验证...');
+
+            try {
+                const response = await fetch(endpoints.login, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(data.message || `登录失败（${response.status}）`);
                 }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Login response:', data);
+
+                if (data.requires2fa) {
+                    state.pendingTwoFaToken = data.twoFactorToken || null;
+                    state.lastUsername = username;
+                    state.recoveryMode = false;
+                    switchStep('totp');
+                    showMessage('info', data.message || '账号已开启二次验证，请输入动态验证码');
+                } else if (data.success) {
+                    handleLoginSuccess(data.message);
+                } else {
+                    throw new Error(data.message || '登录失败，请检查账号与密码');
+                }
+            } catch (error) {
+                showMessage('error', error.message || '网络异常，请稍后重试');
+            } finally {
+                setButtonLoading(ui.loginButton, false);
+            }
+        }
+
+        const totpPattern = /^\d{6}$/;
+        const recoveryPattern = /^[0-9A-F]{6}-[0-9A-F]{6}$/;
+
+        async function submitTwoFactor(event) {
+            event.preventDefault();
+            hideMessage();
+
+            if (!state.pendingTwoFaToken) {
+                showMessage('warning', '登录会话已过期，请重新登录');
+                switchStep('login');
+                return;
+            }
+
+            let code = ui.totpInput.value.trim();
+
+            if (state.recoveryMode) {
+                code = code.toUpperCase();
+                ui.totpInput.value = code;
+            }
+
+            const isValid = state.recoveryMode ? recoveryPattern.test(code) : totpPattern.test(code);
+
+            if (!code || !isValid) {
+                showMessage('error', state.recoveryMode ? '请输入符合格式的恢复代码，例如 F9AF69-FB2025' : '请输入 6 位数字验证码');
+                ui.totpInput.focus();
+                return;
+            }
+
+            setButtonLoading(ui.totpButton, true, '正在验证...');
+
+            try {
+                const endpoint = state.recoveryMode ? endpoints.verifyRecovery : endpoints.verify2fa;
+                const payload = {
+                    token: state.pendingTwoFaToken,
+                    rememberDevice: Boolean(ui.rememberDevice.checked)
+                };
+
+                if (state.recoveryMode) {
+                    payload.recoveryCode = code;
+                } else {
+                    payload.code = code;
+                }
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    const message = data.message || '二次验证失败';
+                    if (response.status === 440 || response.status === 423 || (response.status === 400 && message.includes('重新登录'))) {
+                        state.pendingTwoFaToken = null;
+                        state.recoveryMode = false;
+                        ui.rememberDevice.checked = false;
+                        ui.totpInput.value = '';
+                        switchStep('login');
+                        showMessage('warning', message);
+                        return;
+                    }
+                    throw new Error(message);
+                }
+
                 if (data.success) {
-                    showSuccess('登录成功，正在跳转...');
-                    // 可选：本地存储镜像，仅作前端提示使用
-                    localStorage.setItem('adminLoggedIn', 'true');
-                    localStorage.setItem('adminLoginTime', Date.now().toString());
-                    
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.php';
-                    }, 1000);
+                    handleLoginSuccess(data.message || '验证通过，欢迎回来');
+                } else if (data.requireRecovery) {
+                    state.recoveryMode = true;
+                    ui.rememberDevice.checked = false;
+                    ui.totpInput.value = '';
+                    switchStep('totp');
+                    showMessage('warning', data.message || '需要使用恢复代码完成验证');
                 } else {
-                    showError(data.message || '登录失败，请检查用户名和密码');
+                    throw new Error(data.message || '验证码不正确，请重新输入');
                 }
-            })
-            .catch(error => {
-                console.error('Login error:', error);
-                if (error.message.includes('Failed to fetch')) {
-                    showError('网络连接失败，请检查服务器状态');
-                } else {
-                    showError('登录过程中发生错误，请稍后重试');
+            } catch (error) {
+                showMessage('error', error.message || '网络异常，请稍后重试');
+            } finally {
+                setButtonLoading(ui.totpButton, false);
+            }
+        }
+
+        async function checkExistingSession() {
+            try {
+                const response = await fetch(endpoints.checkSession, { credentials: 'include' });
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok && data.loggedIn) {
+                    showMessage('success', '检测到已登录，会自动跳转');
+                    persistLoginState();
+                    await delay(600);
+                    handleRedirect();
                 }
-            })
-            .finally(() => {
-                setLoadingState(false);
+            } catch (_) {
+                // 忽略网络错误，继续正常流程
+            }
+        }
+
+        function activateRecoveryMode() {
+            if (!state.pendingTwoFaToken) {
+                showMessage('warning', '请先完成账号密码登录');
+                return;
+            }
+            state.recoveryMode = true;
+            ui.rememberDevice.checked = false;
+            ui.totpInput.value = '';
+            switchStep('totp');
+        }
+
+        function initEventListeners() {
+            ui.loginForm.addEventListener('submit', submitLogin);
+            ui.totpForm.addEventListener('submit', submitTwoFactor);
+
+            ui.backToLogin.addEventListener('click', () => {
+                state.pendingTwoFaToken = null;
+                state.recoveryMode = false;
+                ui.totpInput.value = '';
+                ui.rememberDevice.checked = false;
+                switchStep('login');
             });
-        });
 
-        // 添加回车键登录支持
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const form = document.getElementById('login-form');
-                if (form) {
-                    form.dispatchEvent(new Event('submit'));
+            ui.totpInput.addEventListener('input', handleVerificationInput);
+
+            ui.useRecovery.addEventListener('click', activateRecoveryMode);
+
+            ui.forgotPassword.addEventListener('click', activateRecoveryMode);
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !ui.loginForm.classList.contains('is-hidden')) {
+                    hideMessage();
                 }
-            }
-        });
+            });
+        }
 
-        // Auto-focus on username field when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const usernameField = document.getElementById('username');
-            if (usernameField && usernameField.value === 'admin') {
-                // If username is pre-filled, focus on password field
-                document.getElementById('password').focus();
-            } else {
-                usernameField.focus();
-            }
-        });
+        function init() {
+            initEventListeners();
+            configureVerificationField();
+            switchStep('login');
+            checkExistingSession();
+        }
 
-        // Real-time validation feedback
-        document.getElementById('username').addEventListener('input', function() {
-            if (this.value.trim()) {
-                this.style.borderColor = '#10b981';
-            } else {
-                this.style.borderColor = '#e5e7eb';
-            }
-        });
-
-        document.getElementById('password').addEventListener('input', function() {
-            if (this.value) {
-                this.style.borderColor = '#10b981';
-            } else {
-                this.style.borderColor = '#e5e7eb';
-            }
-        });
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-</html> 
+</html>

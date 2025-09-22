@@ -1,85 +1,156 @@
 <?php
-// api/login.php
+
+declare(strict_types=1);
+
 require_once '../config/app.php';
 require_once 'utils.php';
+require_once '../lib/SecurityHelper.php';
 
-// 配置长期会话
 configure_long_term_session();
+handle_cors();
 
-header("Access-Control-Allow-Origin: *"); 
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json; charset=UTF-8");
+header('Content-Type: application/json; charset=UTF-8');
 
-// 处理 OPTIONS 预检请求
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit(0);
-}
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_DURATION_SECONDS = 600;
 
-// 检查请求方法
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_response(405, ['success' => false, 'message' => '仅支持 POST 方法']);
+    json_response(405, [
+        'success' => false,
+        'message' => '仅支持 POST 请求',
+    ]);
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
-
-$username = $data['username'] ?? '';
-$password = $data['password'] ?? '';
-
-// 在真实应用中，用户名也应该从数据库中查询
-$correct_username = 'admin'; 
-
-// 验证用户名和密码
-// 简单防爆破：基于 IP 的失败计数（10 分钟窗口，失败 5 次锁定）
-$client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$rate_key = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'login_fail_' . md5($client_ip);
-$lock_key = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'login_lock_' . md5($client_ip);
-
-// 若处于锁定窗口，直接拒绝
-if (file_exists($lock_key)) {
-    $locked_until = (int)@file_get_contents($lock_key);
-    if (time() < $locked_until) {
-        json_response(429, ['success' => false, 'message' => '登录失败次数过多，请稍后再试']);
-    } else {
-        @unlink($lock_key);
-    }
+$payload = json_decode(file_get_contents('php://input') ?: 'null', true);
+if (!is_array($payload)) {
+    json_response(400, [
+        'success' => false,
+        'message' => '请求格式错误',
+    ]);
 }
 
-if ($username === $correct_username && password_verify($password, ADMIN_PASSWORD_HASH)) {
-    // 登录成功，设置 session
-    // 会话再生，防会话固定
-    if (session_status() === PHP_SESSION_ACTIVE) {
-        session_regenerate_id(true);
-    }
-    $_SESSION['admin_logged_in'] = true;
-    $_SESSION['admin_username'] = $username;
-    $_SESSION['last_activity'] = time();
-    $_SESSION['login_time'] = time();
-    // 重置失败计数
-    @unlink($rate_key);
-    @unlink($lock_key);
-    
-    json_response(200, ['success' => true, 'message' => '登录成功']);
-} else {
-    // 登录失败：累计计数并可能锁定
-    $fails = 0;
-    if (file_exists($rate_key)) {
-        $data_raw = @file_get_contents($rate_key);
-        $arr = json_decode($data_raw, true) ?: [];
-        // 清理 10 分钟前的失败记录
-        $now = time();
-        $arr = array_values(array_filter($arr, function($ts) use ($now) { return ($now - (int)$ts) < 600; }));
-        $fails = count($arr);
-    } else {
-        $arr = [];
-    }
-    $arr[] = time();
-    @file_put_contents($rate_key, json_encode($arr));
-    $fails = count($arr);
-    if ($fails >= 5) {
-        // 锁定 10 分钟
-        @file_put_contents($lock_key, (string)(time() + 600));
-    }
-    json_response(401, ['success' => false, 'message' => '用户名或密码错误']);
+$username = trim((string) ($payload['username'] ?? ''));
+$password = (string) ($payload['password'] ?? '');
+
+if ($username === '' || $password === '') {
+    json_response(422, [
+        'success' => false,
+        'message' => '请提供账号和密码',
+    ]);
 }
-?> 
+
+$clientIp = get_client_ip();
+$conn = get_db_connection();
+
+$stmt = $conn->prepare(
+    'SELECT id, username, password_hash, email, totp_enabled, totp_secret_enc, totp_secret_iv, totp_secret_tag, last_totp_timestamp, login_failed_count, locked_until, trusted_devices, recovery_codes
+     FROM admin WHERE username = ? LIMIT 1'
+);
+
+if ($stmt === false) {
+    json_response(500, [
+        'success' => false,
+        'message' => '系统异常，请稍后重试',
+    ]);
+}
+
+$stmt->bind_param('s', $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$admin = $result ? $result->fetch_assoc() : null;
+$stmt->close();
+
+if (!$admin) {
+    sleep(1);
+    json_response(401, [
+        'success' => false,
+        'message' => '账号或密码错误',
+    ]);
+}
+
+$adminId = (int) $admin['id'];
+$failCount = (int) $admin['login_failed_count'];
+$lockedUntil = $admin['locked_until'] ? strtotime((string) $admin['locked_until']) : null;
+
+if ($lockedUntil !== null && $lockedUntil > time()) {
+    json_response(423, [
+        'success' => false,
+        'message' => '账号暂时锁定，请稍后再试',
+        'lockedUntil' => date('c', $lockedUntil),
+    ]);
+}
+
+if (!password_verify($password, (string) $admin['password_hash'])) {
+    $failCount++;
+    $lockUntilTime = null;
+    if ($failCount >= MAX_LOGIN_ATTEMPTS) {
+        $lockUntilTime = date('Y-m-d H:i:s', time() + LOCK_DURATION_SECONDS);
+    }
+
+    $updateStmt = $conn->prepare('UPDATE admin SET login_failed_count = ?, locked_until = ? WHERE id = ?');
+    if ($updateStmt) {
+        $updateStmt->bind_param('isi', $failCount, $lockUntilTime, $adminId);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
+
+    SecurityHelper::recordAdminLog($adminId, 'login_failed', [
+        'ip' => $clientIp,
+        'reason' => 'invalid_password',
+    ]);
+
+    json_response(401, [
+        'success' => false,
+        'message' => '账号或密码错误',
+    ]);
+}
+
+// Password verified: clear lock counters when login completes successfully.
+
+$totpEnabled = (int) $admin['totp_enabled'] === 1;
+$trustedDevicesJson = $admin['trusted_devices'] ?? null;
+$cookieName = SecurityHelper::getTrustedDeviceCookieName();
+$trustedToken = $_COOKIE[$cookieName] ?? null;
+
+if ($totpEnabled) {
+    $match = SecurityHelper::matchTrustedDevice($trustedDevicesJson, $trustedToken);
+    if ($match['found'] ?? false) {
+        $updatedJson = SecurityHelper::touchTrustedDevice($match['devices'], (int) $match['index'], $clientIp);
+        SecurityHelper::finalizeAdminLogin($admin, $conn, $clientIp, [
+            'trusted_devices_json' => $updatedJson,
+            'used_2fa' => false,
+        ]);
+
+        json_response(200, [
+            'success' => true,
+            'message' => '已识别可信设备，登录成功',
+            'skipped2fa' => true,
+        ]);
+    }
+
+    $challengeToken = bin2hex(random_bytes(16));
+    $_SESSION['pending_2fa'] = [
+        'challenge' => $challengeToken,
+        'admin_id' => $adminId,
+        'username' => $admin['username'],
+        'created_at' => time(),
+        'attempts' => 0,
+    ];
+
+    json_response(200, [
+        'success' => false,
+        'requires2fa' => true,
+        'twoFactorToken' => $challengeToken,
+        'message' => '账号已启用二次验证，请输入动态验证码',
+    ]);
+}
+
+// No 2FA required
+SecurityHelper::finalizeAdminLogin($admin, $conn, $clientIp, [
+    'used_2fa' => false,
+]);
+
+json_response(200, [
+    'success' => true,
+    'message' => '登录成功，正在跳转后台...'
+]);

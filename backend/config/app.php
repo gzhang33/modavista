@@ -126,7 +126,7 @@ function is_session_valid() {
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
         return false;
     }
-    
+
     // 检查最后活动时间（30天无活动则过期）
     $max_inactivity = 30 * 24 * 60 * 60; // 30天
     if (isset($_SESSION['last_activity'])) {
@@ -134,10 +134,25 @@ function is_session_valid() {
             return false;
         }
     }
-    
+
     // 更新最后活动时间
     $_SESSION['last_activity'] = time();
     return true;
+}
+
+/**
+ * 校验 CSRF token。
+ */
+function is_csrf_token_valid(?string $token): bool {
+    if (!is_string($token) || $token === '') {
+        return false;
+    }
+
+    if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        return false;
+    }
+
+    return hash_equals($_SESSION['csrf_token'], $token);
 }
 
 /**

@@ -15,19 +15,33 @@ jobs:
     # 运行环境：使用最新的 Ubuntu 系统
     runs-on: ubuntu-latest
 
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
     steps:
     # 第一步：检出代码
-    # 这个步骤会将你的仓库代码下载到 GitHub Actions 的虚拟机上
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 第二步：部署到 FTP 服务器
+    # 预检查：如果缺少必要的 Secrets，则跳过部署并给出提示
+    - name: Check required secrets
+      if: ${{ env.FTP_SERVER == '' || env.FTP_USERNAME == '' || env.FTP_PASSWORD == '' }}
+      run: |
+        echo "Missing one or more required secrets: FTP_SERVER / FTP_USERNAME / FTP_PASSWORD" >&2
+        echo "Set them in GitHub → Settings → Secrets and variables → Actions" >&2
+        echo "Skipping deploy." >&2
+
+    # 部署到 FTP 服务器（仅当全部 Secrets 存在时执行）
     - name: FTP Deploy
+      if: ${{ env.FTP_SERVER != '' && env.FTP_USERNAME != '' && env.FTP_PASSWORD != '' }}
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
+        server: ${{ env.FTP_SERVER }}
+        username: ${{ env.FTP_USERNAME }}
+        password: ${{ env.FTP_PASSWORD }}
+        protocol: ftps
         server-dir: /htdocs/
         exclude: |
           **/.git/**

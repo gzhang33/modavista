@@ -19,6 +19,10 @@ export interface ImageErrorHandlerOptions {
 // 处理单个图片路径
 export function processImagePath(imagePath: string | undefined | null, options: ImageProcessingOptions = {}): string {
   const { debug = false } = options;
+  const base = (typeof window !== 'undefined' && (window as any).__vite_base__)
+    ? (window as any).__vite_base__
+    : (import.meta as any)?.env?.BASE_URL || '/';
+  const withBase = (p: string) => (base.endsWith('/') ? base.slice(0, -1) : base) + p;
   
   if (debug) {
     console.log('Processing image path:', imagePath);
@@ -27,7 +31,7 @@ export function processImagePath(imagePath: string | undefined | null, options: 
   // 如果没有图片路径，返回placeholder
   if (!imagePath || imagePath.trim() === '') {
     if (debug) console.log('No image path provided, using placeholder');
-    return '/storage/uploads/placeholder-image.svg';
+    return withBase('/storage/uploads/placeholder-image.svg');
   }
   
   // 如果已经是完整的HTTP URL，直接返回
@@ -38,7 +42,7 @@ export function processImagePath(imagePath: string | undefined | null, options: 
   
   // 如果是placeholder，直接返回
   if (imagePath.includes('placeholder')) {
-    return '/storage/uploads/placeholder-image.svg';
+    return withBase('/storage/uploads/placeholder-image.svg');
   }
   
   // 处理API返回的相对路径，API返回格式：products/media-xxx.jpg
@@ -46,40 +50,40 @@ export function processImagePath(imagePath: string | undefined | null, options: 
   
   // 如果以products/开头，移除这个前缀并添加代理前缀
   if (finalPath.startsWith('products/')) {
-    finalPath = `/storage/uploads/product_images/${finalPath.substring(9)}`; // 移除'products/'并添加代理前缀
+    finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(9)}`); // 移除'products/'并添加代理前缀
   } 
   // 如果以/images/products/开头
   else if (finalPath.startsWith('/images/products/')) {
-    finalPath = `/storage/uploads/product_images/${finalPath.substring(17)}`; // 移除'/images/products/'并添加代理前缀
+    finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(17)}`); // 移除'/images/products/'并添加代理前缀
   }
   // 如果以images/products/开头
   else if (finalPath.startsWith('images/products/')) {
-    finalPath = `/storage/uploads/product_images/${finalPath.substring(16)}`; // 移除'images/products/'并添加代理前缀
+    finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(16)}`); // 移除'images/products/'并添加代理前缀
   }
   // 如果以/images/开头（兼容旧数据）
   else if (finalPath.startsWith('/images/')) {
-    finalPath = `/storage/uploads/product_images/${finalPath.substring(8)}`; // 移除'/images/'并添加代理前缀
+    finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(8)}`); // 移除'/images/'并添加代理前缀
   }
   // 如果以images/开头（兼容旧数据）
   else if (finalPath.startsWith('images/')) {
-    finalPath = `/storage/uploads/product_images/${finalPath.substring(7)}`; // 移除'images/'并添加代理前缀
+    finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(7)}`); // 移除'images/'并添加代理前缀
   }
   // 如果包含反斜杠（来自数据库的转义字符），替换为正斜杠
   else if (finalPath.includes('\\')) {
-    finalPath = finalPath.replace(/\\/g, '/');
+      finalPath = finalPath.replace(/\\/g, '/');
     // 再次检查是否以products/或images/开头
     if (finalPath.startsWith('products/')) {
-      finalPath = `/storage/uploads/product_images/${finalPath.substring(9)}`;
+      finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(9)}`);
     } else if (finalPath.startsWith('images/')) {
-      finalPath = `/storage/uploads/product_images/${finalPath.substring(7)}`;
+      finalPath = withBase(`/storage/uploads/product_images/${finalPath.substring(7)}`);
     } else {
-      finalPath = `/storage/uploads/product_images/${finalPath}`;
+      finalPath = withBase(`/storage/uploads/product_images/${finalPath}`);
     }
   }
   // 其他情况，如果不是绝对路径，则添加代理前缀
   else {
     if (!finalPath.startsWith('/')) {
-        finalPath = `/storage/uploads/product_images/${finalPath}`;
+        finalPath = withBase(`/storage/uploads/product_images/${finalPath}`);
     }
   }
   
@@ -88,7 +92,7 @@ export function processImagePath(imagePath: string | undefined | null, options: 
     console.log('Final path:', finalPath);
   }
   
-  return finalPath;
+  return finalPath.startsWith(base) ? finalPath : withBase(finalPath);
 }
 
 // 处理图片数组
@@ -97,7 +101,11 @@ export function processImageArray(images: (string | undefined | null)[] | undefi
   
   if (!images || !Array.isArray(images) || images.length === 0) {
     if (debug) console.log('No images provided, using placeholder array');
-    return ['/storage/uploads/placeholder-image.svg'];
+    const base = (typeof window !== 'undefined' && (window as any).__vite_base__)
+      ? (window as any).__vite_base__
+      : (import.meta as any)?.env?.BASE_URL || '/';
+    const withBase = (p: string) => (base.endsWith('/') ? base.slice(0, -1) : base) + p;
+    return [withBase('/storage/uploads/placeholder-image.svg')];
   }
   
   const processedImages = images
@@ -185,7 +193,12 @@ export async function preloadImages(images: string[]): Promise<string[]> {
   const validImages = results.filter((src): src is string => src !== null);
   
   // 如果没有可用图片，返回placeholder
-  return validImages.length > 0 ? validImages : ['/storage/uploads/placeholder-image.svg'];
+  if (validImages.length > 0) return validImages;
+  const base = (typeof window !== 'undefined' && (window as any).__vite_base__)
+    ? (window as any).__vite_base__
+    : (import.meta as any)?.env?.BASE_URL || '/';
+  const withBase = (p: string) => (base.endsWith('/') ? base.slice(0, -1) : base) + p;
+  return [withBase('/storage/uploads/placeholder-image.svg')];
 }
 
 // 智能获取分类图片路径的函数
@@ -209,7 +222,11 @@ export async function getCategoryImagePath(englishName: string): Promise<string>
   for (const name of uniqueNames) {
     for (const ext of ['.jpg', '.png']) {
       // 分类图片存储在 categories 目录中
-      const imagePath = `/storage/uploads/categories/${name}${ext}`;
+      const base = (typeof window !== 'undefined' && (window as any).__vite_base__)
+        ? (window as any).__vite_base__
+        : (import.meta as any)?.env?.BASE_URL || '/';
+      const withBase = (p: string) => (base.endsWith('/') ? base.slice(0, -1) : base) + p;
+      const imagePath = withBase(`/storage/uploads/categories/${name}${ext}`);
       try {
         const isAvailable = await preloadImage(imagePath);
         if (isAvailable) {
@@ -223,7 +240,11 @@ export async function getCategoryImagePath(englishName: string): Promise<string>
   }
 
   // 如果所有尝试都失败，返回placeholder
-  return '/storage/uploads/placeholder-image.svg';
+  const base = (typeof window !== 'undefined' && (window as any).__vite_base__)
+    ? (window as any).__vite_base__
+    : (import.meta as any)?.env?.BASE_URL || '/';
+  const withBase = (p: string) => (base.endsWith('/') ? base.slice(0, -1) : base) + p;
+  return withBase('/storage/uploads/placeholder-image.svg');
 }
 
 // 创建分类图片错误处理函数
@@ -247,7 +268,11 @@ export function createCategoryImageErrorHandler(
     
     // 如果已经是placeholder，不要再次设置以避免无限循环
     if (!target.src.includes('placeholder-image.svg')) {
-      target.src = '/storage/uploads/placeholder-image.svg';
+      const base = (typeof window !== 'undefined' && (window as any).__vite_base__)
+        ? (window as any).__vite_base__
+        : (import.meta as any)?.env?.BASE_URL || '/';
+      const withBase = (p: string) => (base.endsWith('/') ? base.slice(0, -1) : base) + p;
+      target.src = withBase('/storage/uploads/placeholder-image.svg');
       
       if (debug) {
         console.log('Fallback to placeholder for category:', categoryName);

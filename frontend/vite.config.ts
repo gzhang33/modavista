@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
+  // 允许通过环境变量控制部署基础路径，GitHub Pages（项目页）通常为 '/<repo>/'
+  base: process.env.VITE_BASE || '/',
   plugins: [react()],
   resolve: {
     alias: {

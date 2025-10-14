@@ -49,7 +49,19 @@ if exist "%projectRoot%\frontend\dist" (
     echo   WARNING: Frontend dist directory not found - run 'npx vite build' first
 )
 
-echo [3/4] Copying configuration files...
+echo [3/4] Copying storage uploads (runtime assets)...
+if exist "%projectRoot%\storage\uploads" (
+    xcopy "%projectRoot%\storage\uploads\*" "%tempDir%\storage\uploads\" /E /I /Y /Q
+    if errorlevel 1 (
+        echo ERROR: Failed to copy storage/uploads
+        goto :cleanup_and_exit
+    )
+    echo   storage/uploads copied successfully
+) else (
+    echo   WARNING: storage/uploads directory not found - skipping runtime assets copy
+)
+
+echo [4/4] Copying configuration files...
 set configCount=0
 if exist "%projectRoot%\.htaccess" (
     copy "%projectRoot%\.htaccess" "%tempDir%\" /Y >nul
@@ -59,7 +71,7 @@ if exist "%projectRoot%\.htaccess" (
 echo   %configCount% configuration files copied
 
 echo.
-echo [4/4] Creating deployment ZIP file...
+echo Creating deployment ZIP file...
 powershell -command "Add-Type -AssemblyName System.IO.Compression.FileSystem; try { [System.IO.Compression.ZipFile]::CreateFromDirectory('%tempDir%', '%zipPath%'); Write-Host 'ZIP file created successfully' } catch { Write-Host 'ERROR: Failed to create ZIP file -' $_.Exception.Message; exit 1 }"
 
 if errorlevel 1 (

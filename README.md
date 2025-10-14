@@ -2,6 +2,10 @@
 
 B2B产品展示平台，专为服装工厂设计。采用前后端分离架构，支持产品变体、多语言界面和现代化后台管理系统。
 
+> License: MIT. See `LICENSE`.
+>
+> Branding/Media: Company-owned branding, logos, and media are excluded from the open-source distribution (Option A). See `NOTICE` and the "品牌与媒体(Option A)" section below for how to replace placeholders.
+
 ## 项目架构
 
 本项目采用前后端分离架构，实现关注点分离和模块化设计：
@@ -174,52 +178,20 @@ docs(readme): update installation guide
 3. 配置文件：`backend/config/app.php` (统一管理)
 4. 环境变量：`.env` 文件 (敏感信息)
 
-## 管理后台功能详解
+## 品牌与媒体（Option A）
+- 本仓库不包含公司品牌、Logo 和媒体资源（详见 `NOTICE`）。
+- `storage/uploads/` 已在 `.gitignore` 中排除，仓库仅提供占位符路径。
+- 你可以在以下位置替换为自有品牌：
+  - 前端占位路径定义：`frontend/src/lib/image-config.ts`
+    - 字段：`DEFAULT_OG`, `PLACEHOLDER`, `COMPANY_INFO`, `DREAMODA_LOGO`, `INDEX_BACKGROUND`
+  - 资源放置目录（运行时）：`/storage/uploads/` 下对应文件夹（如 `product_images/`, `flags/`）
+- 示例占位替换：
+  1) 将你的 `logo.png` 放到 `storage/uploads/`
+  2) 更新 `frontend/src/lib/image-config.ts` 中 `DREAMODA_LOGO` 指向 `/storage/uploads/logo.png`
 
-### 核心管理模块
-- **产品管理** (`/backend/admin/dashboard.php`)
-  - 产品列表展示和筛选
-  - 产品添加/编辑/删除
-  - 产品变体管理（同款不同颜色）
-  - 媒体文件上传和排序
-
-- **客户询价管理** (`/backend/admin/contact_messages.php`)
-  - 询价消息查看和回复
-  - 状态跟踪（待定/进行中/完成）
-  - 备注和标签管理
-  - 移动端适配界面
-
-- **多语言翻译** (`/backend/admin/translations.php`)
-  - AI驱动的自动翻译
-  - 手动翻译编辑
-  - 翻译状态管理
-  - 批量翻译处理
-
-- **用户认证** (`/backend/admin/login.html`)
-  - 现代化登录界面
-  - 会话管理和安全验证
-  - 自动登录状态检查
-
-### 技术架构
-- **组件化设计**: 模块化JavaScript组件
-- **事件驱动**: EventBus事件系统
-- **响应式UI**: 移动端优先设计
-- **实时反馈**: Toast通知系统
-- **数据验证**: 客户端和服务端双重验证
-
-## API接口概览
-
-### 核心API端点
-- **产品管理**: `/backend/api/products.php`
-- **分类管理**: `/backend/api/categories.php`
-- **材质管理**: `/backend/api/materials.php`
-- **颜色管理**: `/backend/api/colors.php`
-- **季节管理**: `/backend/api/seasons.php`
-- **媒体管理**: `/backend/api/media.php`
-- **客户询价**: `/backend/api/contact_messages.php`
-- **多语言**: `/backend/api/translation.php`
-- **用户认证**: `/backend/api/login.php`
-- **会话管理**: `/backend/api/check_session.php`
+## 环境变量
+- 复制根目录 `.env.example` 为 `.env` 并按需修改。
+- 常用变量：数据库、CORS、上传大小等。后端将从 `.env` 读取配置（详见 `backend/config/env_loader.php`）。
 
 ## 相关文档
 
@@ -229,4 +201,4 @@ docs(readme): update installation guide
 
 ## 许可证
 
-本项目专为Dreamoda商业使用而设计。
+本项目以 **MIT License** 开源（参见 `LICENSE`）。品牌与媒体资源不在开源许可范围内（详见 `NOTICE`）。

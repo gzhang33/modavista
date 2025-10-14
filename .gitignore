@@ -64,3 +64,20 @@ lh-*.json
 frontend/dist/
 
 scripts\dist
+
+# Runtime/uploads (excluded from OSS)
+storage/uploads/
+
+# Env and local secrets
+.env
+.env.local
+.env.*.local
+
+# Built assets
+frontend/dist/
+
+# Local cookies/session
+cookies.txt
+
+# Scripts output
+scripts\dist

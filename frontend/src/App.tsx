@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 // import { Toaster } from "@/components/ui/toaster";
@@ -206,8 +206,14 @@ function MultilingualRoutes() {
   );
 }
 
-function Router() {
-  return <MultilingualRoutes />;
+function AppRouterWrapper() {
+  // 由 Vite 在构建时注入，等于工作流中传给 --base 的值
+  const base = (import.meta as any).env?.BASE_URL || "/";
+  return (
+    <WouterRouter base={base}>
+      <MultilingualRoutes />
+    </WouterRouter>
+  );
 }
 
 function App() {
@@ -216,7 +222,7 @@ function App() {
       <LanguageProvider>
         {/* <TooltipProvider> */}
           {/* <Toaster /> */}
-          <Router />
+          <AppRouterWrapper />
         {/* </TooltipProvider> */}
       </LanguageProvider>
     </QueryClientProvider>

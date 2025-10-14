@@ -36,6 +36,9 @@ jobs:
       - name: Build with Vite (project pages base)
         run: npm run build -- --base=/modavista/
 
+      - name: Add SPA fallback (404.html)
+        run: cp dist/index.html dist/404.html
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

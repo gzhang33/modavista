@@ -1,6 +1,6 @@
-# Dreamoda 电商展示平台
+<h1 align="center">Dreamoda B2B Showcase Platform</h1>
 
-<p align="center"><a href="README.md">English</a> | <a href="README_cn.md">中文</a>.</p>
+<p align="center"><a href="README.md">English</a> | <a href="README_cn.md">中文</a></p>
 
 面向服装工厂的 B2B 产品展示与询价平台。支持多语言产品目录、响应式前台体验，以及模块化的后台管理工具（产品、媒体、翻译、询价、用户与安全）。本项目当前仅作展示用途，本文档聚焦于功能概览与主要界面预览。
 

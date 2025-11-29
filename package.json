@@ -1,7 +1,7 @@
 {
-  "name": "dreamoda-project",
+  "name": "modavista-showcase",
   "version": "1.0.0",
-  "description": "Dreamoda E-commerce Platform - Full Stack Project",
+  "description": "Static showcase site for Modavista",
   "license": "MIT",
   "scripts": {
     "dev": "cd frontend && npm run dev",
@@ -13,10 +13,6 @@
   "workspaces": [
     "frontend"
   ],
-  "dependencies": {
-    "@hookform/resolvers": "^5.2.1",
-    "react-hook-form": "^7.62.0",
-    "wouter": "^3.7.1",
-    "zod": "^3.25.76"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

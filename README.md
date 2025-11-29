@@ -1,6 +1,6 @@
 # Dreamoda B2B Showcase Platform
 
-<p align="center"><a href="README.md">English</a> | <a href="README_cn.md">中文</a>.</p>
+<p align="center"><a href="README.md">English</a> | <a href="README_cn.md">中文</a></p>
 
 Dreamoda is a B2B product showcase and inquiry platform for garment manufacturers. It provides a multi‑language product catalog, responsive storefront, and modular admin console for products, media, translations, inquiries, users, and security. This repository is a demo implementation; this document focuses on a concise feature overview and key UI screenshots.
 

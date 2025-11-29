@@ -113,8 +113,8 @@ Dreamoda/
 
 ## Related Docs
 
-- [Architecture and technical details](docs/architecture.md)
-- [API Specification](docs/api_specification.md)
+- [Architecture and technical details](architecture.md)
+- [API Specification](api_specification.md)
 
 ## License
 This project is designed for Dreamoda commercial use.

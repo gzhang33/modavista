@@ -1,5 +1,7 @@
 # Dreamoda 电商展示平台
 
+<p align="center"><a href="README.md">English</a> | <a href="README_cn.md">中文</a>.</p>
+
 面向服装工厂的 B2B 产品展示与询价平台。支持多语言产品目录、响应式前台体验，以及模块化的后台管理工具（产品、媒体、翻译、询价、用户与安全）。本项目当前仅作展示用途，本文档聚焦于功能概览与主要界面预览。
 
 ## 目录
@@ -113,8 +115,8 @@ Dreamoda/
 - **管理与安全**：`/backend/api/admin/*.php`、`/backend/api/login.php`、`/backend/api/logout.php`、`/backend/api/check_session.php`、`/backend/api/verify_2fa.php`
 
 ## 相关文档
-- [架构设计](docs/architecture.md)
-- [API 规范](docs/api_specification.md)
+- [架构设计](architecture_cn.md)
+- [API 规范](api_specification_cn.md)
 
 ## 许可证
 本项目专为 Dreamoda 商业使用而设计。
